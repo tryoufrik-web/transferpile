@@ -3,710 +3,890 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📡 Wireless File Transfer</title>
+    <title>📦 WebFolder • File Transfer</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: #ffffff;
+            background: #0b0e14;
+            color: #edf2f7;
             min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #00adb5;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #00adb5;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            padding: 24px;
         }
         
-        .subtitle {
-            color: #eeeeee;
-            font-size: 1.1em;
-            opacity: 0.9;
+        .container {
+            max-width: 1100px;
+            width: 100%;
         }
         
-        .status-bar {
-            background: rgba(0, 173, 181, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+        /* HEADER */
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
         }
         
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #a0e7ff, #7aa2f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
         }
         
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ff4757;
+        .hero p {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
-        .status-dot.connected {
-            background: #2ed573;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .main-panel {
+        /* DUAL PANEL */
+        .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 28px;
+            margin-bottom: 40px;
         }
         
-        @media (max-width: 768px) {
-            .main-panel {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
         }
         
-        .panel {
-            background: rgba(30, 30, 46, 0.8);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(0, 173, 181, 0.3);
+        /* CARD */
+        .card {
+            background: #14181f;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #2a2f37;
+            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
         }
         
-        .panel-title {
-            color: #00adb5;
-            font-size: 1.3em;
-            margin-bottom: 20px;
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #2d3748;
         }
         
-        .file-drop-zone {
-            border: 3px dashed #00adb5;
-            border-radius: 15px;
-            padding: 40px 20px;
+        .card-header i {
+            font-size: 1.8rem;
+            color: #7aa2f7;
+        }
+        
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        /* FOLDER SECTION */
+        .folder-section {
+            background: #0f131a;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 1px dashed #4a5568;
+        }
+        
+        .folder-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e0;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+        
+        .link-box {
+            background: #0a0d12;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #2d3748;
+            margin-bottom: 16px;
+        }
+        
+        .link-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #a0e7ff;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            padding: 4px 0;
+            outline: none;
+        }
+        
+        .qr-placeholder {
+            background: #1e242c;
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            background: #2d3748;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            color: #cbd5e0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .badge i {
+            color: #7aa2f7;
+        }
+        
+        /* UPLOAD AREA */
+        .upload-zone {
+            border: 2px dashed #4a5568;
+            border-radius: 20px;
+            padding: 36px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            background: #0f131a;
             margin-bottom: 20px;
         }
         
-        .file-drop-zone:hover {
-            background: rgba(0, 173, 181, 0.1);
-            border-color: #2ed573;
+        .upload-zone:hover {
+            border-color: #7aa2f7;
+            background: rgba(122, 162, 247, 0.05);
         }
         
-        .file-drop-zone.dragover {
-            background: rgba(46, 213, 115, 0.2);
-            border-color: #2ed573;
-            transform: scale(1.02);
+        .upload-zone i {
+            font-size: 2.8rem;
+            color: #7aa2f7;
+            margin-bottom: 12px;
         }
         
+        .upload-zone h3 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .upload-zone p {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        .file-hint {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .file-hint span {
+            background: #1e242c;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            color: #cbd5e0;
+        }
+        
+        /* FILE LIST */
         .file-list {
-            margin-top: 20px;
-            max-height: 300px;
+            margin-top: 16px;
+            max-height: 280px;
             overflow-y: auto;
+            padding-right: 4px;
         }
         
         .file-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 15px;
+            background: #1a1e26;
+            border-radius: 16px;
+            padding: 16px;
             margin-bottom: 10px;
-            border-radius: 8px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            transition: background 0.3s;
-        }
-        
-        .file-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            justify-content: space-between;
+            border-left: 4px solid #7aa2f7;
+            transition: 0.1s;
         }
         
         .file-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
             flex: 1;
+            min-width: 0;
         }
         
         .file-icon {
-            font-size: 1.5em;
+            font-size: 1.8rem;
         }
         
         .file-details {
             flex: 1;
+            min-width: 0;
         }
         
         .file-name {
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             margin-bottom: 4px;
         }
         
-        .file-size {
-            color: #888;
-            font-size: 0.9em;
+        .file-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: #a0aec0;
         }
         
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin-top: 5px;
-            overflow: hidden;
+        .file-status {
+            font-size: 0.8rem;
+            color: #7aa2f7;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00adb5, #2ed573);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        button {
-            background: linear-gradient(45deg, #00adb5, #0097a7);
-            color: white;
+        /* BUTTON */
+        .btn {
+            background: #7aa2f7;
+            color: #0b0e14;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
+            padding: 14px 24px;
+            border-radius: 40px;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
-            margin-top: 10px;
         }
         
-        button:hover {
-            background: linear-gradient(45deg, #0097a7, #00adb5);
+        .btn:hover {
+            background: #8ab4f8;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 173, 181, 0.4);
+            box-shadow: 0 8px 20px rgba(122, 162, 247, 0.25);
         }
         
-        button:disabled {
-            background: #666;
-            cursor: not-allowed;
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #4a5568;
+            color: #e2e8f0;
+        }
+        
+        .btn-outline:hover {
+            background: #1e242c;
+            border-color: #7aa2f7;
             transform: none;
             box-shadow: none;
         }
         
-        button.secondary {
-            background: linear-gradient(45deg, #393e46, #222831);
+        .btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
         
-        button.secondary:hover {
-            background: linear-gradient(45deg, #222831, #393e46);
+        /* RECEIVE SECTION */
+        .incoming-area {
+            background: #0f131a;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
         }
         
-        .device-list {
+        .empty-inbox {
+            text-align: center;
+            padding: 40px 20px;
+            color: #718096;
+        }
+        
+        .empty-inbox i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #4a5568;
+        }
+        
+        /* FOOTER */
+        .footer-info {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 20px 0;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0 0;
+            color: #718096;
+            font-size: 0.85rem;
+            border-top: 1px solid #2d3748;
+            margin-top: 20px;
         }
         
-        .device-item {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
+        .encryption-badge {
             display: flex;
             align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            gap: 8px;
         }
         
-        .device-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
+        /* LOGS */
+        .logs-panel {
+            background: #0a0d12;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #2d3748;
         }
         
-        .device-icon {
-            font-size: 1.8em;
+        .logs-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #a0aec0;
+            font-size: 0.9rem;
         }
         
-        .logs {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 30px;
-            max-height: 200px;
+        .log-stream {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+            color: #a0aec0;
+            max-height: 150px;
             overflow-y: auto;
-            font-family: monospace;
-            font-size: 0.9em;
         }
         
         .log-entry {
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 0;
+            border-bottom: 1px solid #1e242c;
+            display: flex;
+            gap: 12px;
         }
         
         .log-time {
-            color: #00adb5;
+            color: #7aa2f7;
         }
         
-        .log-message {
-            color: #ffffff;
-        }
-        
-        .instruction {
-            background: rgba(255, 215, 0, 0.1);
-            border-left: 4px solid gold;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
+        /* UTILS */
+        .hidden { display: none; }
+        .text-accent { color: #a0e7ff; }
+        .mt-4 { margin-top: 16px; }
+        .mt-3 { margin-top: 12px; }
+        .gap-2 { gap: 8px; }
+        .flex { display: flex; }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-wifi"></i> Wireless File Transfer</h1>
-            <p class="subtitle">Transfer files between laptop and phone without cables • 100% Browser-based</p>
-        </header>
-        
-        <div class="status-bar">
-            <div class="status-item">
-                <div class="status-dot" id="connectionStatus"></div>
-                <span id="connectionText">Ready to Transfer</span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-laptop"></i>
-                <span id="deviceCount">Local Device</span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-database"></i>
-                <span id="storageInfo">Storage: <span id="storageUsed">0</span> MB</span>
-            </div>
+        <!-- HERO -->
+        <div class="hero">
+            <h1>📁 webfolder</h1>
+            <p>Buat folder web • kirim file tanpa batas • real‑time • pure local</p>
         </div>
         
-        <div class="main-panel">
-            <!-- LEFT PANEL: SENDER -->
-            <div class="panel">
-                <div class="panel-title">
-                    <i class="fas fa-upload"></i> Send Files
+        <!-- GRID: SEND + RECEIVE -->
+        <div class="grid">
+            <!-- ========== PANEL KIRI: SENDER ========== -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-folder-open"></i>
+                    <h2>WebFolder Saya</h2>
                 </div>
                 
-                <div class="file-drop-zone" id="dropZone">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 3em; margin-bottom: 15px; color: #00adb5;"></i>
-                    <h3>Drag & Drop Files Here</h3>
-                    <p>or click to select files</p>
-                    <p style="font-size: 0.9em; color: #aaa; margin-top: 10px;">
-                        Max file size: 100MB per file
-                    </p>
-                </div>
-                
-                <input type="file" id="fileInput" multiple>
-                
-                <div class="file-list" id="fileList">
-                    <div style="text-align: center; color: #888; padding: 20px;">
-                        <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>No files selected</p>
-                        <p style="font-size: 0.9em; margin-top: 5px;">Click or drag files to start</p>
+                <!-- FOLDER INFO -->
+                <div class="folder-section">
+                    <div class="folder-label">
+                        <i class="fas fa-link" style="color: #7aa2f7;"></i>
+                        <span>Alamat folder unik (copy & share)</span>
+                    </div>
+                    <div class="link-box">
+                        <i class="fas fa-lock" style="color: #a0e7ff; opacity: 0.7;"></i>
+                        <input type="text" id="folderLink" value="https://webfolder.local/7f3a1d#K8x2pL9q" readonly>
+                        <button class="qr-placeholder" onclick="copyFolderLink()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <span class="badge"><i class="fas fa-infinity"></i> No size limit</span>
+                        <span class="badge"><i class="fas fa-clock"></i> Auto‑destroy 90h</span>
+                        <span class="badge"><i class="fas fa-shield"></i> AES‑128 (simulasi)</span>
                     </div>
                 </div>
                 
-                <button onclick="sendFiles()" id="sendBtn" disabled>
-                    <i class="fas fa-paper-plane"></i> Send Files
-                </button>
-                <button onclick="clearAllFiles()" class="secondary" id="clearBtn">
-                    <i class="fas fa-trash"></i> Clear All
-                </button>
+                <!-- UPLOAD ZONE (FILENYA HARUS MUNCUL) -->
+                <div class="upload-zone" id="dropZoneSender">
+                    <input type="file" id="fileInputSender" multiple style="display: none;">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Taruh file di sini</h3>
+                    <p>atau klik untuk memilih</p>
+                    <div class="file-hint">
+                        <span><i class="far fa-image"></i> Gambar</span>
+                        <span><i class="far fa-file-video"></i> Video</span>
+                        <span><i class="far fa-file-archive"></i> Arsip</span>
+                        <span><i class="far fa-file-pdf"></i> PDF</span>
+                    </div>
+                </div>
+                
+                <!-- LIST FILE YANG DIPILIH (HARUS MUNCUL) -->
+                <div id="senderFileListContainer">
+                    <!-- isi dari javascript -->
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button class="btn" id="sendBtn" disabled>
+                        <i class="fas fa-paper-plane"></i> Kirim Sekarang
+                    </button>
+                    <button class="btn-outline" onclick="clearAllSenderFiles()" style="width: auto;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #2d3748;">
+                    <div style="display: flex; justify-content: space-between; color: #a0aec0; font-size: 0.9rem;">
+                        <span><i class="fas fa-bolt"></i> Real‑time: link aktif saat pilih file</span>
+                        <span><i class="fas fa-redo-alt"></i> Resume ready</span>
+                    </div>
+                </div>
             </div>
             
-            <!-- RIGHT PANEL: RECEIVER -->
-            <div class="panel">
-                <div class="panel-title">
-                    <i class="fas fa-download"></i> Receive Files
+            <!-- ========== PANEL KANAN: RECEIVER ========== -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-inbox"></i>
+                    <h2>File Masuk</h2>
                 </div>
                 
-                <div class="instruction">
-                    <p><strong>How to receive files:</strong></p>
-                    <p>1. Wait for sender to transfer files</p>
-                    <p>2. Files will appear here automatically</p>
-                    <p>3. Click download to save</p>
-                </div>
-                
-                <div class="file-list" id="incomingFiles">
-                    <div style="text-align: center; color: #888; padding: 30px;">
-                        <i class="fas fa-inbox" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>Waiting for incoming files...</p>
+                <!-- INSTRUKSI (ala filekiwi: "letakkan file di sini") [citation:6] -->
+                <div style="background: #0f131a; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <i class="fas fa-hand-pointer" style="font-size: 2rem; color: #7aa2f7;"></i>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 4px;">Butuh kirim file ke orang lain?</div>
+                            <div style="color: #a0aec0; font-size: 0.9rem;">Cukup kirim link folder. Mereka upload di sini, langsung muncul ke kamu.</div>
+                        </div>
                     </div>
                 </div>
                 
-                <button onclick="acceptAllFiles()" id="acceptBtn" disabled class="secondary">
-                    <i class="fas fa-check-circle"></i> Download All Files
-                </button>
+                <!-- INCOMING FILES DARI SENDER / DARI ORANG LAIN -->
+                <div class="incoming-area" style="background: #0a0d12;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                        <span style="font-weight: 600;"><i class="fas fa-download"></i> File diterima</span>
+                        <span class="badge" id="incomingCountBadge">0 file</span>
+                    </div>
+                    
+                    <div id="receiverFileListContainer">
+                        <!-- file yang diterima akan muncul di sini -->
+                    </div>
+                    
+                    <button class="btn-outline" id="downloadAllBtn" disabled style="margin-top: 20px; width: 100%;" onclick="downloadAllFiles()">
+                        <i class="fas fa-file-export"></i> Download semua
+                    </button>
+                </div>
+                
+                <!-- QR CODE SIMULASI (filekiwi punya QR) [citation:10] -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 12px; background: #0f131a; border-radius: 16px;">
+                    <div style="background: white; border-radius: 12px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: black; font-size: 1.8rem;">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500; font-size: 0.95rem;">QR Code folder</div>
+                        <div style="color: #a0aec0; font-size: 0.8rem;">Scan untuk buka link di HP</div>
+                    </div>
+                    <button class="badge" onclick="alert('QR: ' + document.getElementById('folderLink').value)">Tampilkan</button>
+                </div>
             </div>
         </div>
         
-        <div class="logs" id="logContainer">
-            <div class="log-entry">
-                <span class="log-time">[System]</span>
-                <span class="log-message"> Ready to transfer files. Select files to begin.</span>
+        <!-- LOG ACTIVITY -->
+        <div class="logs-panel">
+            <div class="logs-header">
+                <i class="fas fa-shield-alt" style="color: #7aa2f7;"></i>
+                <span>End‑to‑end encryption • semua diproses di browser</span>
+                <span style="margin-left: auto; font-size: 0.8rem;">🔒 128-bit AES-GCM (simulasi)</span>
+            </div>
+            <div class="log-stream" id="logStream">
+                <div class="log-entry"><span class="log-time">[Sistem]</span> WebFolder siap. Link unik telah dibuat.</div>
+                <div class="log-entry"><span class="log-time">[Sistem]</span> Tidak ada batasan ukuran, semua file diproses lokal.</div>
+            </div>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="footer-info">
+            <div class="encryption-badge">
+                <i class="fas fa-lock"></i> 
+                <span>dienkripsi di browser • server tidak tahu isi</span>
+            </div>
+            <div>
+                <i class="fas fa-clock"></i> auto-destroy: <span id="destroyTimer">89:59:32</span>
             </div>
         </div>
     </div>
 
     <script>
-        // State variables
-        let selectedFiles = [];
-        let receivedFiles = [];
-        let fileTransfers = {};
-        
-        // DOM Elements
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
-        const incomingFiles = document.getElementById('incomingFiles');
-        const sendBtn = document.getElementById('sendBtn');
-        const acceptBtn = document.getElementById('acceptBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const logContainer = document.getElementById('logContainer');
-        const storageUsed = document.getElementById('storageUsed');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const connectionText = document.getElementById('connectionText');
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            updateStorageInfo();
-            log('System ready. Select files to transfer.');
+        (function() {
+            "use strict";
+
+            // -------------------- STATE --------------------
+            // File yg dipilih di panel kiri (sender)
+            let selectedFiles = [];
             
-            // Set connected status
-            connectionStatus.className = 'status-dot connected';
-            connectionText.textContent = 'Ready to Transfer';
-        });
-        
-        function setupEventListeners() {
-            // File input change - FIXED: langsung panggil handleFiles
-            fileInput.addEventListener('change', function(e) {
-                handleFiles(e.target.files);
-                // Reset input biar bisa pilih file yang sama lagi
-                this.value = null;
-            });
+            // File yg "dikirim" / diterima di panel kanan (receiver)
+            let receivedFiles = [];
+
+            // ID folder unik (simulasi)
+            const FOLDER_ID = generateFolderId();
+            const FOLDER_KEY = generateEncKey();
             
-            // Click drop zone to trigger file input
-            dropZone.addEventListener('click', function() {
-                fileInput.click();
-            });
+            // DOM Elements
+            const dropZone = document.getElementById('dropZoneSender');
+            const fileInput = document.getElementById('fileInputSender');
+            const senderFileListContainer = document.getElementById('senderFileListContainer');
+            const receiverFileListContainer = document.getElementById('receiverFileListContainer');
+            const sendBtn = document.getElementById('sendBtn');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            const folderLinkInput = document.getElementById('folderLink');
+            const incomingCountBadge = document.getElementById('incomingCountBadge');
+            const logStream = document.getElementById('logStream');
+            const destroyTimer = document.getElementById('destroyTimer');
+
+            // Generate link folder (filekiwi style: # untuk key) [citation:8]
+            function generateFolderId() {
+                return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 6);
+            }
+            function generateEncKey() {
+                return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 8);
+            }
             
-            // Drag and drop events
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('dragover');
-            });
-            
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('dragover');
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) {
-                    handleFiles(e.dataTransfer.files);
+            // Set link folder
+            function updateFolderLink() {
+                folderLinkInput.value = `https://webfolder.local/${FOLDER_ID}#${FOLDER_KEY}`;
+            }
+            updateFolderLink();
+
+            // -------------------- UI: SENDER FILE LIST (FILE HARUS MUNCUL) --------------------
+            function renderSenderFileList() {
+                if (!senderFileListContainer) return;
+                
+                if (selectedFiles.length === 0) {
+                    senderFileListContainer.innerHTML = `
+                        <div style="background: #0f131a; border-radius: 16px; padding: 24px; text-align: center; margin-top: 8px; color: #718096;">
+                            <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.6;"></i>
+                            <p style="font-size: 0.95rem;">Belum ada file dipilih</p>
+                            <p style="font-size: 0.8rem;">Klik atau drag file ke area upload</p>
+                        </div>
+                    `;
+                    sendBtn.disabled = true;
+                    return;
                 }
-            });
-        }
-        
-        function handleFiles(files) {
-            if (!files || files.length === 0) return;
-            
-            console.log('Files received:', files.length); // Debug
-            
-            // Convert FileList to Array
-            const filesArray = Array.from(files);
-            
-            // Filter out duplicate files
-            const newFiles = filesArray.filter(file => {
-                return !selectedFiles.some(f => 
-                    f.name === file.name && f.size === file.size
+                
+                sendBtn.disabled = false;
+                
+                let html = `<div class="file-list" style="margin-top: 12px;">`;
+                selectedFiles.forEach((file, index) => {
+                    const icon = getFileIcon(file.type);
+                    const size = formatBytes(file.size);
+                    html += `
+                        <div class="file-item">
+                            <div class="file-info">
+                                <span class="file-icon">${icon}</span>
+                                <div class="file-details">
+                                    <div class="file-name">${escapeHTML(file.name)}</div>
+                                    <div class="file-meta">
+                                        <span>${size}</span>
+                                        <span style="color: #7aa2f7;"><i class="fas fa-lock"></i> encrypt</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span class="file-status"><i class="fas fa-check-circle"></i> siap</span>
+                                <i class="fas fa-times" style="cursor: pointer; color: #f87171; font-size: 1.1rem;" onclick="removeSenderFile(${index})"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                senderFileListContainer.innerHTML = html;
+                
+                // Log aktivitas
+                addLog(`📦 ${selectedFiles.length} file siap dikirim`, 'info');
+            }
+
+            // -------------------- HANDLE UPLOAD (FILE WAJIB MUNCUL) --------------------
+            function handleSenderFiles(fileList) {
+                if (!fileList || fileList.length === 0) return;
+                
+                const filesArray = Array.from(fileList);
+                
+                // Filter duplikat (berdasarkan nama + size)
+                const newFiles = filesArray.filter(newFile => 
+                    !selectedFiles.some(ex => ex.name === newFile.name && ex.size === newFile.size)
                 );
-            });
-            
-            if (newFiles.length === 0) {
-                log('File already exists in list');
-                return;
-            }
-            
-            // Add new files
-            selectedFiles = [...selectedFiles, ...newFiles];
-            
-            // Update UI
-            updateFileList();
-            updateSendButton();
-            
-            log(`Added ${newFiles.length} file(s). Total: ${selectedFiles.length} files`);
-        }
-        
-        function updateFileList() {
-            fileList.innerHTML = '';
-            
-            if (selectedFiles.length === 0) {
-                fileList.innerHTML = `
-                    <div style="text-align: center; color: #888; padding: 20px;">
-                        <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>No files selected</p>
-                        <p style="font-size: 0.9em; margin-top: 5px;">Click or drag files to start</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            selectedFiles.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
                 
-                const fileIcon = getFileIcon(file.type);
-                const fileSize = formatFileSize(file.size);
+                if (newFiles.length === 0) {
+                    addLog('⚠️ File sudah ada di daftar', 'warn');
+                    return;
+                }
                 
-                fileItem.innerHTML = `
-                    <div class="file-info">
-                        <div class="file-icon">${fileIcon}</div>
-                        <div class="file-details">
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-size">${fileSize}</div>
-                        </div>
-                    </div>
-                    <div>
-                        <i class="fas fa-times" style="cursor: pointer; color: #ff4757; font-size: 1.2em;" 
-                           onclick="removeFile(${index})"></i>
-                    </div>
-                `;
+                selectedFiles = [...selectedFiles, ...newFiles];
+                renderSenderFileList();
                 
-                fileList.appendChild(fileItem);
-            });
-        }
-        
-        function removeFile(index) {
-            if (index >= 0 && index < selectedFiles.length) {
-                const fileName = selectedFiles[index].name;
-                selectedFiles.splice(index, 1);
-                updateFileList();
-                updateSendButton();
-                log(`Removed: ${fileName}`);
+                // FILEKIWI STYLE: real-time, link langsung aktif tanpa nunggu upload [citation:1][citation:5]
+                addLog(`✅ +${newFiles.length} file ditambahkan. Link siap dibagikan.`, 'success');
             }
-        }
-        
-        function clearAllFiles() {
-            selectedFiles = [];
-            updateFileList();
-            updateSendButton();
-            log('Cleared all files');
-        }
-        
-        function updateSendButton() {
-            sendBtn.disabled = selectedFiles.length === 0;
-        }
-        
-        function getFileIcon(mimeType) {
-            if (mimeType.includes('image')) return '🖼️';
-            if (mimeType.includes('video')) return '🎬';
-            if (mimeType.includes('audio')) return '🎵';
-            if (mimeType.includes('pdf')) return '📄';
-            if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
-            if (mimeType.includes('text')) return '📝';
-            if (mimeType.includes('word')) return '📋';
-            if (mimeType.includes('excel')) return '📊';
-            if (mimeType.includes('powerpoint')) return '📽️';
-            return '📁';
-        }
-        
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        function sendFiles() {
-            if (selectedFiles.length === 0) {
-                alert('No files selected!');
-                return;
-            }
-            
-            log(`📤 Sending ${selectedFiles.length} file(s)...`);
-            
-            // Simulate transfer for each file
-            selectedFiles.forEach((file, index) => {
-                setTimeout(() => {
-                    // Add to received files
-                    receivedFiles.push({
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        transferred: true
-                    });
-                    
-                    // Show in incoming files
-                    addToIncomingFiles(file);
-                    
-                    // Update progress
-                    updateStorageInfo();
-                    
-                    log(`✓ Sent: ${file.name}`);
-                }, index * 500);
-            });
-            
-            // Clear selected files after sending
-            setTimeout(() => {
+
+            // -------------------- REMOVE FILE --------------------
+            window.removeSenderFile = function(index) {
+                if (index >= 0 && index < selectedFiles.length) {
+                    const removed = selectedFiles[index].name;
+                    selectedFiles.splice(index, 1);
+                    renderSenderFileList();
+                    addLog(`🗑️ Hapus: ${removed}`, 'info');
+                }
+            };
+
+            window.clearAllSenderFiles = function() {
                 selectedFiles = [];
-                updateFileList();
-                updateSendButton();
-                log('✅ All files sent successfully!');
-                alert('Files sent successfully! Check Receive panel.');
-            }, selectedFiles.length * 500 + 500);
-        }
-        
-        function addToIncomingFiles(file) {
-            // Remove "waiting" message if present
-            if (incomingFiles.innerHTML.includes('Waiting for incoming files')) {
-                incomingFiles.innerHTML = '';
-            }
-            
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            const fileIcon = getFileIcon(file.type);
-            const fileSize = formatFileSize(file.size);
-            
-            fileItem.innerHTML = `
-                <div class="file-info">
-                    <div class="file-icon">${fileIcon}</div>
-                    <div class="file-details">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${fileSize}</div>
-                        <div style="font-size: 0.85em; color: #2ed573; margin-top: 5px;">
-                            <i class="fas fa-check-circle"></i> Ready to download
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <i class="fas fa-download" style="cursor: pointer; color: #00adb5; font-size: 1.2em;" 
-                       onclick="downloadFile('${file.name.replace(/'/g, "\\'")}', ${file.size}, '${file.type}')"></i>
-                </div>
-            `;
-            
-            incomingFiles.appendChild(fileItem);
-            
-            // Enable accept button
-            acceptBtn.disabled = false;
-            acceptBtn.innerHTML = '<i class="fas fa-download"></i> Download All Files (' + receivedFiles.length + ')';
-        }
-        
-        function downloadFile(fileName, fileSize, fileType) {
-            log(`📥 Downloading: ${fileName}...`);
-            
-            // Create sample content
-            const content = `File: ${fileName}\nSize: ${formatFileSize(fileSize)}\nType: ${fileType}\nTransferred via Wireless File Transfer\n\nThis is a simulated file download.`;
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            log(`✅ Downloaded: ${fileName}`);
-        }
-        
-        function acceptAllFiles() {
-            const downloadIcons = document.querySelectorAll('#incomingFiles .fa-download');
-            
-            if (downloadIcons.length === 0) {
-                alert('No files to download!');
-                return;
-            }
-            
-            log(`📥 Downloading ${downloadIcons.length} file(s)...`);
-            
-            downloadIcons.forEach((icon, index) => {
+                renderSenderFileList();
+                addLog('🧹 Semua file dihapus dari antrian', 'info');
+            };
+
+            // -------------------- SEND FILES (PANEL KIRI -> PANEL KANAN) --------------------
+            window.sendFiles = function() {
+                if (selectedFiles.length === 0) {
+                    alert('Tidak ada file yang dipilih');
+                    return;
+                }
+
+                addLog(`📤 Mengirim ${selectedFiles.length} file ke folder...`, 'info');
+                
+                // Simulasi real-time: langsung masuk ke received
+                selectedFiles.forEach((file, idx) => {
+                    setTimeout(() => {
+                        // Buat salinan file object (simulasi)
+                        const fileObj = {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            id: Date.now() + idx + Math.random(),
+                            transferredAt: new Date().toLocaleTimeString()
+                        };
+                        receivedFiles.push(fileObj);
+                        renderReceiverFileList();
+                        
+                        // Log tiap file
+                        addLog(`✨ File masuk: ${file.name} (${formatBytes(file.size)})`, 'success');
+                    }, idx * 150); // real-time bertahap
+                });
+
+                // Kosongkan sender setelah terkirim
                 setTimeout(() => {
-                    icon.click();
-                }, index * 300);
-            });
-            
-            setTimeout(() => {
-                log('✅ All files downloaded');
-            }, downloadIcons.length * 300 + 500);
-        }
-        
-        function updateStorageInfo() {
-            // Calculate total size of received files
-            const totalSize = receivedFiles.reduce((sum, file) => sum + (file.size || 0), 0);
-            storageUsed.textContent = (totalSize / (1024 * 1024)).toFixed(2);
-        }
-        
-        function log(message) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `
-                <span class="log-time">[${timeString}]</span>
-                <span class="log-message"> ${message}</span>
-            `;
-            
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
-            
-            // Keep only last 30 logs
-            const logs = logContainer.querySelectorAll('.log-entry');
-            if (logs.length > 30) {
-                logs[0].remove();
+                    selectedFiles = [];
+                    renderSenderFileList();
+                    addLog('🎉 Semua file terkirim!', 'success');
+                }, selectedFiles.length * 150 + 300);
+            };
+            sendBtn.onclick = window.sendFiles;
+
+            // -------------------- RECEIVER: LIST FILE DITERIMA --------------------
+            function renderReceiverFileList() {
+                if (!receiverFileListContainer) return;
+                
+                if (receivedFiles.length === 0) {
+                    receiverFileListContainer.innerHTML = `
+                        <div class="empty-inbox">
+                            <i class="fas fa-inbox"></i>
+                            <p style="margin-bottom: 4px;">Belum ada file diterima</p>
+                            <p style="font-size: 0.8rem;">File yang dikirim akan muncul di sini secara real‑time</p>
+                        </div>
+                    `;
+                    downloadAllBtn.disabled = true;
+                    incomingCountBadge.innerText = '0 file';
+                    return;
+                }
+                
+                downloadAllBtn.disabled = false;
+                incomingCountBadge.innerText = `${receivedFiles.length} file`;
+                
+                let html = `<div class="file-list" style="max-height: 280px;">`;
+                receivedFiles.forEach((file, idx) => {
+                    const icon = getFileIcon(file.type);
+                    const size = formatBytes(file.size);
+                    html += `
+                        <div class="file-item" style="border-left-color: #48bb78;">
+                            <div class="file-info">
+                                <span class="file-icon">${icon}</span>
+                                <div class="file-details">
+                                    <div class="file-name">${escapeHTML(file.name)}</div>
+                                    <div class="file-meta">
+                                        <span>${size}</span>
+                                        <span style="color: #a0e7ff;"><i class="fas fa-lock-open"></i> decrypt</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <i class="fas fa-download" style="cursor: pointer; color: #7aa2f7; font-size: 1.2rem;" onclick="downloadSingleFile(${idx})"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                receiverFileListContainer.innerHTML = html;
             }
-        }
-        
-        // Drag and drop fallback for debugging
-        window.addEventListener('dragover', (e) => e.preventDefault());
-        window.addEventListener('drop', (e) => e.preventDefault());
-    </script>
-</body>
-</html>
+
+            // -------------------- DOWNLOAD --------------------
+            window.downloadSingleFile = function(index) {
+                if (index >= 0 && index < receivedFiles.length) {
+                    const file = receivedFiles[index];
+                    // Buat file dummy (karena tidak ada file asli tanpa server)
+                    const blob = new Blob([`File: ${file.name}\nSize: ${file.size}\nDiterima via WebFolder (simulasi).\nFile ini dibuat secara lokal, tidak diupload ke server.`], 
+                                        { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    addLog(`⬇️ Download: ${file.name}`, 'info');
+                }
+            };
+
+            window.downloadAllFiles = function() {
+                receivedFiles.forEach((_, idx) => {
+                    setTimeout(() => {
+                        window.downloadSingleFile(idx);
+                    }, idx * 200);
+                });
+                addLog(`📥 Download semua (${receivedFiles.length} file)`, 'info');
+            };
+
+            // -------------------- EVENT LISTENERS (UPLOAD WAJIB WORK) --------------------
+            function setupEventListeners() {
+                // 1. Klik zona upload -> trigger file input
+                dropZone.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        fileInput.click();
+                    }
+                });
+
+                // 2. Drag & drop
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '#7aa2f7';
+                    dropZone.style.background = 'rgba(122, 162, 247, 0.08)';
+                });
+                dropZone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '#4a5568';
+                    dropZone.style.background = '#0f131a';
+                });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '#4a5568';
+                    dropZone.style.background = '#0f131a';
+                    if (e.dataTransfer.files.length > 0) {
+                        handleSenderFiles(e.dataTransfer.files);
+                    }
+                });
+
+                // 3. File input change
+                fileInput.addEventListener('change', function(e) {
+                    handleSenderFiles(e.target.files);
+                    fileInput.value = ''; // biar bisa pilih file yg sama lagi
+                });
+            }
+
+            // -------------------- UTILS --------------------
+            function getFileIcon(mime) {
+                if (mime.includes('image')) return '🖼️';
+                if (mime.includes('video')) return '🎬';
+                if (mime.includes('audio')) return '🎵';
+                if (mime.includes('pdf')) return '📄';
+                if (mime.includes('zip') || mime.includes('rar') || mime.includes('tar')) return '📦';
+                if (mime.includes('word') || mime.includes('document')) return '📋';
+                if (mime.includes('excel') || mime.includes('sheet')) return '📊';
+                if (mime.includes('powerpoint') || mime.includes('presentation')) return '📽️';
+                if (mime.includes('text')) return '📝';
+                return '📁';
+            }
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            function escapeHTML(str) {
+                return String(str).replace(/[&<>"]/g, function(c) {
+                    if (c === '&') return '&amp;';
+                    if (c === '<') return '&lt;';
+                    if (c === '>') return '&gt;';
+                    if (c === '"') return '&quot;';
+                    return c;
+                });
+            }
+
+            window.copyFolderLink = function() {
+                const link = document.getElementById('folderLink');
+                link.select();
+                navigator.clipboard.writeText(link.value);
+                addLog('🔗 Link folder dicopy', 'info');
+                alert('Link folder dicopy!');
+            };
+
+            // LOG SYSTEM
+            function addLog(message, type = 'info') {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+                logStream.appendChild(entry);
+                logStream.scrollTop = logStream.scrollHeight;
+                
+                // batasi 15 log
+                if (logStream.children.length > 15) {
+                    logStream.removeChild(logStream.children[0]);
+                }
+            }
+
+            // TIMER SIMULASI AUTO-DESTROY (90 jam)
+            let seconds = 90 * 3600 - 28; // biar gak bulat
+            function updateTimer() {
+                if (seconds <= 0) {
+                    destroyTimer.innerText = '0:00:00';
+                    return;
+                }
+                seconds--;
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = seconds % 60;
+                destroyTimer.innerText = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
+            setInterval(updateTimer, 1000);
+
+            // -------------------- INIT --------------------
+            setupEventListeners();
+            renderSenderFileList();
+            renderReceiverFileList();
+            
+            // Contoh dummy file supaya user liat
