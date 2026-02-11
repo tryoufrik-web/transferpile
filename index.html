@@ -116,33 +116,6 @@
             gap: 10px;
         }
         
-        .qr-container {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        
-        #qrCode {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        
-        .url-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-        
         .file-drop-zone {
             border: 3px dashed #00adb5;
             border-radius: 15px;
@@ -189,10 +162,20 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex: 1;
         }
         
         .file-icon {
             font-size: 1.5em;
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 4px;
         }
         
         .file-size {
@@ -302,15 +285,6 @@
             color: #ffffff;
         }
         
-        .connection-code {
-            font-size: 2em;
-            font-weight: bold;
-            color: #00adb5;
-            text-align: center;
-            margin: 20px 0;
-            letter-spacing: 5px;
-        }
-        
         .instruction {
             background: rgba(255, 215, 0, 0.1);
             border-left: 4px solid gold;
@@ -323,7 +297,7 @@
             display: none !important;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -335,19 +309,16 @@
         <div class="status-bar">
             <div class="status-item">
                 <div class="status-dot" id="connectionStatus"></div>
-                <span id="connectionText">Disconnected</span>
+                <span id="connectionText">Ready to Transfer</span>
             </div>
             <div class="status-item">
                 <i class="fas fa-laptop"></i>
-                <span id="deviceCount">0 devices connected</span>
+                <span id="deviceCount">Local Device</span>
             </div>
             <div class="status-item">
                 <i class="fas fa-database"></i>
-                <span id="storageInfo">Local storage: <span id="storageUsed">0</span> MB</span>
+                <span id="storageInfo">Storage: <span id="storageUsed">0</span> MB</span>
             </div>
-            <button class="secondary" onclick="startServer()" id="startBtn">
-                <i class="fas fa-play"></i> Start Server
-            </button>
         </div>
         
         <div class="main-panel">
@@ -366,24 +337,21 @@
                     </p>
                 </div>
                 
-                <input type="file" id="fileInput" multiple style="display: none;">
+                <input type="file" id="fileInput" multiple>
                 
                 <div class="file-list" id="fileList">
-                    <!-- File items will appear here -->
                     <div style="text-align: center; color: #888; padding: 20px;">
-                        No files selected
-                    </div>
-                </div>
-                
-                <div class="device-list" id="receiverList">
-                    <!-- Connected devices will appear here -->
-                    <div style="text-align: center; color: #888; padding: 20px;">
-                        No receivers connected
+                        <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <p>No files selected</p>
+                        <p style="font-size: 0.9em; margin-top: 5px;">Click or drag files to start</p>
                     </div>
                 </div>
                 
                 <button onclick="sendFiles()" id="sendBtn" disabled>
-                    <i class="fas fa-paper-plane"></i> Send to Selected Device
+                    <i class="fas fa-paper-plane"></i> Send Files
+                </button>
+                <button onclick="clearAllFiles()" class="secondary" id="clearBtn">
+                    <i class="fas fa-trash"></i> Clear All
                 </button>
             </div>
             
@@ -394,225 +362,183 @@
                 </div>
                 
                 <div class="instruction">
-                    <p><strong>How to connect:</strong></p>
-                    <p>1. Open this page on your phone</p>
-                    <p>2. Scan QR code or enter connection code</p>
-                    <p>3. Wait for files to appear</p>
-                </div>
-                
-                <div class="qr-container">
-                    <div id="qrCode"></div>
-                    <p style="margin-top: 15px; color: #aaa;">Scan with phone camera</p>
-                </div>
-                
-                <div class="connection-code" id="connectionCode">
-                    0000
-                </div>
-                
-                <div style="text-align: center;">
-                    <button onclick="copyLink()" class="secondary">
-                        <i class="fas fa-link"></i> Copy Connection Link
-                    </button>
-                </div>
-                
-                <div class="url-box" id="shareUrl">
-                    https://wireless-transfer.local/connect/0000
+                    <p><strong>How to receive files:</strong></p>
+                    <p>1. Wait for sender to transfer files</p>
+                    <p>2. Files will appear here automatically</p>
+                    <p>3. Click download to save</p>
                 </div>
                 
                 <div class="file-list" id="incomingFiles">
-                    <!-- Incoming files will appear here -->
-                    <div style="text-align: center; color: #888; padding: 20px;">
-                        Waiting for files...
+                    <div style="text-align: center; color: #888; padding: 30px;">
+                        <i class="fas fa-inbox" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <p>Waiting for incoming files...</p>
                     </div>
                 </div>
                 
                 <button onclick="acceptAllFiles()" id="acceptBtn" disabled class="secondary">
-                    <i class="fas fa-check-circle"></i> Accept All Files
+                    <i class="fas fa-check-circle"></i> Download All Files
                 </button>
             </div>
         </div>
         
         <div class="logs" id="logContainer">
             <div class="log-entry">
-                <span class="log-time">[12:00:00]</span>
-                <span class="log-message"> System initialized</span>
+                <span class="log-time">[System]</span>
+                <span class="log-message"> Ready to transfer files. Select files to begin.</span>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
         // State variables
-        let serverActive = false;
-        let peerConnection = null;
-        let dataChannel = null;
         let selectedFiles = [];
-        let connectedDevices = [];
-        let currentRoomCode = generateRoomCode();
+        let receivedFiles = [];
         let fileTransfers = {};
         
         // DOM Elements
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
-        const receiverList = document.getElementById('receiverList');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const connectionText = document.getElementById('connectionText');
-        const connectionCode = document.getElementById('connectionCode');
-        const shareUrl = document.getElementById('shareUrl');
         const incomingFiles = document.getElementById('incomingFiles');
         const sendBtn = document.getElementById('sendBtn');
         const acceptBtn = document.getElementById('acceptBtn');
+        const clearBtn = document.getElementById('clearBtn');
         const logContainer = document.getElementById('logContainer');
-        const deviceCount = document.getElementById('deviceCount');
         const storageUsed = document.getElementById('storageUsed');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateConnectionCode();
             setupEventListeners();
             updateStorageInfo();
-            log('System ready. Click "Start Server" to begin.');
+            log('System ready. Select files to transfer.');
+            
+            // Set connected status
+            connectionStatus.className = 'status-dot connected';
+            connectionText.textContent = 'Ready to Transfer';
         });
         
         function setupEventListeners() {
-            // File drag and drop
-            dropZone.addEventListener('click', () => fileInput.click());
+            // File input change - FIXED: langsung panggil handleFiles
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(e.target.files);
+                // Reset input biar bisa pilih file yang sama lagi
+                this.value = null;
+            });
+            
+            // Click drop zone to trigger file input
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // Drag and drop events
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.classList.add('dragover');
             });
+            
             dropZone.addEventListener('dragleave', () => {
                 dropZone.classList.remove('dragover');
             });
+            
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
-                handleFiles(e.dataTransfer.files);
-            });
-            
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
-        }
-        
-        function generateRoomCode() {
-            return Math.floor(1000 + Math.random() * 9000).toString();
-        }
-        
-        function updateConnectionCode() {
-            connectionCode.textContent = currentRoomCode;
-            const url = `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
-            shareUrl.textContent = url;
-            
-            // Generate QR Code
-            QRCode.toCanvas(document.getElementById('qrCode'), url, {
-                width: 200,
-                height: 200,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
                 }
-            }, function(error) {
-                if (error) console.error(error);
             });
-        }
-        
-        function startServer() {
-            if (serverActive) {
-                stopServer();
-                return;
-            }
-            
-            serverActive = true;
-            updateConnectionStatus(true);
-            log('Server started. Room code: ' + currentRoomCode);
-            log('Share this code with other devices to connect.');
-            
-            // Simulate WebRTC connection (simplified for demo)
-            simulatePeerConnection();
-            
-            // Update button
-            document.getElementById('startBtn').innerHTML = '<i class="fas fa-stop"></i> Stop Server';
-        }
-        
-        function stopServer() {
-            serverActive = false;
-            updateConnectionStatus(false);
-            log('Server stopped');
-            document.getElementById('startBtn').innerHTML = '<i class="fas fa-play"></i> Start Server';
-        }
-        
-        function updateConnectionStatus(connected) {
-            const dot = document.getElementById('connectionStatus');
-            if (connected) {
-                dot.className = 'status-dot connected';
-                connectionText.textContent = 'Connected • Room: ' + currentRoomCode;
-            } else {
-                dot.className = 'status-dot';
-                connectionText.textContent = 'Disconnected';
-            }
         }
         
         function handleFiles(files) {
-            selectedFiles = [];
-            fileList.innerHTML = '';
+            if (!files || files.length === 0) return;
             
-            for (let file of files) {
-                selectedFiles.push(file);
-                addFileToList(file);
+            console.log('Files received:', files.length); // Debug
+            
+            // Convert FileList to Array
+            const filesArray = Array.from(files);
+            
+            // Filter out duplicate files
+            const newFiles = filesArray.filter(file => {
+                return !selectedFiles.some(f => 
+                    f.name === file.name && f.size === file.size
+                );
+            });
+            
+            if (newFiles.length === 0) {
+                log('File already exists in list');
+                return;
             }
             
+            // Add new files
+            selectedFiles = [...selectedFiles, ...newFiles];
+            
+            // Update UI
+            updateFileList();
             updateSendButton();
-            log(`Added ${files.length} file(s) to queue`);
+            
+            log(`Added ${newFiles.length} file(s). Total: ${selectedFiles.length} files`);
         }
         
-        function addFileToList(file) {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            
-            const fileIcon = getFileIcon(file.type);
-            const fileSize = formatFileSize(file.size);
-            
-            fileItem.innerHTML = `
-                <div class="file-info">
-                    <div class="file-icon">${fileIcon}</div>
-                    <div>
-                        <div style="font-weight: 600;">${file.name}</div>
-                        <div class="file-size">${fileSize}</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <i class="fas fa-times" style="cursor: pointer; color: #ff4757;" 
-                       onclick="removeFile('${file.name}')"></i>
-                </div>
-            `;
-            
-            fileList.appendChild(fileItem);
-        }
-        
-        function removeFile(fileName) {
-            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
-            updateFileListDisplay();
-            updateSendButton();
-            log(`Removed ${fileName} from queue`);
-        }
-        
-        function updateFileListDisplay() {
+        function updateFileList() {
             fileList.innerHTML = '';
+            
             if (selectedFiles.length === 0) {
                 fileList.innerHTML = `
                     <div style="text-align: center; color: #888; padding: 20px;">
-                        No files selected
+                        <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <p>No files selected</p>
+                        <p style="font-size: 0.9em; margin-top: 5px;">Click or drag files to start</p>
                     </div>
                 `;
-            } else {
-                selectedFiles.forEach(addFileToList);
+                return;
             }
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileIcon = getFileIcon(file.type);
+                const fileSize = formatFileSize(file.size);
+                
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-icon">${fileIcon}</div>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fas fa-times" style="cursor: pointer; color: #ff4757; font-size: 1.2em;" 
+                           onclick="removeFile(${index})"></i>
+                    </div>
+                `;
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        function removeFile(index) {
+            if (index >= 0 && index < selectedFiles.length) {
+                const fileName = selectedFiles[index].name;
+                selectedFiles.splice(index, 1);
+                updateFileList();
+                updateSendButton();
+                log(`Removed: ${fileName}`);
+            }
+        }
+        
+        function clearAllFiles() {
+            selectedFiles = [];
+            updateFileList();
+            updateSendButton();
+            log('Cleared all files');
+        }
+        
+        function updateSendButton() {
+            sendBtn.disabled = selectedFiles.length === 0;
         }
         
         function getFileIcon(mimeType) {
@@ -622,6 +548,9 @@
             if (mimeType.includes('pdf')) return '📄';
             if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
             if (mimeType.includes('text')) return '📝';
+            if (mimeType.includes('word')) return '📋';
+            if (mimeType.includes('excel')) return '📊';
+            if (mimeType.includes('powerpoint')) return '📽️';
             return '📁';
         }
         
@@ -633,171 +562,71 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
-        function updateSendButton() {
-            sendBtn.disabled = selectedFiles.length === 0 || !serverActive;
-        }
-        
-        function simulatePeerConnection() {
-            // In real implementation, this would use WebRTC
-            // For demo, we'll simulate connections
-            
-            // Simulate devices connecting
-            setTimeout(() => {
-                simulateDeviceConnect('Android Phone');
-            }, 2000);
-            
-            setTimeout(() => {
-                simulateDeviceConnect('iPhone');
-            }, 4000);
-        }
-        
-        function simulateDeviceConnect(deviceName) {
-            const deviceId = 'device_' + Date.now();
-            connectedDevices.push({
-                id: deviceId,
-                name: deviceName,
-                type: deviceName.includes('Android') ? 'android' : 'ios'
-            });
-            
-            updateDeviceList();
-            log(`${deviceName} connected to room`);
-        }
-        
-        function updateDeviceList() {
-            receiverList.innerHTML = '';
-            deviceCount.textContent = `${connectedDevices.length} devices connected`;
-            
-            if (connectedDevices.length === 0) {
-                receiverList.innerHTML = `
-                    <div style="text-align: center; color: #888; padding: 20px;">
-                        No receivers connected
-                    </div>
-                `;
-            } else {
-                connectedDevices.forEach(device => {
-                    const deviceItem = document.createElement('div');
-                    deviceItem.className = 'device-item';
-                    deviceItem.setAttribute('data-id', device.id);
-                    
-                    deviceItem.innerHTML = `
-                        <div class="device-icon">
-                            ${device.type === 'android' ? '🤖' : '🍎'}
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600;">${device.name}</div>
-                            <div style="font-size: 0.9em; color: #aaa;">Ready to receive</div>
-                        </div>
-                        <div>
-                            <i class="fas fa-wifi" style="color: #2ed573;"></i>
-                        </div>
-                    `;
-                    
-                    deviceItem.addEventListener('click', () => {
-                        selectDevice(device.id);
-                    });
-                    
-                    receiverList.appendChild(deviceItem);
-                });
-            }
-        }
-        
-        function selectDevice(deviceId) {
-            // Remove previous selection
-            document.querySelectorAll('.device-item').forEach(item => {
-                item.style.background = '';
-            });
-            
-            // Highlight selected
-            const selected = document.querySelector(`[data-id="${deviceId}"]`);
-            if (selected) {
-                selected.style.background = 'rgba(0, 173, 181, 0.3)';
-            }
-            
-            // Enable send button
-            sendBtn.disabled = false;
-            log('Device selected for file transfer');
-        }
-        
         function sendFiles() {
             if (selectedFiles.length === 0) {
                 alert('No files selected!');
                 return;
             }
             
-            log(`Starting transfer of ${selectedFiles.length} file(s)...`);
+            log(`📤 Sending ${selectedFiles.length} file(s)...`);
             
-            // Simulate transfer progress
+            // Simulate transfer for each file
             selectedFiles.forEach((file, index) => {
-                simulateFileTransfer(file, index);
+                setTimeout(() => {
+                    // Add to received files
+                    receivedFiles.push({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        transferred: true
+                    });
+                    
+                    // Show in incoming files
+                    addToIncomingFiles(file);
+                    
+                    // Update progress
+                    updateStorageInfo();
+                    
+                    log(`✓ Sent: ${file.name}`);
+                }, index * 500);
             });
             
-            // Clear selection after transfer
+            // Clear selected files after sending
             setTimeout(() => {
                 selectedFiles = [];
-                updateFileListDisplay();
+                updateFileList();
                 updateSendButton();
-            }, selectedFiles.length * 2000);
+                log('✅ All files sent successfully!');
+                alert('Files sent successfully! Check Receive panel.');
+            }, selectedFiles.length * 500 + 500);
         }
         
-        function simulateFileTransfer(file, index) {
-            const fileId = 'file_' + Date.now() + '_' + index;
-            fileTransfers[fileId] = {
-                name: file.name,
-                size: file.size,
-                progress: 0
-            };
-            
-            // Update progress bar
-            const progressBars = document.querySelectorAll('.progress-fill');
-            if (progressBars[index]) {
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += Math.random() * 20;
-                    if (progress >= 100) {
-                        progress = 100;
-                        clearInterval(interval);
-                        
-                        // Show success
-                        log(`✓ ${file.name} transferred successfully`);
-                        
-                        // Update storage
-                        updateStorageInfo();
-                        
-                        // Simulate receiving on other end
-                        simulateIncomingFile(file);
-                    }
-                    
-                    progressBars[index].style.width = progress + '%';
-                    fileTransfers[fileId].progress = progress;
-                }, 100);
-            }
-        }
-        
-        function simulateIncomingFile(file) {
-            const incomingList = document.getElementById('incomingFiles');
-            
+        function addToIncomingFiles(file) {
             // Remove "waiting" message if present
-            if (incomingFiles.innerHTML.includes('Waiting for files')) {
+            if (incomingFiles.innerHTML.includes('Waiting for incoming files')) {
                 incomingFiles.innerHTML = '';
             }
             
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             
+            const fileIcon = getFileIcon(file.type);
+            const fileSize = formatFileSize(file.size);
+            
             fileItem.innerHTML = `
                 <div class="file-info">
-                    <div class="file-icon">${getFileIcon(file.type)}</div>
-                    <div>
-                        <div style="font-weight: 600;">${file.name}</div>
-                        <div class="file-size">${formatFileSize(file.size)}</div>
-                        <div style="font-size: 0.8em; color: #2ed573;">
-                            <i class="fas fa-check"></i> Ready to download
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                        <div style="font-size: 0.85em; color: #2ed573; margin-top: 5px;">
+                            <i class="fas fa-check-circle"></i> Ready to download
                         </div>
                     </div>
                 </div>
                 <div>
-                    <i class="fas fa-download" style="cursor: pointer; color: #00adb5;" 
-                       onclick="downloadFile('${file.name}', ${file.size})"></i>
+                    <i class="fas fa-download" style="cursor: pointer; color: #00adb5; font-size: 1.2em;" 
+                       onclick="downloadFile('${file.name.replace(/'/g, "\\'")}', ${file.size}, '${file.type}')"></i>
                 </div>
             `;
             
@@ -805,14 +634,17 @@
             
             // Enable accept button
             acceptBtn.disabled = false;
+            acceptBtn.innerHTML = '<i class="fas fa-download"></i> Download All Files (' + receivedFiles.length + ')';
         }
         
-        function downloadFile(fileName, fileSize) {
-            log(`Downloading ${fileName}...`);
+        function downloadFile(fileName, fileSize, fileType) {
+            log(`📥 Downloading: ${fileName}...`);
             
-            // Create and trigger download (simulated)
-            const blob = new Blob([`Simulated content of ${fileName}`], { type: 'text/plain' });
+            // Create sample content
+            const content = `File: ${fileName}\nSize: ${formatFileSize(fileSize)}\nType: ${fileType}\nTransferred via Wireless File Transfer\n\nThis is a simulated file download.`;
+            const blob = new Blob([content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
+            
             const a = document.createElement('a');
             a.href = url;
             a.download = fileName;
@@ -821,35 +653,39 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            log(`✓ ${fileName} downloaded to device`);
+            log(`✅ Downloaded: ${fileName}`);
         }
         
         function acceptAllFiles() {
             const downloadIcons = document.querySelectorAll('#incomingFiles .fa-download');
-            downloadIcons.forEach(icon => icon.click());
-            acceptBtn.disabled = true;
-        }
-        
-        function copyLink() {
-            const url = shareUrl.textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                log('Connection link copied to clipboard');
-                alert('Link copied! Share it with your phone.');
+            
+            if (downloadIcons.length === 0) {
+                alert('No files to download!');
+                return;
+            }
+            
+            log(`📥 Downloading ${downloadIcons.length} file(s)...`);
+            
+            downloadIcons.forEach((icon, index) => {
+                setTimeout(() => {
+                    icon.click();
+                }, index * 300);
             });
+            
+            setTimeout(() => {
+                log('✅ All files downloaded');
+            }, downloadIcons.length * 300 + 500);
         }
         
         function updateStorageInfo() {
-            // Simulate storage usage
-            const used = Object.values(fileTransfers).reduce((sum, file) => {
-                return sum + (file.size * file.progress / 100);
-            }, 0);
-            
-            storageUsed.textContent = (used / (1024 * 1024)).toFixed(2);
+            // Calculate total size of received files
+            const totalSize = receivedFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+            storageUsed.textContent = (totalSize / (1024 * 1024)).toFixed(2);
         }
         
         function log(message) {
             const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
@@ -861,28 +697,16 @@
             logContainer.appendChild(logEntry);
             logContainer.scrollTop = logContainer.scrollHeight;
             
-            // Keep only last 50 logs
+            // Keep only last 30 logs
             const logs = logContainer.querySelectorAll('.log-entry');
-            if (logs.length > 50) {
+            if (logs.length > 30) {
                 logs[0].remove();
             }
         }
         
-        // URL parameter handling for room joining
-        function checkUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const room = urlParams.get('room');
-            
-            if (room) {
-                currentRoomCode = room;
-                updateConnectionCode();
-                log(`Joined room: ${room}`);
-                startServer();
-            }
-        }
-        
-        // Check URL on load
-        checkUrlParams();
+        // Drag and drop fallback for debugging
+        window.addEventListener('dragover', (e) => e.preventDefault());
+        window.addEventListener('drop', (e) => e.preventDefault());
     </script>
 </body>
 </html>
