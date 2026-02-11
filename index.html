@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 WebFolder • Peer Transfer</title>
     <style>
-        /* [style sama seperti sebelumnya, ringkas] */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: #0b0e14; color: #edf2f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
         .container { max-width: 1100px; width: 100%; }
@@ -35,6 +34,8 @@
         .file-info { display: flex; align-items: center; gap: 16px; flex:1; }
         .btn { background: #7aa2f7; color: #0b0e14; border: none; padding: 14px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap:8px; width:100%; }
         .btn-outline { background: transparent; border: 1.5px solid #4a5568; color: #e2e8f0; }
+        .btn-outline:hover { background: #1e242c; border-color: #7aa2f7; }
+        .btn:disabled { opacity: 0.5; pointer-events: none; }
         .incoming-area { background: #0f131a; border-radius: 20px; padding: 20px; margin-top: 20px; }
         .empty-inbox { text-align: center; padding: 40px 20px; color: #718096; }
         .logs-panel { background: #0a0d12; border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid #2d3748; }
@@ -42,6 +43,10 @@
         .log-entry { padding: 6px 0; border-bottom: 1px solid #1e242c; display: flex; gap: 12px; }
         .log-time { color: #7aa2f7; }
         .footer-info { display: flex; justify-content: space-between; padding: 20px 0 0; color: #718096; border-top: 1px solid #2d3748; margin-top: 20px; }
+        .flex { display: flex; align-items: center; gap: 8px; }
+        .mt-2 { margin-top: 12px; }
+        .retry-btn { background: #ffa502; border: none; color: black; padding: 6px 12px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; }
+        .retry-btn:hover { background: #ffb142; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -109,7 +114,11 @@
                     <span class="peer-dot" id="receiverPeerDot"></span>
                     <span id="receiverPeerStatus">Belum tersambung</span>
                 </div>
-                <div class="incoming-area">
+                <div class="flex mt-2">
+                    <button class="retry-btn" onclick="retryConnection()"><i class="fas fa-redo-alt"></i> Coba Sambung Ulang</button>
+                    <button class="badge" onclick="resetReceiverPeer()" style="background:#555;"><i class="fas fa-power-off"></i> Reset</button>
+                </div>
+                <div class="incoming-area" style="margin-top:20px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
                         <span style="font-weight:600;"><i class="fas fa-download"></i> File Diterima</span>
                         <span class="badge" id="incomingCountBadge">0 file</span>
@@ -140,7 +149,13 @@
         let isConnected = false;
         let selectedFiles = [];
         let receivedFiles = [];
-        let currentPeerId = '';   // ID peer yang sedang aktif
+        let currentPeerId = '';   // ID peer sender
+
+        // Receiver state
+        let receiverPeer = null;
+        let receiverConn = null;
+        let retryCount = 0;
+        const MAX_RETRY = 3;
 
         // DOM
         const peerDot = document.getElementById('peerDot');
@@ -159,6 +174,18 @@
         const logStream = document.getElementById('logStream');
         const targetPeerIdInput = document.getElementById('targetPeerId');
 
+        // ==================== ICE SERVERS (STUN) ====================
+        const iceServers = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.services.mozilla.com' }
+            ]
+        };
+
         // ==================== GENERATE ID UNIK ====================
         function generatePeerId() {
             return 'wf-' + Math.random().toString(36).substring(2, 10);
@@ -172,7 +199,7 @@
             peerStatus.innerText = 'Membuat peer...';
             peerDot.classList.remove('connected');
 
-            // LANGSUNG generate QR dari ID yang diminta (walau peer belum siap)
+            // LANGSUNG generate QR dari ID yang diminta
             generateQRFromId(requestedId);
             addLog('🔄 Mencoba menggunakan ID: ' + requestedId);
 
@@ -180,7 +207,7 @@
                 host: 'peerjs.com',
                 port: 443,
                 secure: true,
-                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+                config: iceServers
             });
 
             peer.on('open', function(id) {
@@ -189,7 +216,6 @@
                 peerStatus.innerText = 'Siap, ID: ' + id;
                 peerDot.classList.add('connected');
                 addLog('✅ Peer siap. ID: ' + id);
-                // QR sudah digenerate, tapi ID mungkin berubah jika ada konflik
                 if (id !== requestedId) {
                     generateQRFromId(id);
                 }
@@ -211,13 +237,16 @@
                     peerDot.classList.remove('connected');
                     addLog('⚠️ Koneksi dengan penerima putus');
                 });
+
+                conn.on('error', function(err) {
+                    addLog('❌ Connection error: ' + err);
+                });
             });
 
             peer.on('error', function(err) {
                 console.error(err);
-                addLog('❌ Peer error: ' + (err.type || err), 'error');
+                addLog('❌ Peer error: ' + (err.type || err));
                 if (err.type === 'unavailable-id') {
-                    // ID sudah dipakai, coba generate baru
                     const newId = generatePeerId();
                     currentPeerId = newId;
                     peerIdInput.value = newId;
@@ -225,6 +254,10 @@
                     generateQRFromId(newId);
                     addLog('🔄 ID sudah ada, ganti ke: ' + newId);
                     peer.reconnect();
+                } else if (err.type === 'network' || err.message?.includes('network')) {
+                    peerStatus.innerText = 'Gagal koneksi ke server, coba lagi...';
+                    addLog('⚠️ Network error, mencoba reconnect...');
+                    setTimeout(() => peer.reconnect(), 2000);
                 }
             });
         }
@@ -238,15 +271,11 @@
             addLog('📸 QR code diperbarui: ' + id);
         }
 
-        // Fungsi public untuk regenerate QR
         window.generateQR = function() {
             if (currentPeerId) generateQRFromId(currentPeerId);
         };
 
         // ==================== RECEIVER SIDE ====================
-        let receiverPeer = null;
-        let receiverConn = null;
-
         function checkUrlForAutoConnect() {
             const urlParams = new URLSearchParams(window.location.search);
             const targetId = urlParams.get('connect');
@@ -268,18 +297,23 @@
             receiverPeer = new Peer(generatePeerId(), {
                 host: 'peerjs.com',
                 port: 443,
-                secure: true
+                secure: true,
+                config: iceServers
             });
 
             receiverPeer.on('open', function(id) {
                 addLog('📱 Receiver peer siap: ' + id);
-                const connection = receiverPeer.connect(targetId);
+                const connection = receiverPeer.connect(targetId, {
+                    reliable: true,
+                    serialization: 'json'
+                });
                 receiverConn = connection;
 
                 connection.on('open', function() {
                     receiverPeerStatus.innerText = 'Terhubung ke ' + targetId;
                     receiverPeerDot.classList.add('connected');
                     addLog('✅ Tersambung ke sender: ' + targetId);
+                    retryCount = 0;
                 });
 
                 connection.on('data', function(data) {
@@ -294,27 +328,56 @@
 
                 connection.on('error', function(err) {
                     addLog('❌ Connection error: ' + err);
+                    receiverPeerStatus.innerText = 'Gagal koneksi';
+                    receiverPeerDot.classList.remove('connected');
                 });
             });
 
             receiverPeer.on('error', function(err) {
-                receiverPeerStatus.innerText = 'Gagal koneksi';
+                console.error('Receiver peer error:', err);
+                receiverPeerStatus.innerText = 'Gagal koneksi ke server';
                 addLog('❌ Receiver peer error: ' + (err.type || err));
+                receiverPeerDot.classList.remove('connected');
             });
+        };
+
+        window.retryConnection = function() {
+            if (retryCount < MAX_RETRY) {
+                retryCount++;
+                addLog(`🔄 Mencoba ulang (${retryCount}/${MAX_RETRY})...`);
+                connectToPeer();
+            } else {
+                addLog('❌ Gagal setelah ' + MAX_RETRY + ' kali. Reset dan coba lagi.');
+                alert('Gagal koneksi. Coba reset receiver.');
+            }
+        };
+
+        window.resetReceiverPeer = function() {
+            if (receiverPeer) receiverPeer.destroy();
+            receiverPeer = null;
+            receiverConn = null;
+            retryCount = 0;
+            receiverPeerStatus.innerText = 'Belum tersambung';
+            receiverPeerDot.classList.remove('connected');
+            addLog('🔄 Receiver di-reset');
         };
 
         // ==================== HANDLE INCOMING FILE ====================
         function handleIncomingData(data) {
             if (data && data.type === 'file') {
-                const file = new File([data.buffer], data.name, { type: data.type });
-                receivedFiles.push({
-                    file: file,
-                    name: data.name,
-                    size: data.size,
-                    type: data.type
-                });
-                renderReceiverFileList();
-                addLog(`📥 Menerima: ${data.name} (${formatBytes(data.size)})`);
+                try {
+                    const file = new File([data.buffer], data.name, { type: data.type });
+                    receivedFiles.push({
+                        file: file,
+                        name: data.name,
+                        size: data.size,
+                        type: data.type
+                    });
+                    renderReceiverFileList();
+                    addLog(`📥 Menerima: ${data.name} (${formatBytes(data.size)})`);
+                } catch (e) {
+                    addLog('❌ Error saat menerima file: ' + e);
+                }
             }
         }
 
@@ -344,6 +407,9 @@
                     };
                     activeConn.send(data);
                     addLog(`✅ Terkirim: ${file.name}`);
+                };
+                reader.onerror = function(e) {
+                    addLog(`❌ Gagal baca file: ${file.name}`);
                 };
                 reader.readAsArrayBuffer(file);
             });
