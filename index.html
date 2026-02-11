@@ -1,260 +1,820 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WebDrop Room</title>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
-<style>
-body{
-margin:0;
-background:#0f172a;
-font-family:Arial;
-color:white;
-display:flex;
-justify-content:center;
-}
-.container{
-max-width:700px;
-width:100%;
-padding:20px;
-}
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:16px;
-margin-bottom:20px;
-}
-input,button{
-width:100%;
-padding:12px;
-border-radius:10px;
-border:none;
-margin-top:8px;
-}
-button{
-background:#3b82f6;
-color:white;
-cursor:pointer;
-}
-.device{
-background:#334155;
-padding:10px;
-border-radius:10px;
-margin-top:6px;
-cursor:pointer;
-}
-.progress{
-background:#334155;
-height:8px;
-border-radius:10px;
-overflow:hidden;
-margin-top:10px;
-}
-.bar{
-height:100%;
-width:0%;
-background:#22c55e;
-}
-.file{
-background:#475569;
-padding:10px;
-border-radius:10px;
-margin-top:6px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📦 WebDrop · Room Stabil</title>
+    <!-- PeerJS -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            background: #0b1120;
+            color: white;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 750px;
+            width: 100%;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        input, .code-box {
+            width: 100%;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 40px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 12px;
+        }
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59,130,246,0.4);
+        }
+        button.secondary {
+            background: #334155;
+        }
+        button.secondary:hover {
+            background: #475569;
+        }
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .code-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 8px 12px;
+        }
+        .code-box span {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+        .badge {
+            background: #334155;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .qr-container {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 16px;
+            border: 2px solid #e2e8f0;
+        }
+        #qrImage {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        .device-list, .file-list, .received-list {
+            margin-top: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 16px;
+        }
+        .device-item, .file-item, .received-item {
+            background: #263340;
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid #3b82f6;
+            transition: 0.2s;
+        }
+        .device-item:hover {
+            background: #334155;
+            border-left-color: #60a5fa;
+        }
+        .device-item.selected {
+            background: #1e3a5f;
+            border-left-color: #fbbf24;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .file-icon {
+            font-size: 1.8rem;
+        }
+        .file-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .file-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-meta {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 6px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #22c55e;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .status-bar {
+            background: #1a2634;
+            border-radius: 40px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f43f5e;
+        }
+        .dot.connected {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1e293b;
+            border-left: 6px solid #3b82f6;
+            border-radius: 16px;
+            padding: 14px 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 350px;
+            z-index: 9999;
+            display: none;
+        }
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        hr {
+            border: 1px solid #334155;
+            margin: 20px 0;
+        }
+    </style>
 </head>
-
 <body>
-<div class="container">
+    <div class="container">
+        <!-- ========== STATUS HEADER ========== -->
+        <div class="status-bar">
+            <span class="dot" id="connectionDot"></span>
+            <span id="statusText">Memulai Peer...</span>
+            <span style="margin-left: auto; display: flex; gap: 6px;">
+                <span class="badge" id="roleBadge">-</span>
+                <span class="badge" id="deviceCount">0 device</span>
+            </span>
+        </div>
 
-<div class="card">
-<h3>Room Code</h3>
-<input id="roomInput" placeholder="Masukkan kode room">
-<button onclick="joinRoom()">Join Room</button>
-<div id="myId"></div>
-</div>
+        <!-- ========== ROOM & KONEKSI ========== -->
+        <div class="card">
+            <h3><span>🚪</span> Room / Kode</h3>
+            <div class="flex-row">
+                <input type="text" id="roomInput" placeholder="Masukkan kode room (contoh: kantor123)" value="demo" autocomplete="off">
+                <button onclick="joinRoom()" style="width: auto; padding: 14px 32px;">Join</button>
+            </div>
+            <div class="qr-container" id="qrContainer" style="display: none;">
+                <img id="qrImage" src="" alt="QR Code">
+                <div style="flex:1;">
+                    <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR untuk join</div>
+                    <div style="font-size:0.85rem; color:#2d3a4a; margin:8px 0;">Buka kamera HP, arahkan ke QR</div>
+                    <button class="badge" onclick="generateQR()" style="background:#3b82f6; color:white;">↻ Buat QR</button>
+                </div>
+            </div>
+            <div style="margin-top: 16px;">
+                <div class="label">ID Peer Kamu</div>
+                <div class="code-box">
+                    <span id="myPeerId">-</span>
+                    <button class="badge" onclick="copyMyId()" style="background: #475569;">Copy</button>
+                </div>
+            </div>
+        </div>
 
-<div class="card">
-<h3>Device di Room</h3>
-<div id="deviceList"></div>
-</div>
+        <!-- ========== DEVICE DI ROOM ========== -->
+        <div class="card">
+            <h3><span>📱</span> Device di Room</h3>
+            <div id="deviceListContainer" class="device-list">
+                <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>
+            </div>
+        </div>
 
-<div class="card">
-<h3>Kirim File</h3>
-<input type="file" id="fileInput" hidden multiple>
-<button onclick="pickFile()">Pilih File</button>
-<div class="progress"><div class="bar" id="progressBar"></div></div>
-</div>
+        <!-- ========== FILE YANG AKAN DIKIRIM ========== -->
+        <div class="card">
+            <h3><span>📤</span> Kirim File</h3>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="pickFile()" id="pickFileBtn" disabled style="flex: 2;">
+                    <i class="fas fa-file"></i> Pilih File
+                </button>
+                <button onclick="clearSelectedFiles()" class="secondary" style="flex: 1;">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+            <input type="file" id="fileInput" multiple style="display: none;">
+            <div id="selectedFileList" class="file-list" style="margin-top: 20px;"></div>
+            <div style="margin-top: 16px;">
+                <div class="label">Device tujuan</div>
+                <select id="targetDeviceSelect" style="width:100%; padding:14px; background:#0f172a; border:1px solid #334155; border-radius:40px; color:white;">
+                    <option value="">-- Pilih device target --</option>
+                </select>
+            </div>
+            <button onclick="sendFiles()" id="sendBtn" disabled style="margin-top: 20px;">
+                <i class="fas fa-paper-plane"></i> Kirim Sekarang
+            </button>
+            <div class="progress-bar" style="margin-top: 16px;">
+                <div class="progress-fill" id="globalProgress"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                <span id="progressText">-</span>
+                <span id="selectedSize">0 KB</span>
+            </div>
+        </div>
 
-<div class="card">
-<h3>Diterima</h3>
-<div id="receivedList"></div>
-</div>
+        <!-- ========== FILE DITERIMA ========== -->
+        <div class="card">
+            <h3><span>📥</span> File Diterima</h3>
+            <div id="receivedListContainer" class="received-list">
+                <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada file diterima</div>
+            </div>
+        </div>
 
-</div>
+        <!-- ========== TOAST NOTIFIKASI ========== -->
+        <div id="toast" class="toast"></div>
+    </div>
 
-<script>
-let peer;
-let myId;
-let roomHostId;
-let connections = {};
-let selectedTarget = null;
-const CHUNK = 256*1024;
+    <script>
+        // ==================================================
+        //   KONFIGURASI ICE SERVER (STABIL!)
+        // ==================================================
+        const ICE_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.cloudflare.com:3478' },        // Cloudflare STUN
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                // TURN gratis dari Metered.ca (untuk koneksi di jaringan ketat)
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+            ]
+        };
 
-function joinRoom(){
-const room = document.getElementById("roomInput").value.trim();
-if(!room) return alert("Masukkan kode room!");
+        // ========== STATE ==========
+        let peer;                   // Peer utama
+        let myId;                 // ID Peer sendiri
+        let roomCode;            // Kode room (dari input)
+        let roomHostId = null;   // ID host room (room-{code})
+        let isHost = false;      // Apakah kita host?
+        let connections = {};    // Semua koneksi aktif (key = peerId, value = DataConnection)
+        let deviceList = [];     // Daftar ID peer selain diri sendiri
 
-peer = new Peer(undefined,{
-config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
-});
+        // File states
+        let selectedFiles = [];       // Array of File objects
+        let currentTarget = null;    // Peer ID tujuan pengiriman
 
-peer.on("open",id=>{
-myId=id;
-document.getElementById("myId").innerText="ID: "+id;
+        // Received files
+        let receivedFiles = [];      // Array of {file, name, size, type, blob}
 
-roomHostId="room-"+room;
+        // DOM elements
+        const connectionDot = document.getElementById('connectionDot');
+        const statusText = document.getElementById('statusText');
+        const roleBadge = document.getElementById('roleBadge');
+        const deviceCountSpan = document.getElementById('deviceCount');
+        const myPeerIdSpan = document.getElementById('myPeerId');
+        const roomInput = document.getElementById('roomInput');
+        const qrContainer = document.getElementById('qrContainer');
+        const qrImage = document.getElementById('qrImage');
+        const deviceListContainer = document.getElementById('deviceListContainer');
+        const targetDeviceSelect = document.getElementById('targetDeviceSelect');
+        const pickFileBtn = document.getElementById('pickFileBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFileListDiv = document.getElementById('selectedFileList');
+        const receivedListContainer = document.getElementById('receivedListContainer');
+        const globalProgress = document.getElementById('globalProgress');
+        const progressText = document.getElementById('progressText');
+        const selectedSizeSpan = document.getElementById('selectedSize');
+        const toast = document.getElementById('toast');
 
-const hostConn = peer.connect(roomHostId);
-hostConn.on("error",()=>{
-// Kalau gagal berarti belum ada host → jadi host
-peer.destroy();
-peer=new Peer(roomHostId);
-peer.on("open",()=>{
-roomHostId=peer.id;
-});
-peer.on("connection",setupConnection);
-});
-hostConn.on("open",()=>{
-hostConn.send({type:"join",id:myId});
-});
-hostConn.on("data",data=>{
-if(data.type==="list"){
-data.ids.forEach(connectToPeer);
-}
-});
-});
+        // ========== INIT ==========
+        window.onload = function() {
+            // Auto-generate room code random jika kosong
+            if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
+            showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
+        };
 
-peer.on("connection",setupConnection);
-}
+        // ========== TOAST ==========
+        function showToast(msg, type = 'info') {
+            toast.innerHTML = msg;
+            toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
 
-function connectToPeer(id){
-if(id===myId || connections[id]) return;
-const conn=peer.connect(id);
-setupConnection(conn);
-}
+        // ========== JOIN ROOM ==========
+        window.joinRoom = function() {
+            const code = roomInput.value.trim();
+            if (!code) { alert('Masukkan kode room!'); return; }
+            roomCode = code;
+            roomHostId = 'room-' + code;   // ID host tetap
 
-function setupConnection(conn){
-connections[conn.peer]=conn;
-renderDevices();
+            if (peer) peer.destroy();
+            // Buat peer dengan ID random dulu
+            peer = new Peer(undefined, { config: ICE_CONFIG });
 
-let buffer=[];
-let meta=null;
+            peer.on('open', (id) => {
+                myId = id;
+                myPeerIdSpan.innerText = myId;
+                statusText.innerText = 'Peer siap';
+                connectionDot.classList.add('connected');
+                showToast(`✅ Peer siap, ID: ${id}`, 'success');
 
-conn.on("data",data=>{
-if(data.type==="join" && peer.id===roomHostId){
-connections[data.id]=null;
-broadcastList();
-}
-else if(data.type==="list"){
-data.ids.forEach(connectToPeer);
-}
-else if(data.type==="meta"){
-meta=data;
-buffer=[];
-}
-else if(data instanceof ArrayBuffer){
-buffer.push(data);
-}
-else if(data.type==="end"){
-const blob=new Blob(buffer,{type:meta.mime});
-downloadBlob(blob,meta.name);
-}
-});
-}
+                // Coba connect ke host
+                const hostConn = peer.connect(roomHostId);
+                const timeout = setTimeout(() => {
+                    // Jika tidak ada respons → jadi host
+                    becomeHost();
+                }, 2000);
 
-function broadcastList(){
-const ids=Object.keys(connections);
-Object.values(connections).forEach(c=>{
-if(c && c.open){
-c.send({type:"list",ids:ids});
-}
-});
-}
+                hostConn.on('open', () => {
+                    clearTimeout(timeout);
+                    isHost = false;
+                    roleBadge.innerText = 'MEMBER';
+                    showToast(`🔗 Terhubung ke host ${roomHostId}`, 'success');
+                    // Kirim sinyal join
+                    hostConn.send({ type: 'join', id: myId });
+                    // Simpan koneksi host
+                    connections[roomHostId] = hostConn;
+                    setupConnection(hostConn);
+                    // Minta daftar device
+                    hostConn.send({ type: 'list-request' });
+                });
 
-function renderDevices(){
-const div=document.getElementById("deviceList");
-div.innerHTML="";
-Object.keys(connections).forEach(id=>{
-if(id===myId) return;
-div.innerHTML+=`<div class="device" onclick="selectDevice('${id}')">${id}</div>`;
-});
-}
+                hostConn.on('error', (err) => {
+                    clearTimeout(timeout);
+                    becomeHost();
+                });
+            });
 
-function selectDevice(id){
-selectedTarget=id;
-alert("Target dipilih: "+id);
-}
+            peer.on('error', (err) => {
+                console.error(err);
+                showToast(`❌ Peer error: ${err.type}`, 'error');
+                if (err.type === 'unavailable-id' && isHost) {
+                    // ID host sudah dipakai? Tambah random suffix
+                    roomHostId = 'room-' + code + '-' + Math.random().toString(36).substring(2,4);
+                    becomeHost();
+                }
+            });
 
-function pickFile(){
-if(!selectedTarget) return alert("Pilih device dulu!");
-document.getElementById("fileInput").click();
-}
+            peer.on('connection', (conn) => {
+                // Koneksi masuk dari peer lain
+                connections[conn.peer] = conn;
+                setupConnection(conn);
+                updateDeviceList();
+            });
+        };
 
-document.getElementById("fileInput").addEventListener("change",e=>{
-sendFiles([...e.target.files]);
-});
+        function becomeHost() {
+            isHost = true;
+            roleBadge.innerText = 'HOST';
+            showToast(`👑 Menjadi host room: ${roomHostId}`, 'success');
+            // Re-inisialisasi peer dengan ID host
+            peer.destroy();
+            peer = new Peer(roomHostId, { config: ICE_CONFIG });
+            peer.on('open', (id) => {
+                roomHostId = id;
+                myId = id;
+                myPeerIdSpan.innerText = myId;
+                statusText.innerText = 'Host siap';
+                connectionDot.classList.add('connected');
+                // Tampilkan QR
+                generateQR();
+                qrContainer.style.display = 'flex';
+            });
+            peer.on('connection', (conn) => {
+                connections[conn.peer] = conn;
+                setupConnection(conn);
+                updateDeviceList();
+                // Broadcast daftar device ke semua anggota
+                broadcastDeviceList();
+            });
+        }
 
-async function sendFiles(files){
-const conn=connections[selectedTarget];
-if(!conn||!conn.open) return alert("Device tidak terkoneksi!");
+        // ========== SETUP SATU KONEKSI ==========
+        function setupConnection(conn) {
+            if (!conn) return;
+            connections[conn.peer] = conn;
 
-let total=files.reduce((a,b)=>a+b.size,0);
-let sent=0;
+            let fileBuffer = [];
+            let fileMeta = null;
+            let fileProgress = 0;
 
-for(const file of files){
-await sendOne(conn,file,total,sent);
-sent+=file.size;
-}
-alert("Selesai kirim!");
-}
+            conn.on('data', (data) => {
+                if (data.type === 'join' && isHost) {
+                    // Member baru join
+                    if (!connections[data.id]) {
+                        connections[data.id] = null; // nanti akan terkoneksi otomatis
+                    }
+                    updateDeviceList();
+                    broadcastDeviceList();
+                }
+                else if (data.type === 'list-request' && isHost) {
+                    // Kirim daftar device ke yang minta
+                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
+                    conn.send({ type: 'device-list', ids });
+                }
+                else if (data.type === 'device-list') {
+                    // Terima daftar device dari host
+                    data.ids.forEach(id => {
+                        if (!connections[id] && id !== myId) {
+                            // Sambungkan ke device tersebut
+                            const newConn = peer.connect(id);
+                            setupConnection(newConn);
+                        }
+                    });
+                }
+                else if (data.type === 'file-meta') {
+                    fileMeta = data;
+                    fileBuffer = [];
+                    fileProgress = 0;
+                    showToast(`📥 Menerima: ${data.name}`, 'info');
+                }
+                else if (data instanceof ArrayBuffer) {
+                    fileBuffer.push(data);
+                    if (fileMeta) {
+                        fileProgress += data.byteLength;
+                        // Update progress bar di sini? (opsional)
+                    }
+                }
+                else if (data.type === 'file-end') {
+                    if (fileMeta) {
+                        const blob = new Blob(fileBuffer, { type: fileMeta.mime });
+                        const file = new File([blob], fileMeta.name, { type: fileMeta.mime });
+                        receivedFiles.push({
+                            file: file,
+                            name: fileMeta.name,
+                            size: fileMeta.size,
+                            type: fileMeta.mime,
+                            blob: blob
+                        });
+                        renderReceivedFiles();
+                        showToast(`✅ Selesai menerima: ${fileMeta.name}`, 'success');
+                    }
+                    fileMeta = null;
+                    fileBuffer = [];
+                }
+            });
 
-function sendOne(conn,file,total,sent){
-return new Promise(resolve=>{
-const reader=new FileReader();
-reader.onload=e=>{
-const buffer=e.target.result;
+            conn.on('close', () => {
+                delete connections[conn.peer];
+                updateDeviceList();
+                broadcastDeviceList();
+                showToast(`⚠️ Device ${conn.peer} terputus`, 'error');
+            });
 
-conn.send({type:"meta",name:file.name,mime:file.type});
+            conn.on('error', (err) => {
+                showToast(`⚠️ Koneksi error: ${err}`, 'error');
+            });
+        }
 
-let offset=0;
+        // ========== BROADCAST DAFTAR DEVICE (HOST) ==========
+        function broadcastDeviceList() {
+            if (!isHost) return;
+            const ids = Object.keys(connections).filter(id => id !== myId);
+            Object.values(connections).forEach(c => {
+                if (c && c.open) {
+                    c.send({ type: 'device-list', ids });
+                }
+            });
+            updateDeviceList();
+        }
 
-while(offset<buffer.byteLength){
-const chunk=buffer.slice(offset,offset+CHUNK);
-conn.send(chunk);
-offset+=CHUNK;
+        // ========== UPDATE UI DEVICE LIST ==========
+        function updateDeviceList() {
+            deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
+            deviceCountSpan.innerText = deviceList.length + ' device';
 
-let percent=((sent+offset)/total)*100;
-document.getElementById("progressBar").style.width=percent+"%";
-}
+            // Render daftar device di panel
+            let html = '';
+            if (deviceList.length === 0) {
+                html = '<div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>';
+            } else {
+                deviceList.forEach(id => {
+                    const isSelected = (currentTarget === id);
+                    html += `<div class="device-item ${isSelected ? 'selected' : ''}" onclick="selectTarget('${id}')">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span style="font-size:1.4rem;">📱</span>
+                                    <span style="font-family:monospace;">${id}</span>
+                                </div>
+                                <span class="badge" style="background:${isSelected ? '#fbbf24' : '#334155'}; color:black;">${isSelected ? '✓ Terpilih' : 'Pilih'}</span>
+                            </div>`;
+                });
+            }
+            deviceListContainer.innerHTML = html;
 
-conn.send({type:"end"});
-resolve();
-};
-reader.readAsArrayBuffer(file);
-});
-}
+            // Update dropdown
+            let options = '<option value="">-- Pilih device target --</option>';
+            deviceList.forEach(id => {
+                options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id}</option>`;
+            });
+            targetDeviceSelect.innerHTML = options;
 
-function downloadBlob(blob,name){
-const url=URL.createObjectURL(blob);
-const a=document.createElement("a");
-a.href=url;
-a.download=name;
-a.click();
-}
+            // Enable/disable tombol kirim
+            pickFileBtn.disabled = !currentTarget;
+            sendBtn.disabled = !currentTarget || selectedFiles.length === 0;
+        }
 
-</script>
+        // ========== SELECT TARGET ==========
+        window.selectTarget = function(id) {
+            currentTarget = id;
+            updateDeviceList();
+            showToast(`🎯 Target: ${id}`, 'info');
+        };
+        targetDeviceSelect.addEventListener('change', (e) => {
+            currentTarget = e.target.value;
+            updateDeviceList();
+        });
+
+        // ========== QR CODE GENERATION ==========
+        window.generateQR = function() {
+            if (!roomHostId) return;
+            const url = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(roomCode);
+            const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
+            qrImage.src = qrApi;
+            qrContainer.style.display = 'flex';
+        };
+
+        // ========== AUTO JOIN DARI URL ==========
+        function checkUrlParam() {
+            const params = new URLSearchParams(window.location.search);
+            const roomParam = params.get('room');
+            if (roomParam) {
+                roomInput.value = roomParam;
+                joinRoom();
+            }
+        }
+        checkUrlParam();
+
+        // ========== COPY ID ==========
+        window.copyMyId = function() {
+            navigator.clipboard.writeText(myId);
+            showToast('📋 ID peer dicopy', 'success');
+        };
+
+        // ========== PICK FILE (WAJIB BUKA FILE MANAGER) ==========
+        window.pickFile = function() {
+            if (!currentTarget) { showToast('❌ Pilih device target dulu!', 'error'); return; }
+            fileInput.click(); // 🔥 PASTI BUKA FILE EXPLORER
+        };
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const newFiles = Array.from(e.target.files).filter(f => 
+                    !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                );
+                selectedFiles = [...selectedFiles, ...newFiles];
+                renderSelectedFiles();
+                e.target.value = ''; // reset agar bisa pilih file sama lagi
+            }
+        });
+
+        function renderSelectedFiles() {
+            if (selectedFiles.length === 0) {
+                selectedFileListDiv.innerHTML = '<div style="color:#94a3b8; padding:20px; text-align:center;">Belum ada file dipilih</div>';
+                selectedSizeSpan.innerText = '0 KB';
+                sendBtn.disabled = true;
+                return;
+            }
+            let totalSize = 0;
+            let html = '';
+            selectedFiles.forEach((f, i) => {
+                totalSize += f.size;
+                const icon = getFileIcon(f.type);
+                html += `<div class="file-item">
+                            <div class="file-info">
+                                <span class="file-icon">${icon}</span>
+                                <div class="file-details">
+                                    <div class="file-name">${escapeHTML(f.name)}</div>
+                                    <div class="file-meta">${formatBytes(f.size)}</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-times" style="color:#f87171; cursor:pointer; padding:8px;" onclick="removeFile(${i})"></i>
+                        </div>`;
+            });
+            selectedFileListDiv.innerHTML = html;
+            selectedSizeSpan.innerText = formatBytes(totalSize);
+            sendBtn.disabled = !currentTarget;
+        }
+
+        window.removeFile = function(index) {
+            selectedFiles.splice(index, 1);
+            renderSelectedFiles();
+        };
+        window.clearSelectedFiles = function() {
+            selectedFiles = [];
+            renderSelectedFiles();
+        };
+
+        // ========== KIRIM FILE ==========
+        window.sendFiles = async function() {
+            if (!currentTarget) { showToast('❌ Pilih target!', 'error'); return; }
+            if (selectedFiles.length === 0) { showToast('❌ Tidak ada file!', 'error'); return; }
+
+            const conn = connections[currentTarget];
+            if (!conn || !conn.open) { showToast('❌ Koneksi ke target tidak tersedia', 'error'); return; }
+
+            let totalSent = 0;
+            const totalSize = selectedFiles.reduce((a,b)=>a+b.size,0);
+            showToast(`📤 Mengirim ${selectedFiles.length} file ke ${currentTarget}...`, 'info');
+
+            for (const file of selectedFiles) {
+                await sendOneFile(conn, file, totalSent, totalSize);
+                totalSent += file.size;
+            }
+            showToast('✅ Semua file terkirim!', 'success');
+            // Tidak menghapus selectedFiles otomatis, biar user hapus manual
+        };
+
+        function sendOneFile(conn, file, sentBefore, totalSize) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const buffer = e.target.result;
+                    const CHUNK = 256 * 1024; // 256KB
+
+                    conn.send({ type: 'file-meta', name: file.name, size: file.size, mime: file.type });
+
+                    let offset = 0;
+                    const chunkInterval = setInterval(() => {
+                        if (offset >= buffer.byteLength) {
+                            clearInterval(chunkInterval);
+                            conn.send({ type: 'file-end' });
+                            resolve();
+                            return;
+                        }
+                        const chunk = buffer.slice(offset, offset + CHUNK);
+                        conn.send(chunk);
+                        offset += chunk.byteLength;
+
+                        // Update progress
+                        const percent = ((sentBefore + offset) / totalSize) * 100;
+                        globalProgress.style.width = percent + '%';
+                        progressText.innerText = Math.round(percent) + '%';
+                    }, 30);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // ========== RENDER FILE DITERIMA ==========
+        function renderReceivedFiles() {
+            if (receivedFiles.length === 0) {
+                receivedListContainer.innerHTML = '<div style="color:#94a3b8; padding:20px; text-align:center;">Belum ada file diterima</div>';
+                return;
+            }
+            let html = '';
+            receivedFiles.forEach((f, i) => {
+                const icon = getFileIcon(f.type);
+                html += `<div class="file-item" style="border-left-color:#22c55e;">
+                            <div class="file-info">
+                                <span class="file-icon">${icon}</span>
+                                <div class="file-details">
+                                    <div class="file-name">${escapeHTML(f.name)}</div>
+                                    <div class="file-meta">${formatBytes(f.size)}</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-download" style="color:#3b82f6; cursor:pointer; padding:8px;" onclick="downloadReceived(${i})"></i>
+                        </div>`;
+            });
+            receivedListContainer.innerHTML = html;
+        }
+
+        window.downloadReceived = function(index) {
+            const f = receivedFiles[index];
+            const url = URL.createObjectURL(f.file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = f.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // ========== UTILS ==========
+        function getFileIcon(type) {
+            if (type.includes('image')) return '🖼️';
+            if (type.includes('video')) return '🎬';
+            if (type.includes('audio')) return '🎵';
+            if (type.includes('pdf')) return '📄';
+            if (type.includes('zip')||type.includes('rar')) return '📦';
+            if (type.includes('text')) return '📝';
+            return '📁';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+        }
+
+        function escapeHTML(s) {
+            return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
+        }
+
+        // FontAwesome untuk icon (opsional)
+        const faLink = document.createElement('link');
+        faLink.rel = 'stylesheet';
+        faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
+        document.head.appendChild(faLink);
+    </script>
 </body>
 </html>
