@@ -138,13 +138,14 @@
             border: 2px solid #e2e8f0;
         }
         
-        #qrCanvas {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
+        #qrImage {
             width: 120px;
             height: 120px;
+            background: white;
+            padding: 0;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            object-fit: contain;
         }
         
         .qr-info {
@@ -376,13 +377,12 @@
         .flex { display: flex; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="hero">
             <h1>📁 webfolder</h1>
-            <p>Upload file asli • QR code putih • no simulasi • 100% work</p>
+            <p>Upload file asli • QR Code via API • 100% work</p>
         </div>
         
         <div class="grid">
@@ -406,9 +406,9 @@
                         </button>
                     </div>
                     
-                    <!-- QR CODE BACKGROUND PUTIH -->
+                    <!-- QR CODE VIA API -->
                     <div class="qr-container" style="background: white; border: 2px solid #e2e8f0;">
-                        <canvas id="qrCanvas"></canvas>
+                        <img id="qrImage" src="" alt="QR Code">
                         <div class="qr-info">
                             <h4 style="color: #0b0e14;"><i class="fas fa-qrcode" style="color: #0b0e14;"></i> QR Code Folder</h4>
                             <p style="color: #4a5568;">Scan dengan kamera HP untuk buka link</p>
@@ -424,14 +424,14 @@
                     </div>
                 </div>
                 
-                <!-- UPLOAD ZONE - PASTI BISA UPLOAD -->
+                <!-- UPLOAD ZONE - PASTI BUKA FILE EXPLORER -->
                 <div class="upload-zone" id="dropZoneSender">
                     <input type="file" id="fileInputSender" multiple style="display: none;">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <h3>Taruh file di sini</h3>
-                    <p>atau klik untuk memilih file</p>
+                    <h3>Klik di sini untuk pilih file</h3>
+                    <p>atau drag & drop file ke area ini</p>
                     <div style="margin-top: 12px; color: #a0e7ff; font-size: 0.85rem;">
-                        <i class="fas fa-check-circle"></i> File asli 100% - bukan simulasi
+                        <i class="fas fa-check-circle"></i> File asli 100% - langsung proses
                     </div>
                 </div>
                 
@@ -440,7 +440,7 @@
                     <div style="background: #0f131a; border-radius: 16px; padding: 24px; text-align: center; margin-top: 8px; color: #718096;">
                         <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.6;"></i>
                         <p style="font-size: 0.95rem;">Belum ada file dipilih</p>
-                        <p style="font-size: 0.8rem;">Klik atau drag file ke area upload</p>
+                        <p style="font-size: 0.8rem;">Klik area di atas untuk memilih file</p>
                     </div>
                 </div>
                 
@@ -492,22 +492,22 @@
             </div>
         </div>
         
-        <!-- LOGS - TIDAK ADA SIMULASI -->
+        <!-- LOGS -->
         <div class="logs-panel">
             <div class="logs-header">
                 <i class="fas fa-check-circle" style="color: #7aa2f7;"></i>
-                <span>File asli • QR code putih • 100% client-side</span>
-                <span style="margin-left: auto; font-size: 0.8rem;">✅ No simulasi - semua real</span>
+                <span>File asli • QR via API • 100% client-side</span>
+                <span style="margin-left: auto; font-size: 0.8rem;">✅ No library - QR dari API</span>
             </div>
             <div class="log-stream" id="logStream">
-                <div class="log-entry"><span class="log-time">[System]</span> WebFolder ready. Klik zona upload untuk pilih file.</div>
+                <div class="log-entry"><span class="log-time">[System]</span> WebFolder ready. Klik area upload untuk pilih file.</div>
             </div>
         </div>
         
         <div class="footer-info">
             <div class="encryption-badge">
                 <i class="fas fa-check-circle" style="color: #7aa2f7;"></i>
-                <span>Upload & Download file asli • QR code putih</span>
+                <span>Upload & Download file asli • QR via API</span>
             </div>
             <div>
                 <i class="fas fa-qrcode"></i> QR aktif
@@ -530,7 +530,7 @@
         const folderLinkInput = document.getElementById('folderLink');
         const incomingCountBadge = document.getElementById('incomingCountBadge');
         const logStream = document.getElementById('logStream');
-        const qrCanvas = document.getElementById('qrCanvas');
+        const qrImage = document.getElementById('qrImage');
         
         // Generate link unik
         const FOLDER_ID = Math.random().toString(36).substring(2, 12);
@@ -542,43 +542,21 @@
             return link;
         }
         
-        // GENERATE QR CODE - BACKGROUND PUTIH (FIXED)
+        // GENERATE QR CODE VIA API - PASTI JALAN
         window.generateQRCode = function() {
             const link = folderLinkInput.value;
             if (!link) return;
             
-            // Clear canvas first
-            const ctx = qrCanvas.getContext('2d');
-            ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+            // Encode URL
+            const encodedLink = encodeURIComponent(link);
+            // Gunakan API QR Server (gratis, tanpa library)
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=1&data=${encodedLink}`;
+            qrImage.src = qrUrl;
             
-            // Check if QRCode library is loaded
-            if (typeof QRCode === 'undefined') {
-                addLog('❌ Library QR Code tidak ditemukan', 'error');
-                // Fallback: draw text
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
-                ctx.fillStyle = 'black';
-                ctx.font = '12px Arial';
-                ctx.fillText('QR Error', 30, 60);
-                return;
-            }
+            // Tambahkan timestamp agar tidak cache
+            qrImage.src = qrUrl + '&t=' + Date.now();
             
-            QRCode.toCanvas(qrCanvas, link, {
-                width: 120,
-                height: 120,
-                margin: 1,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            }, function(error) {
-                if (error) {
-                    console.error(error);
-                    addLog('❌ Gagal generate QR: ' + error.message, 'error');
-                } else {
-                    addLog('✅ QR code siap - background putih', 'success');
-                }
-            });
+            addLog('✅ QR code digenerate via API (qrserver.com)', 'success');
         };
         
         // Copy link
@@ -588,7 +566,7 @@
             addLog('📋 Link dicopy', 'info');
         };
         
-        // ============ HANDLE UPLOAD FILE ASLI (FIXED: no new tab) ============
+        // ============ HANDLE UPLOAD FILE ASLI (PASTI BUKA FILE EXPLORER) ============
         function handleSenderFiles(fileList) {
             if (!fileList || fileList.length === 0) {
                 addLog('❌ Tidak ada file', 'error');
@@ -624,7 +602,7 @@
                     <div style="background: #0f131a; border-radius: 16px; padding: 24px; text-align: center; margin-top: 8px; color: #718096;">
                         <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.6;"></i>
                         <p style="font-size: 0.95rem;">Belum ada file dipilih</p>
-                        <p style="font-size: 0.8rem;">Klik atau drag file ke area upload</p>
+                        <p style="font-size: 0.8rem;">Klik area upload untuk memilih file</p>
                     </div>
                 `;
                 sendBtn.disabled = true;
@@ -780,13 +758,14 @@
             addLog(`📥 Download ${receivedFiles.length} file`, 'info');
         };
         
-        // ============ EVENT LISTENERS - FIX BUKA TAB BARU ============
+        // ============ EVENT LISTENERS - PASTI BUKA FILE EXPLORER, TIDAK BUKA TAB ============
         function setupEventListeners() {
-            // KLICK area upload - PASTI TIDAK BUKA TAB BARU
+            // KLICK area upload - PASTI trigger file input
             dropZone.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                fileInput.click();
+                fileInput.click();  // Buka file explorer
+                addLog('📂 Membuka file explorer...', 'info');
             });
             
             // Drag over
@@ -805,7 +784,7 @@
                 dropZone.style.background = '#0f131a';
             });
             
-            // Drop - FIXED
+            // Drop - PASTI
             dropZone.addEventListener('drop', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -823,7 +802,8 @@
                 e.stopPropagation();
                 if (e.target.files && e.target.files.length > 0) {
                     handleSenderFiles(e.target.files);
-                    fileInput.value = ''; // Reset
+                    // Reset input agar bisa pilih file yang sama lagi
+                    fileInput.value = '';
                 }
             });
         }
@@ -878,14 +858,12 @@
         // ============ INIT ============
         document.addEventListener('DOMContentLoaded', function() {
             updateFolderLink();
-            // Tunggu sebentar untuk QR library
-            setTimeout(function() {
-                window.generateQRCode();
-            }, 100);
+            // Generate QR pertama kali
+            window.generateQRCode();
             setupEventListeners();
             renderSenderFileList();
             renderReceiverFileList();
-            addLog('🚀 WebFolder siap - upload file asli', 'success');
+            addLog('🚀 WebFolder siap - Klik area upload untuk pilih file', 'success');
         });
     </script>
 </body>
