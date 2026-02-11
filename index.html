@@ -10,8 +10,7 @@
         .container { max-width: 700px; width: 100%; background: #14181f; border-radius: 32px; padding: 28px; border: 1px solid #2d3a4a; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
         h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #91c7ff, #6d9eff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
         .sub { color: #a0b3cc; margin-bottom: 24px; font-size: 0.95rem; }
-        
-        /* KONEKSI */
+
         .connection-area { background: #1e2630; border-radius: 24px; padding: 20px; margin-bottom: 24px; border: 1px solid #2f3b4b; }
         .flex-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .peer-id-box { background: #0b0e12; border-radius: 40px; padding: 10px 18px; display: flex; align-items: center; gap: 10px; flex: 1; border: 1px solid #3a4a5a; }
@@ -20,41 +19,35 @@
         .badge:hover { background: #3e5062; }
         .qr-container { background: white; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-top: 16px; border: 2px solid #cbd5e0; }
         #qrImage { width: 100px; height: 100px; background: white; border-radius: 12px; object-fit: contain; }
-        .server-select { background: #1a212a; border: 1px solid #3f4e60; color: white; padding: 6px 12px; border-radius: 30px; font-size: 0.8rem; }
-        
-        /* STATUS */
+
         .status-bar { background: #1b222c; border-radius: 40px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; margin: 16px 0; border: 1px solid #3b4a5a; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background: #f43f5e; transition: 0.2s; }
         .dot.connected { background: #2ed573; box-shadow: 0 0 10px #2ed573; animation: pulse 1.5s infinite; }
-        .dot.warning { background: #ffb142; box-shadow: 0 0 10px #ffb142; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
-        
-        /* UPLOAD & SEND */
+
         .upload-card { background: #1e2630; border-radius: 24px; padding: 20px; margin-bottom: 20px; border: 1px solid #2f3b4b; }
         .upload-zone { border: 2px dashed #4f6f8f; border-radius: 20px; padding: 30px 16px; text-align: center; cursor: pointer; background: #10161c; transition: 0.2s; }
         .upload-zone:hover { border-color: #6d9eff; background: #19232b; }
         .upload-zone i { font-size: 2.5rem; color: #6d9eff; margin-bottom: 8px; }
+
         .btn { background: #6d9eff; color: #0b0e12; border: none; padding: 14px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: 0.2s; }
         .btn:disabled { background: #3a4a5a; opacity: 0.5; pointer-events: none; }
         .btn-outline { background: transparent; border: 1.5px solid #4f6f8f; color: #e2e8f0; }
-        
-        /* FILE LISTS */
-        .file-list { margin-top: 16px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
+
+        .file-list { margin-top: 16px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
         .file-item { background: #1a212c; border-radius: 16px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #6d9eff; }
         .file-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
         .file-icon { font-size: 1.6rem; }
         .file-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .file-meta { font-size: 0.75rem; color: #9aaec2; }
-        
-        /* LOGS */
+
         .logs { background: #0e1319; border-radius: 20px; padding: 16px; margin-top: 24px; border: 1px solid #2d3a4a; font-family: monospace; font-size: 0.8rem; max-height: 150px; overflow-y: auto; }
         .log-entry { padding: 4px 0; border-bottom: 1px solid #25303a; color: #b0c8dd; display: flex; gap: 12px; }
         .log-time { color: #7aa2f7; }
-        
+
         .footer { display: flex; justify-content: space-between; margin-top: 16px; color: #859db0; font-size: 0.75rem; }
         .flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .mt-2 { margin-top: 16px; }
-        .hidden { display: none; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -62,7 +55,7 @@
 <body>
     <div class="container">
         <h1>📁 webfolder · p2p</h1>
-        <div class="sub">Kirim file langsung antar device • QR / ID • dua arah</div>
+        <div class="sub">Kirim file langsung • QR / ID • dua arah</div>
 
         <!-- PEER ID & QR -->
         <div class="connection-area">
@@ -81,18 +74,9 @@
                     <button class="badge" onclick="generateQR()" style="background:#6d9eff; color:white;"><i class="fas fa-sync-alt"></i> Buat QR ulang</button>
                 </div>
             </div>
-            <div class="flex mt-2">
-                <span style="color:#a5c9ff;"><i class="fas fa-server"></i> Server:</span>
-                <select id="serverSelect" class="server-select" onchange="switchServer()">
-                    <option value="peerjs.com">peerjs.com (utama)</option>
-                    <option value="0.peerjs.com">0.peerjs.com</option>
-                    <option value="peerjs.xyz">peerjs.xyz (cadangan)</option>
-                </select>
-                <button class="badge" onclick="testConnection()" style="background:#2ed573; color:black;"><i class="fas fa-globe"></i> Test koneksi</button>
-            </div>
         </div>
 
-        <!-- STATUS KONEKSI -->
+        <!-- STATUS & SAMBUNGAN -->
         <div class="status-bar">
             <span class="dot" id="connectionDot"></span>
             <span id="connectionStatus">Memulai peer...</span>
@@ -101,16 +85,14 @@
             </span>
         </div>
 
-        <!-- SAMBUNG KE DEVICE LAIN -->
         <div style="background:#1b222c; border-radius: 40px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <i class="fas fa-plug" style="color:#6d9eff;"></i>
             <span style="font-weight:500;">Sambung ke device lain:</span>
             <input type="text" id="targetPeerId" placeholder="masukkan ID peer tujuan" style="flex:2; min-width:180px; background:#0e1319; border:1px solid #3f4e60; border-radius: 40px; padding: 10px 18px; color:white; outline:none;">
             <button class="badge" onclick="connectToPeer()" style="background:#6d9eff; color:white; padding:10px 24px; border-radius:40px;"><i class="fas fa-link"></i> Sambung</button>
-            <button class="badge" onclick="retryConnection()" style="background:#ffa502;"><i class="fas fa-redo-alt"></i> Ulang</button>
         </div>
 
-        <!-- ===== 2 SEKSI SIMETRIS: KIRIM FILE & FILE DITERIMA ===== -->
+        <!-- ===== UPLOAD & KIRIM ===== -->
         <div class="upload-card">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
                 <i class="fas fa-upload" style="color:#6d9eff; font-size:1.4rem;"></i>
@@ -122,7 +104,7 @@
                 <input type="file" id="fileInput" multiple style="display:none;">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <h4>Tarik file atau klik di sini</h4>
-                <p style="color:#9aaec2; font-size:0.85rem;">tidak ada batasan ukuran</p>
+                <p style="color:#9aaec2; font-size:0.85rem;">file manager akan terbuka</p>
             </div>
             <!-- Daftar file yang dipilih -->
             <div id="fileListContainer"></div>
@@ -133,6 +115,7 @@
             </div>
         </div>
 
+        <!-- ===== FILE DITERIMA ===== -->
         <div class="upload-card">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
                 <i class="fas fa-inbox" style="color:#2ed573; font-size:1.4rem;"></i>
@@ -154,43 +137,30 @@
             <div id="logStream"></div>
         </div>
         <div class="footer">
-            <span><i class="fas fa-shield-alt"></i> P2P langsung, tidak lewat server</span>
+            <span><i class="fas fa-shield-alt"></i> P2P langsung</span>
             <span><i class="fas fa-qrcode"></i> QR = ID peer</span>
         </div>
     </div>
 
     <script>
-        // ========== KONFIGURASI MULTI SERVER + TURN ==========
-        const PEER_SERVERS = {
-            'peerjs.com': { host: 'peerjs.com', port: 443, secure: true },
-            '0.peerjs.com': { host: '0.peerjs.com', port: 443, secure: true },
-            'peerjs.xyz': { host: 'peerjs.xyz', port: 443, secure: true }
-        };
+        // ========== KONFIGURASI PEER ==========
         const ICE_CONFIG = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.services.mozilla.com' },
-                // TURN gratis (metered.ca)
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
 
         // ========== STATE ==========
-        let peer = null;                // peer utama (sender/receiver)
-        let currentConn = null;        // koneksi aktif (dua arah)
+        let peer = null;
+        let currentConn = null;
         let isConnected = false;
-        let connectedPeerId = '';     // ID lawan yang sedang terhubung
-        let currentPeerId = '';       // ID kita sendiri
-        let currentServer = 'peerjs.com';
-
-        // File state
-        let selectedFiles = [];        // file yang akan dikirim
-        let receivedFiles = [];       // file yang sudah diterima
+        let connectedPeerId = '';
+        let currentPeerId = '';
+        let selectedFiles = [];
+        let receivedFiles = [];
 
         // DOM
         const peerIdInput = document.getElementById('peerIdInput');
@@ -198,7 +168,6 @@
         const connectionDot = document.getElementById('connectionDot');
         const connectionStatus = document.getElementById('connectionStatus');
         const targetPeerIdInput = document.getElementById('targetPeerId');
-        const serverSelect = document.getElementById('serverSelect');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileListContainer = document.getElementById('fileListContainer');
@@ -214,28 +183,23 @@
             return 'wf-' + Math.random().toString(36).substring(2, 10);
         }
 
-        // ========== INIT PEER (dipanggil saat load & ganti server) ==========
+        // ========== INIT PEER ==========
         function initPeer() {
             const requestedId = generatePeerId();
             currentPeerId = requestedId;
             peerIdInput.value = requestedId;
             connectionStatus.innerText = 'Menyiapkan peer...';
-            connectionDot.classList.remove('connected', 'warning');
-            connectionDot.classList.add('dot');
+            connectionDot.classList.remove('connected');
 
             generateQRFromId(requestedId);
-            addLog(`🔄 Memulai peer (server: ${currentServer}) ID: ${requestedId}`);
-
-            const serverCfg = PEER_SERVERS[currentServer];
-            if (!serverCfg) return;
+            addLog(`🔄 Memulai peer dengan ID: ${requestedId}`);
 
             if (peer) peer.destroy();
             peer = new Peer(requestedId, {
-                host: serverCfg.host,
-                port: serverCfg.port,
-                secure: serverCfg.secure,
-                config: ICE_CONFIG,
-                debug: 1
+                host: 'peerjs.com',
+                port: 443,
+                secure: true,
+                config: ICE_CONFIG
             });
 
             peer.on('open', (id) => {
@@ -243,20 +207,17 @@
                 peerIdInput.value = id;
                 connectionStatus.innerText = `Siap, ID: ${id}`;
                 connectionDot.classList.add('connected');
-                connectionDot.classList.remove('warning');
-                addLog(`✅ Peer aktif, ID: ${id}`);
+                addLog(`✅ Peer siap, ID: ${id}`);
                 if (id !== requestedId) generateQRFromId(id);
             });
 
             peer.on('connection', (conn) => {
-                // Koneksi masuk dari peer lain
                 currentConn = conn;
                 connectedPeerId = conn.peer;
                 isConnected = true;
                 connectionStatus.innerText = `Terhubung dengan ${conn.peer}`;
                 peerTargetDisplay.innerText = `(terhubung ke ${conn.peer})`;
                 addLog(`🔗 Koneksi masuk dari ${conn.peer}`);
-
                 setupConnection(conn);
             });
 
@@ -267,25 +228,20 @@
                     const newId = generatePeerId();
                     currentPeerId = newId;
                     peerIdInput.value = newId;
-                    connectionStatus.innerText = `ID dipakai, ganti: ${newId}`;
                     generateQRFromId(newId);
+                    connectionStatus.innerText = `ID dipakai, ganti: ${newId}`;
                     peer.reconnect();
-                } else if (err.type === 'network' || err.message?.includes('network')) {
-                    connectionStatus.innerText = '⚠️ Gagal konek server';
-                    connectionDot.classList.add('warning');
                 }
             });
         }
 
-        // ========== SETUP KONEKSI (data handler) ==========
+        // ========== SETUP KONEKSI ==========
         function setupConnection(conn) {
             conn.on('open', () => {
                 isConnected = true;
                 connectedPeerId = conn.peer;
                 connectionStatus.innerText = `Terhubung dengan ${conn.peer}`;
                 peerTargetDisplay.innerText = `(terhubung ke ${conn.peer})`;
-                connectionDot.classList.add('connected');
-                connectionDot.classList.remove('warning');
                 addLog(`✅ Koneksi terbuka dengan ${conn.peer}`);
             });
 
@@ -311,21 +267,15 @@
                 addLog('⚠️ Koneksi ditutup');
                 currentConn = null;
             });
-
-            conn.on('error', (err) => {
-                addLog(`❌ Connection error: ${err}`);
-            });
         }
 
-        // ========== CONNECT KE PEER LAIN (dari sisi kita) ==========
+        // ========== CONNECT KE PEER LAIN ==========
         window.connectToPeer = function() {
             const targetId = targetPeerIdInput.value.trim();
             if (!targetId) { alert('Masukkan ID peer tujuan'); return; }
             if (targetId === currentPeerId) { alert('Tidak bisa sambung ke diri sendiri'); return; }
 
             connectionStatus.innerText = `Menyambung ke ${targetId}...`;
-            connectionDot.classList.remove('connected', 'warning');
-
             const conn = peer.connect(targetId, { reliable: true, serialization: 'json' });
             currentConn = conn;
             connectedPeerId = targetId;
@@ -341,7 +291,7 @@
         }
         window.generateQR = function() { if (currentPeerId) generateQRFromId(currentPeerId); };
 
-        // ========== KIRIM FILE (dua arah) ==========
+        // ========== KIRIM FILE ==========
         window.sendFiles = function() {
             if (!currentConn || !isConnected) { alert('Belum terhubung ke device lain!'); return; }
             if (selectedFiles.length === 0) { alert('Pilih file dulu!'); return; }
@@ -363,20 +313,23 @@
                 reader.readAsArrayBuffer(file);
             });
 
-            // Kosongkan daftar file setelah kirim
-            setTimeout(() => {
-                selectedFiles = [];
-                renderFileList();
-                addLog('🎉 Pengiriman selesai');
-            }, 500);
+            // TIDAK OTOMATIS HAPUS, biar user hapus manual
+            // Hanya kasih notifikasi
+            addLog('🎉 Pengiriman selesai. Hapus file dari daftar jika sudah tidak diperlukan.');
         };
 
-        // ========== HANDLE UPLOAD ==========
+        // ========== HANDLE UPLOAD (FILE MANAGER WAJIB MUNCUL) ==========
         function handleFiles(files) {
             if (!files || files.length === 0) return;
             const arr = Array.from(files);
-            const newFiles = arr.filter(f => !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size));
-            if (newFiles.length === 0) return;
+            // Filter duplikat (nama & size sama)
+            const newFiles = arr.filter(f => 
+                !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+            );
+            if (newFiles.length === 0) {
+                addLog('⚠️ File sudah ada di daftar');
+                return;
+            }
             selectedFiles = [...selectedFiles, ...newFiles];
             renderFileList();
             addLog(`📁 +${newFiles.length} file (${formatBytes(newFiles.reduce((a,b)=>a+b.size,0))})`);
@@ -406,13 +359,25 @@
             fileListContainer.innerHTML = html;
         }
 
-        window.removeFile = function(index) { selectedFiles.splice(index, 1); renderFileList(); };
-        window.clearSelectedFiles = function() { selectedFiles = []; renderFileList(); };
+        window.removeFile = function(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+            addLog('🗑️ File dihapus dari daftar kirim');
+        };
+
+        window.clearSelectedFiles = function() {
+            selectedFiles = [];
+            renderFileList();
+            addLog('🧹 Semua file dihapus dari daftar kirim');
+        };
 
         // ========== RENDER FILE DITERIMA ==========
         function renderReceivedFiles() {
             if (receivedFiles.length === 0) {
-                receivedContainer.innerHTML = `<div style="text-align:center; padding:32px 16px; color:#73879b;"><i class="fas fa-download" style="font-size:2.2rem; opacity:0.6;"></i><p>Belum ada file diterima</p></div>`;
+                receivedContainer.innerHTML = `<div style="text-align:center; padding:32px 16px; color:#73879b;">
+                    <i class="fas fa-download" style="font-size:2.2rem; opacity:0.6;"></i>
+                    <p>Belum ada file diterima</p>
+                </div>`;
                 downloadAllBtn.disabled = true;
                 incomingCountBadge.innerText = '0 file';
                 return;
@@ -446,18 +411,13 @@
             URL.revokeObjectURL(url);
             addLog(`⬇️ Download: ${file.name}`);
         };
+
         window.downloadAllFiles = function() {
             receivedFiles.forEach((_, i) => setTimeout(() => downloadFile(i), i * 200));
             addLog(`📥 Download ${receivedFiles.length} file`);
         };
 
-        // ========== SERVER & KONEKSI ==========
-        window.switchServer = function() {
-            currentServer = serverSelect.value;
-            addLog(`🔄 Ganti server ke ${currentServer}`);
-            resetConnection();
-            initPeer();
-        };
+        // ========== RESET ==========
         window.resetConnection = function() {
             if (peer) peer.destroy();
             peer = null;
@@ -465,26 +425,17 @@
             isConnected = false;
             connectedPeerId = '';
             connectionStatus.innerText = 'Peer di-reset';
-            connectionDot.classList.remove('connected', 'warning');
+            connectionDot.classList.remove('connected');
             peerTargetDisplay.innerText = '(reset)';
             initPeer();
         };
-        window.testConnection = function() {
-            addLog(`🔄 Test koneksi ke ${currentServer}...`);
-            fetch(`https://${currentServer}/peerjs/id`, { mode: 'no-cors' })
-                .then(() => addLog(`✅ Server ${currentServer} reachable`))
-                .catch(() => addLog(`❌ Server ${currentServer} tidak reachable`));
-        };
-        window.retryConnection = function() {
-            if (targetPeerIdInput.value.trim()) connectToPeer();
-            else addLog('⚠️ Masukkan ID peer tujuan dulu');
-        };
+
         window.copyPeerId = function() {
             navigator.clipboard.writeText(currentPeerId);
             addLog('📋 ID peer dicopy');
         };
 
-        // ========== AUTO CONNECT DARI URL (QR) ==========
+        // ========== AUTO CONNECT DARI URL ==========
         function checkUrlForAutoConnect() {
             const params = new URLSearchParams(window.location.search);
             const target = params.get('connect');
@@ -505,15 +456,18 @@
             if (type.includes('text')) return '📝';
             return '📁';
         }
+
         function formatBytes(b) {
             if (b===0) return '0 B';
             const u = ['B','KB','MB','GB'];
             const i = Math.floor(Math.log(b)/Math.log(1024));
             return (b/Math.pow(1024,i)).toFixed(1)+' '+u[i];
         }
+
         function escapeHTML(s) {
             return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
         }
+
         function addLog(msg) {
             const e = document.createElement('div');
             e.className = 'log-entry';
@@ -523,19 +477,42 @@
             if (logStream.children.length > 15) logStream.removeChild(logStream.children[0]);
         }
 
-        // ========== SETUP UPLOAD ==========
+        // ========== SETUP UPLOAD - PASTI BUKA FILE MANAGER ==========
         function setupUpload() {
-            dropZone.addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
-            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#6d9eff'; dropZone.style.background = '#19232b'; });
-            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.style.borderColor = '#4f6f8f'; dropZone.style.background = '#10161c'; });
-            dropZone.addEventListener('drop', (e) => {
+            // Klik di area upload -> panggil fileInput.click()
+            dropZone.addEventListener('click', function(e) {
                 e.preventDefault();
-                dropZone.style.borderColor = '#4f6f8f'; dropZone.style.background = '#10161c';
-                if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+                e.stopPropagation();
+                fileInput.click();  // INI YANG BUKA FILE MANAGER
             });
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) handleFiles(e.target.files);
-                fileInput.value = '';
+
+            // Drag & drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = '#6d9eff';
+                dropZone.style.background = '#19232b';
+            });
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = '#4f6f8f';
+                dropZone.style.background = '#10161c';
+            });
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = '#4f6f8f';
+                dropZone.style.background = '#10161c';
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Input file change
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFiles(e.target.files);
+                    // Reset input agar bisa pilih file yang sama lagi
+                    fileInput.value = '';
+                }
             });
         }
 
@@ -546,7 +523,7 @@
             checkUrlForAutoConnect();
             renderFileList();
             renderReceivedFiles();
-            addLog('🚀 Aplikasi siap. Koneksikan ke device lain via ID atau QR.');
+            addLog('🚀 Siap. Klik area upload untuk pilih file (file manager akan terbuka).');
         };
     </script>
 </body>
