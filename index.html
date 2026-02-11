@@ -5,555 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 WebFolder • Peer Transfer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background: #0b0e14;
-            color: #edf2f7;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .container {
-            max-width: 1100px;
-            width: 100%;
-        }
-
-        .hero {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .hero h1 {
-            font-size: 3.2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #a0e7ff, #7aa2f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: #a0aec0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-            margin-bottom: 40px;
-        }
-
-        @media (max-width: 720px) {
-            .grid { grid-template-columns: 1fr; }
-        }
-
-        .card {
-            background: #14181f;
-            border-radius: 32px;
-            padding: 28px;
-            border: 1px solid #2a2f37;
-            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.5);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #2d3748;
-        }
-
-        .card-header i {
-            font-size: 1.8rem;
-            color: #7aa2f7;
-        }
-
-        .card-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #e2e8f0;
-        }
-
-        .folder-section {
-            background: #0f131a;
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 28px;
-            border: 1px dashed #4a5568;
-        }
-
-        .folder-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #cbd5e0;
-            font-size: 0.95rem;
-            margin-bottom: 12px;
-        }
-
-        .link-box {
-            background: #0a0d12;
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid #2d3748;
-            margin-bottom: 16px;
-        }
-
-        .link-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #a0e7ff;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.95rem;
-            padding: 4px 0;
-            outline: none;
-        }
-
-        .qr-container {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 16px;
-            border: 2px solid #e2e8f0;
-        }
-
-        #qrImage {
-            width: 120px;
-            height: 120px;
-            background: white;
-            padding: 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            object-fit: contain;
-        }
-
-        .qr-info {
-            flex: 1;
-        }
-
-        .qr-info h4 {
-            color: #0b0e14;
-            margin-bottom: 8px;
-        }
-
-        .qr-info p {
-            color: #2d3748;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            background: #2d3748;
-            border-radius: 30px;
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            color: #cbd5e0;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge i {
-            color: #7aa2f7;
-        }
-
-        .peer-status {
-            background: #1a1e2a;
-            border-radius: 40px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            border: 1px solid #4a5568;
-        }
-
-        .peer-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ff4757;
-            transition: 0.2s;
-        }
-
-        .peer-dot.connected {
-            background: #2ed573;
-            box-shadow: 0 0 12px #2ed573;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .upload-zone {
-            border: 2px dashed #4a5568;
-            border-radius: 20px;
-            padding: 36px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #0f131a;
-            margin-bottom: 20px;
-        }
-
-        .upload-zone:hover {
-            border-color: #7aa2f7;
-            background: rgba(122, 162, 247, 0.05);
-        }
-
-        .upload-zone i {
-            font-size: 2.8rem;
-            color: #7aa2f7;
-            margin-bottom: 12px;
-        }
-
-        .upload-zone h3 {
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-bottom: 6px;
-            color: white;
-        }
-
-        .upload-zone p {
-            color: #a0aec0;
-            font-size: 0.9rem;
-        }
-
-        .file-list {
-            margin-top: 16px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .file-item {
-            background: #1a1e26;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-left: 4px solid #7aa2f7;
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .file-icon {
-            font-size: 1.8rem;
-        }
-
-        .file-details {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .file-name {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-            color: white;
-        }
-
-        .file-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 0.8rem;
-            color: #a0aec0;
-        }
-
-        .btn {
-            background: #7aa2f7;
-            color: #0b0e14;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .btn:hover {
-            background: #8ab4f8;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(122, 162, 247, 0.25);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid #4a5568;
-            color: #e2e8f0;
-        }
-
-        .btn-outline:hover {
-            background: #1e242c;
-            border-color: #7aa2f7;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .incoming-area {
-            background: #0f131a;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .empty-inbox {
-            text-align: center;
-            padding: 40px 20px;
-            color: #718096;
-        }
-
-        .empty-inbox i {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            color: #4a5568;
-        }
-
-        .logs-panel {
-            background: #0a0d12;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 1px solid #2d3748;
-        }
-
-        .logs-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            color: #a0aec0;
-            font-size: 0.9rem;
-        }
-
-        .log-stream {
-            font-family: 'SF Mono', monospace;
-            font-size: 0.85rem;
-            color: #a0aec0;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .log-entry {
-            padding: 6px 0;
-            border-bottom: 1px solid #1e242c;
-            display: flex;
-            gap: 12px;
-        }
-
-        .log-time {
-            color: #7aa2f7;
-        }
-
-        .footer-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0 0;
-            color: #718096;
-            font-size: 0.85rem;
-            border-top: 1px solid #2d3748;
-            margin-top: 20px;
-        }
-
-        .hidden { display: none; }
+        /* [style sama seperti sebelumnya, ringkas] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #0b0e14; color: #edf2f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .container { max-width: 1100px; width: 100%; }
+        .hero { text-align: center; margin-bottom: 48px; }
+        .hero h1 { font-size: 3.2rem; background: linear-gradient(135deg, #a0e7ff, #7aa2f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+        @media (max-width:720px){ .grid { grid-template-columns: 1fr; } }
+        .card { background: #14181f; border-radius: 32px; padding: 28px; border: 1px solid #2a2f37; }
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #2d3748; }
+        .card-header i { font-size: 1.8rem; color: #7aa2f7; }
+        .folder-section { background: #0f131a; border-radius: 20px; padding: 20px; margin-bottom: 28px; border: 1px dashed #4a5568; }
+        .link-box { background: #0a0d12; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #2d3748; margin-bottom: 16px; }
+        .link-box input { flex:1; background:transparent; border:none; color:#a0e7ff; font-family:monospace; font-size:0.95rem; padding:4px 0; outline:none; }
+        .qr-container { background: white; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 20px; margin-top: 16px; border: 2px solid #e2e8f0; }
+        #qrImage { width: 120px; height: 120px; background: white; border-radius: 12px; object-fit: contain; }
+        .qr-info { flex:1; } .qr-info h4 { color: #0b0e14; } .qr-info p { color: #2d3748; }
+        .badge { background: #2d3748; border-radius: 30px; padding: 6px 14px; font-size: 0.8rem; color: #cbd5e0; display: inline-flex; align-items: center; gap: 6px; }
+        .peer-status { background: #1a1e2a; border-radius: 40px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; border: 1px solid #4a5568; }
+        .peer-dot { width: 14px; height: 14px; border-radius: 50%; background: #ff4757; transition: 0.2s; }
+        .peer-dot.connected { background: #2ed573; box-shadow: 0 0 12px #2ed573; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+        .upload-zone { border: 2px dashed #4a5568; border-radius: 20px; padding: 36px 20px; text-align: center; cursor: pointer; background: #0f131a; margin-bottom: 20px; }
+        .upload-zone:hover { border-color: #7aa2f7; background: rgba(122,162,247,0.05); }
+        .upload-zone i { font-size: 2.8rem; color: #7aa2f7; }
+        .file-list { margin-top: 16px; max-height: 300px; overflow-y: auto; }
+        .file-item { background: #1a1e26; border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #7aa2f7; }
+        .file-info { display: flex; align-items: center; gap: 16px; flex:1; }
+        .btn { background: #7aa2f7; color: #0b0e14; border: none; padding: 14px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap:8px; width:100%; }
+        .btn-outline { background: transparent; border: 1.5px solid #4a5568; color: #e2e8f0; }
+        .incoming-area { background: #0f131a; border-radius: 20px; padding: 20px; margin-top: 20px; }
+        .empty-inbox { text-align: center; padding: 40px 20px; color: #718096; }
+        .logs-panel { background: #0a0d12; border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid #2d3748; }
+        .log-stream { font-family: monospace; font-size: 0.85rem; color: #a0aec0; max-height: 150px; overflow-y: auto; }
+        .log-entry { padding: 6px 0; border-bottom: 1px solid #1e242c; display: flex; gap: 12px; }
+        .log-time { color: #7aa2f7; }
+        .footer-info { display: flex; justify-content: space-between; padding: 20px 0 0; color: #718096; border-top: 1px solid #2d3748; margin-top: 20px; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="hero">
-            <h1>📁 webfolder · peer</h1>
-            <p>Koneksi langsung via PeerJS • QR code = ID peer • file asli</p>
-        </div>
-
+        <div class="hero"><h1>📁 webfolder · peer</h1><p>QR = ID peer • koneksi langsung • file asli</p></div>
         <div class="grid">
-            <!-- PANEL KIRI: SENDER (PC) -->
+            <!-- SENDER (LAPTOP) -->
             <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-laptop"></i>
-                    <h2>Device Saya (Pengirim)</h2>
-                </div>
-
-                <!-- Status koneksi -->
+                <div class="card-header"><i class="fas fa-laptop"></i><h2>Device Saya (Pengirim)</h2></div>
                 <div class="peer-status">
                     <span class="peer-dot" id="peerDot"></span>
-                    <span id="peerStatus">Mempersiapkan koneksi...</span>
+                    <span id="peerStatus">Menyiapkan peer...</span>
                 </div>
-
-                <!-- ID Peer & QR -->
                 <div class="folder-section">
-                    <div class="folder-label">
-                        <i class="fas fa-id-card"></i>
-                        <span>ID Peer unik (bagikan ke penerima)</span>
-                    </div>
+                    <div class="folder-label"><i class="fas fa-id-card"></i> ID Peer (bagikan ke penerima)</div>
                     <div class="link-box">
-                        <i class="fas fa-lock" style="color: #a0e7ff;"></i>
+                        <i class="fas fa-lock" style="color:#a0e7ff;"></i>
                         <input type="text" id="peerIdInput" value="-" readonly>
-                        <button class="badge" onclick="copyPeerId()" style="cursor: pointer;">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
+                        <button class="badge" onclick="copyPeerId()"><i class="fas fa-copy"></i> Copy</button>
                     </div>
-
-                    <!-- QR Code dari ID peer -->
+                    <!-- QR CODE -->
                     <div class="qr-container">
                         <img id="qrImage" src="" alt="QR Code">
                         <div class="qr-info">
-                            <h4 style="color: #0b0e14;"><i class="fas fa-qrcode"></i> QR Koneksi</h4>
-                            <p style="color: #4a5568;">Scan dengan HP untuk terima file</p>
-                            <button class="badge" onclick="generateQR()" style="background: #7aa2f7; color: white;">
-                                <i class="fas fa-sync-alt"></i> Buat QR
-                            </button>
+                            <h4><i class="fas fa-qrcode"></i> QR Koneksi</h4>
+                            <p>Scan dengan HP untuk terima file</p>
+                            <button class="badge" onclick="generateQR()" style="background:#7aa2f7; color:white;"><i class="fas fa-sync-alt"></i> Buat QR</button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Upload file -->
+                <!-- UPLOAD -->
                 <div class="upload-zone" id="dropZoneSender">
-                    <input type="file" id="fileInputSender" multiple style="display: none;">
+                    <input type="file" id="fileInputSender" multiple style="display:none;">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <h3>Klik untuk pilih file</h3>
                     <p>atau drag & drop</p>
                 </div>
-
-                <div id="senderFileListContainer">
-                    <!-- daftar file akan diisi js -->
-                </div>
-
-                <div style="display: flex; gap: 12px; margin-top: 8px;">
-                    <button class="btn" id="sendBtn" disabled onclick="sendFiles()">
-                        <i class="fas fa-paper-plane"></i> Kirim File
-                    </button>
-                    <button class="btn-outline" onclick="clearSenderFiles()">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                <div id="senderFileListContainer"></div>
+                <div style="display:flex; gap:12px; margin-top:8px;">
+                    <button class="btn" id="sendBtn" disabled onclick="sendFiles()"><i class="fas fa-paper-plane"></i> Kirim File</button>
+                    <button class="btn-outline" onclick="clearSenderFiles()"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
-
-            <!-- PANEL KANAN: RECEIVER (HP) -->
+            <!-- RECEIVER (HP) -->
             <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-mobile-alt"></i>
-                    <h2>Device Lain (Penerima)</h2>
-                </div>
-
-                <div style="background: #0f131a; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <i class="fas fa-hand-pointer" style="font-size: 2rem; color: #7aa2f7;"></i>
+                <div class="card-header"><i class="fas fa-mobile-alt"></i><h2>Device Lain (Penerima)</h2></div>
+                <div style="background:#0f131a; border-radius:20px; padding:20px; margin-bottom:24px;">
+                    <div style="display:flex; gap:16px; align-items:center;">
+                        <i class="fas fa-hand-pointer" style="font-size:2rem; color:#7aa2f7;"></i>
                         <div>
-                            <div style="font-weight: 600; margin-bottom: 4px;">Cara terima file:</div>
-                            <div style="color: #a0aec0; font-size: 0.9rem;">
-                                1. Scan QR code di samping<br>
-                                2. Atau masukkan ID peer manual
-                            </div>
+                            <div style="font-weight:600; margin-bottom:4px;">Cara terima file:</div>
+                            <div style="color:#a0aec0; font-size:0.9rem;">1. Scan QR code di samping<br>2. Atau masukkan ID peer manual</div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Input ID peer tujuan (connect) -->
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <input type="text" id="targetPeerId" placeholder="Masukkan ID peer" style="flex:1; background: #0a0d12; border: 1px solid #4a5568; border-radius: 40px; padding: 12px 20px; color: white; outline: none;">
-                    <button class="badge" onclick="connectToPeer()" style="background: #7aa2f7; color: white; padding: 12px 24px; border-radius: 40px; cursor: pointer;">
+                <div style="display:flex; gap:12px; margin-bottom:20px;">
+                    <input type="text" id="targetPeerId" placeholder="Masukkan ID peer" style="flex:1; background:#0a0d12; border:1px solid #4a5568; border-radius:40px; padding:12px 20px; color:white; outline:none;">
+                    <button class="badge" onclick="connectToPeer()" style="background:#7aa2f7; color:white; padding:12px 24px; border-radius:40px; cursor:pointer;">
                         <i class="fas fa-plug"></i> Sambung
                     </button>
                 </div>
-
-                <!-- Status koneksi receiver -->
-                <div class="peer-status" style="margin-bottom: 0;">
+                <div class="peer-status">
                     <span class="peer-dot" id="receiverPeerDot"></span>
                     <span id="receiverPeerStatus">Belum tersambung</span>
                 </div>
-
-                <!-- File yang diterima -->
-                <div class="incoming-area" style="margin-top: 24px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-                        <span style="font-weight: 600;"><i class="fas fa-download"></i> File Diterima</span>
+                <div class="incoming-area">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                        <span style="font-weight:600;"><i class="fas fa-download"></i> File Diterima</span>
                         <span class="badge" id="incomingCountBadge">0 file</span>
                     </div>
-                    <div id="receiverFileListContainer">
-                        <!-- akan diisi js -->
-                    </div>
-                    <button class="btn-outline" id="downloadAllBtn" disabled style="margin-top: 20px;" onclick="downloadAllFiles()">
+                    <div id="receiverFileListContainer"></div>
+                    <button class="btn-outline" id="downloadAllBtn" disabled style="margin-top:20px;" onclick="downloadAllFiles()">
                         <i class="fas fa-file-export"></i> Download semua
                     </button>
                 </div>
             </div>
         </div>
-
-        <!-- Log panel -->
         <div class="logs-panel">
-            <div class="logs-header">
-                <i class="fas fa-shield-alt"></i>
-                <span>Peer-to-peer • WebRTC • file asli</span>
-                <span style="margin-left: auto;">🔗 PeerJS Cloud</span>
-            </div>
+            <div class="logs-header"><i class="fas fa-shield-alt"></i> Peer-to-peer • WebRTC • file asli</div>
             <div class="log-stream" id="logStream">
-                <div class="log-entry"><span class="log-time">[System]</span> Inisialisasi Peer...</div>
+                <div class="log-entry"><span class="log-time">[System]</span> Inisialisasi...</div>
             </div>
         </div>
-
         <div class="footer-info">
-            <div><i class="fas fa-check-circle" style="color: #7aa2f7;"></i> Koneksi langsung, tanpa server penyimpanan</div>
-            <div><i class="fas fa-qrcode"></i> QR = ID peer</div>
+            <div><i class="fas fa-check-circle" style="color:#7aa2f7;"></i> QR = link koneksi langsung</div>
+            <div><i class="fas fa-qrcode"></i> QR otomatis muncul</div>
         </div>
     </div>
 
     <script>
         // ==================== STATE ====================
-        let peer = null;                 // Peer object (sender)
-        let conn = null;               // DataConnection (aktif)
+        let peer = null;
+        let conn = null;
         let isConnected = false;
-        let selectedFiles = [];        // File asli untuk dikirim
-        let receivedFiles = [];        // File yang diterima (dari koneksi)
-        let currentPeerId = '';       // ID peer sender
+        let selectedFiles = [];
+        let receivedFiles = [];
+        let currentPeerId = '';   // ID peer yang sedang aktif
 
-        // DOM elements
+        // DOM
         const peerDot = document.getElementById('peerDot');
         const peerStatus = document.getElementById('peerStatus');
         const receiverPeerDot = document.getElementById('receiverPeerDot');
@@ -570,17 +159,28 @@
         const logStream = document.getElementById('logStream');
         const targetPeerIdInput = document.getElementById('targetPeerId');
 
-        // ==================== INISIALISASI PEER ====================
+        // ==================== GENERATE ID UNIK ====================
+        function generatePeerId() {
+            return 'wf-' + Math.random().toString(36).substring(2, 10);
+        }
+
+        // ==================== INISIALISASI PEER (SENDER) ====================
         function initPeer() {
-            // Generate ID random
-            const randomId = 'webfolder-' + Math.random().toString(36).substring(2, 10);
-            
-            peer = new Peer(randomId, {
-                // gunakan cloud PeerJS server gratis
+            const requestedId = generatePeerId();
+            currentPeerId = requestedId;
+            peerIdInput.value = requestedId;
+            peerStatus.innerText = 'Membuat peer...';
+            peerDot.classList.remove('connected');
+
+            // LANGSUNG generate QR dari ID yang diminta (walau peer belum siap)
+            generateQRFromId(requestedId);
+            addLog('🔄 Mencoba menggunakan ID: ' + requestedId);
+
+            peer = new Peer(requestedId, {
                 host: 'peerjs.com',
                 port: 443,
                 secure: true,
-                config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }] }
+                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
             });
 
             peer.on('open', function(id) {
@@ -589,7 +189,10 @@
                 peerStatus.innerText = 'Siap, ID: ' + id;
                 peerDot.classList.add('connected');
                 addLog('✅ Peer siap. ID: ' + id);
-                generateQR(); // buat QR dari ID
+                // QR sudah digenerate, tapi ID mungkin berubah jika ada konflik
+                if (id !== requestedId) {
+                    generateQRFromId(id);
+                }
             });
 
             peer.on('connection', function(connection) {
@@ -599,7 +202,6 @@
                 addLog('🔗 Penerima terhubung!');
 
                 conn.on('data', function(data) {
-                    // Menerima file dari sisi lain (jika bidirectional)
                     handleIncomingData(data);
                 });
 
@@ -613,43 +215,57 @@
 
             peer.on('error', function(err) {
                 console.error(err);
-                addLog('❌ Peer error: ' + err.type, 'error');
+                addLog('❌ Peer error: ' + (err.type || err), 'error');
                 if (err.type === 'unavailable-id') {
-                    // coba ulang dengan id lain
+                    // ID sudah dipakai, coba generate baru
+                    const newId = generatePeerId();
+                    currentPeerId = newId;
+                    peerIdInput.value = newId;
+                    peerStatus.innerText = 'ID dipakai, ganti: ' + newId;
+                    generateQRFromId(newId);
+                    addLog('🔄 ID sudah ada, ganti ke: ' + newId);
                     peer.reconnect();
                 }
             });
         }
 
+        // ==================== GENERATE QR DARI ID ====================
+        function generateQRFromId(id) {
+            if (!id) return;
+            const url = window.location.origin + window.location.pathname + '?connect=' + encodeURIComponent(id);
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
+            qrImage.src = qrUrl;
+            addLog('📸 QR code diperbarui: ' + id);
+        }
+
+        // Fungsi public untuk regenerate QR
+        window.generateQR = function() {
+            if (currentPeerId) generateQRFromId(currentPeerId);
+        };
+
         // ==================== RECEIVER SIDE ====================
         let receiverPeer = null;
         let receiverConn = null;
 
-        // Jika halaman dibuka dengan parameter ?connect=PEERID, otomatis connect
         function checkUrlForAutoConnect() {
             const urlParams = new URLSearchParams(window.location.search);
             const targetId = urlParams.get('connect');
             if (targetId) {
                 targetPeerIdInput.value = targetId;
-                addLog('🔍 Mendeteksi ID dari URL: ' + targetId);
+                addLog('🔍 Auto-connect ke: ' + targetId);
                 connectToPeer();
             }
         }
 
-        // Fungsi untuk receiver menghubungi sender
         window.connectToPeer = function() {
             const targetId = targetPeerIdInput.value.trim();
-            if (!targetId) {
-                alert('Masukkan ID peer tujuan');
-                return;
-            }
+            if (!targetId) { alert('Masukkan ID peer'); return; }
 
             receiverPeerStatus.innerText = 'Menghubungi ' + targetId + '...';
             receiverPeerDot.classList.remove('connected');
 
-            // Buat peer untuk receiver (ID random)
             if (receiverPeer) receiverPeer.destroy();
-            receiverPeer = new Peer('receiver-' + Math.random().toString(36).substring(2, 10), {
+            receiverPeer = new Peer(generatePeerId(), {
                 host: 'peerjs.com',
                 port: 443,
                 secure: true
@@ -657,7 +273,6 @@
 
             receiverPeer.on('open', function(id) {
                 addLog('📱 Receiver peer siap: ' + id);
-                // Connect ke target
                 const connection = receiverPeer.connect(targetId);
                 receiverConn = connection;
 
@@ -678,23 +293,19 @@
                 });
 
                 connection.on('error', function(err) {
-                    console.error(err);
-                    receiverPeerStatus.innerText = 'Gagal koneksi';
                     addLog('❌ Connection error: ' + err);
                 });
             });
 
             receiverPeer.on('error', function(err) {
-                console.error(err);
-                receiverPeerStatus.innerText = 'Gagal buat peer';
-                addLog('❌ Receiver peer error: ' + err.type);
+                receiverPeerStatus.innerText = 'Gagal koneksi';
+                addLog('❌ Receiver peer error: ' + (err.type || err));
             });
         };
 
         // ==================== HANDLE INCOMING FILE ====================
         function handleIncomingData(data) {
-            if (data.type === 'file') {
-                // data: { name, size, type, buffer (ArrayBuffer) }
+            if (data && data.type === 'file') {
                 const file = new File([data.buffer], data.name, { type: data.type });
                 receivedFiles.push({
                     file: file,
@@ -709,7 +320,8 @@
 
         // ==================== KIRIM FILE ====================
         window.sendFiles = function() {
-            if (!isConnected && !receiverConn) {
+            const activeConn = conn || receiverConn;
+            if (!activeConn) {
                 alert('Belum ada koneksi ke perangkat lain!');
                 return;
             }
@@ -718,21 +330,17 @@
                 return;
             }
 
-            const activeConn = conn || receiverConn; // mana yang aktif
-            if (!activeConn) return;
-
             addLog(`📤 Mengirim ${selectedFiles.length} file...`);
 
-            selectedFiles.forEach((file, index) => {
+            selectedFiles.forEach((file) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const arrayBuffer = e.target.result;
                     const data = {
                         type: 'file',
                         name: file.name,
                         size: file.size,
                         type: file.type,
-                        buffer: arrayBuffer
+                        buffer: e.target.result
                     };
                     activeConn.send(data);
                     addLog(`✅ Terkirim: ${file.name}`);
@@ -740,7 +348,6 @@
                 reader.readAsArrayBuffer(file);
             });
 
-            // Kosongkan daftar file setelah dikirim
             setTimeout(() => {
                 selectedFiles = [];
                 renderSenderFileList();
@@ -748,7 +355,7 @@
             }, 500);
         };
 
-        // ==================== UPLOAD FILE (SENDER) ====================
+        // ==================== UPLOAD & FILE LIST ====================
         function handleSenderFiles(fileList) {
             if (!fileList || fileList.length === 0) return;
             const filesArray = Array.from(fileList);
@@ -841,20 +448,6 @@
             receivedFiles.forEach((f, i) => setTimeout(() => downloadSingleFile(i), i * 200));
         };
 
-        // ==================== QR CODE via API ====================
-        window.generateQR = function() {
-            if (!currentPeerId) return;
-            const url = window.location.origin + window.location.pathname + '?connect=' + encodeURIComponent(currentPeerId);
-            const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
-            qrImage.src = qrApi;
-            addLog('📸 QR code diperbarui');
-        };
-
-        window.copyPeerId = function() {
-            navigator.clipboard.writeText(currentPeerId);
-            addLog('📋 ID peer dicopy');
-        };
-
         // ==================== UTILS ====================
         function getFileIcon(type) {
             if (type.includes('image')) return '🖼️';
@@ -879,6 +472,11 @@
             });
         }
 
+        window.copyPeerId = function() {
+            navigator.clipboard.writeText(currentPeerId);
+            addLog('📋 ID peer dicopy');
+        };
+
         function addLog(msg) {
             const e = document.createElement('div');
             e.className = 'log-entry';
@@ -890,27 +488,15 @@
 
         // ==================== EVENT LISTENERS UPLOAD ====================
         function setupUploadListeners() {
-            dropZone.addEventListener('click', function(e) {
-                e.preventDefault();
-                fileInput.click();
-            });
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.style.borderColor = '#7aa2f7';
-                dropZone.style.background = 'rgba(122,162,247,0.1)';
-            });
-            dropZone.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                dropZone.style.borderColor = '#4a5568';
-                dropZone.style.background = '#0f131a';
-            });
+            dropZone.addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#7aa2f7'; dropZone.style.background = 'rgba(122,162,247,0.1)'; });
+            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.style.borderColor = '#4a5568'; dropZone.style.background = '#0f131a'; });
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropZone.style.borderColor = '#4a5568';
-                dropZone.style.background = '#0f131a';
+                dropZone.style.borderColor = '#4a5568'; dropZone.style.background = '#0f131a';
                 if (e.dataTransfer.files.length) handleSenderFiles(e.dataTransfer.files);
             });
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length) handleSenderFiles(e.target.files);
                 fileInput.value = '';
             });
