@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📡 Wireless File Transfer - Two Way</title>
+    <title>📡 Wireless Transfer - Easy Connection</title>
     <style>
         * {
             margin: 0;
@@ -13,31 +13,30 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: linear-gradient(135deg, #0a1929, #1a1a2e);
             color: #ffffff;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 173, 181, 0.3);
         }
         
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid #00adb5;
         }
         
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             color: #00adb5;
             display: flex;
@@ -48,96 +47,172 @@
         
         .subtitle {
             color: #eeeeee;
-            font-size: 1.1em;
+            font-size: 1em;
             opacity: 0.9;
         }
         
-        .status-bar {
+        .connection-box {
             background: rgba(0, 173, 181, 0.1);
-            padding: 15px;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+            border: 2px solid rgba(0, 173, 181, 0.3);
+        }
+        
+        .code-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00adb5;
+            margin: 20px 0;
+            letter-spacing: 10px;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
             border-radius: 10px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            border: 2px dashed #00adb5;
         }
         
-        .mode-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
+        .code-input-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 15px;
         }
         
-        .mode-btn {
-            padding: 12px 25px;
-            background: rgba(0, 173, 181, 0.2);
-            border: 1px solid #00adb5;
-            border-radius: 8px;
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .code-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.5em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #00adb5;
+            border-radius: 10px;
             color: white;
+            letter-spacing: 5px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        
+        .code-input::placeholder {
+            letter-spacing: normal;
+            font-size: 0.8em;
+            color: #888;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: #2ed573;
+            box-shadow: 0 0 15px rgba(46, 213, 115, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #00adb5, #0097a7);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
             cursor: pointer;
+            font-size: 1.1em;
             font-weight: 600;
             transition: all 0.3s;
+            min-width: 180px;
         }
         
-        .mode-btn.active {
-            background: #00adb5;
-            box-shadow: 0 0 15px rgba(0, 173, 181, 0.5);
+        button:hover:not(:disabled) {
+            background: linear-gradient(45deg, #0097a7, #00adb5);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 173, 181, 0.4);
         }
         
-        .mode-btn:hover:not(.active) {
-            background: rgba(0, 173, 181, 0.4);
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
-        .main-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+        .btn-secondary {
+            background: linear-gradient(45deg, #393e46, #222831);
         }
         
-        @media (max-width: 768px) {
-            .main-panel {
-                grid-template-columns: 1fr;
-            }
+        .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(45deg, #222831, #393e46);
         }
         
-        .panel {
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            min-width: auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        
+        .device-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .status-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #ff4757;
+        }
+        
+        .status-dot.connected {
+            background: #2ed573;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 10px #2ed573;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .file-section {
             background: rgba(30, 30, 46, 0.8);
             border-radius: 15px;
             padding: 25px;
-            border: 1px solid rgba(0, 173, 181, 0.3);
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
+            margin-top: 25px;
+            display: none;
         }
         
-        .panel-title {
-            color: #00adb5;
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .file-section.active {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .file-drop-zone {
             border: 3px dashed #00adb5;
             border-radius: 15px;
-            padding: 30px 20px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 20px;
-            position: relative;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
+            margin: 20px 0;
         }
         
         .file-drop-zone:hover {
@@ -147,19 +222,7 @@
         
         .file-drop-zone.dragover {
             background: rgba(46, 213, 115, 0.2);
-            border-color: #2ed573;
             transform: scale(1.02);
-        }
-        
-        .file-input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 2;
         }
         
         .file-list {
@@ -168,8 +231,7 @@
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            padding: 10px;
-            flex: 1;
+            padding: 15px;
         }
         
         .file-item {
@@ -180,38 +242,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .file-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex: 1;
-            min-width: 0;
         }
         
         .file-icon {
             font-size: 1.5em;
-            min-width: 30px;
-        }
-        
-        .file-details {
-            flex: 1;
-            min-width: 0;
         }
         
         .file-name {
             font-weight: 600;
-            white-space: nowrap;
+            max-width: 300px;
             overflow: hidden;
             text-overflow: ellipsis;
-            display: block;
+            white-space: nowrap;
         }
         
         .file-size {
@@ -232,142 +280,109 @@
             height: 100%;
             background: linear-gradient(90deg, #00adb5, #2ed573);
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.3s;
         }
         
-        button {
-            background: linear-gradient(45deg, #00adb5, #0097a7);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s;
-            width: 100%;
-            margin-top: 10px;
+        .instructions {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid gold;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
         }
         
-        button:hover:not(:disabled) {
-            background: linear-gradient(45deg, #0097a7, #00adb5);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 173, 181, 0.4);
-        }
-        
-        button:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(45deg, #393e46, #222831);
-        }
-        
-        .btn-secondary:hover:not(:disabled) {
-            background: linear-gradient(45deg, #222831, #393e46);
-        }
-        
-        .connection-section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .connection-code {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #00adb5;
-            margin: 10px 0;
-            letter-spacing: 5px;
-            font-family: monospace;
-        }
-        
-        .device-status {
+        .instructions h3 {
+            color: gold;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ff4757;
-        }
-        
-        .status-dot.connected {
-            background: #2ed573;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
         
         .logs {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             padding: 15px;
-            margin-top: 30px;
+            margin-top: 25px;
             max-height: 200px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 0.9em;
+            display: none;
+        }
+        
+        .logs.active {
+            display: block;
         }
         
         .log-entry {
             padding: 5px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeIn 0.3s ease;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .mode-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(0, 173, 181, 0.3);
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
         }
         
-        .transfer-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .transfer-controls button {
-            margin: 0;
-        }
-        
-        .empty-state {
-            text-align: center;
-            color: #888;
-            padding: 40px 20px;
-            font-style: italic;
-        }
-        
-        .transfer-direction {
-            text-align: center;
+        .qr-container {
             margin: 20px 0;
-            color: #00adb5;
-            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        #qrCode {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .step-counter {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #00adb5;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
         
-        .transfer-direction i {
-            animation: bounce 1s infinite alternate;
+        .step.active .step-number {
+            background: #2ed573;
+            box-shadow: 0 0 15px #2ed573;
         }
         
-        @keyframes bounce {
-            from { transform: translateX(0); }
-            to { transform: translateX(10px); }
+        .step-text {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .step.active .step-text {
+            color: white;
+            font-weight: 600;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -375,101 +390,138 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-exchange-alt"></i> Two-Way File Transfer</h1>
-            <p class="subtitle">Transfer files between Laptop ↔ Phone • Works both directions</p>
+            <h1><i class="fas fa-exchange-alt"></i> Wireless File Transfer</h1>
+            <p class="subtitle">Easy Connection • Just Enter Code • No Installation Needed</p>
         </header>
         
-        <div class="status-bar">
-            <div class="device-status">
-                <span class="status-dot" id="connectionDot"></span>
-                <span id="connectionText">Ready to Connect</span>
+        <div class="step-counter">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-text">Get/Enter Code</div>
             </div>
-            <div>
-                <span id="modeIndicator">Mode: Laptop → Phone</span>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-text">Select Files</div>
             </div>
-            <button onclick="toggleMode()" class="btn-secondary">
-                <i class="fas fa-sync-alt"></i> Switch Direction
-            </button>
-        </div>
-        
-        <div class="mode-selector">
-            <div class="mode-btn active" id="modeLaptopToPhone" onclick="setMode('laptop-to-phone')">
-                <i class="fas fa-laptop"></i> Laptop → Phone
-            </div>
-            <div class="mode-btn" id="modePhoneToLaptop" onclick="setMode('phone-to-laptop')">
-                <i class="fas fa-mobile-alt"></i> Phone → Laptop
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-text">Transfer</div>
             </div>
         </div>
         
-        <div class="transfer-direction" id="directionArrow">
-            <i class="fas fa-laptop"></i>
-            <i class="fas fa-long-arrow-alt-right"></i>
-            <i class="fas fa-mobile-alt"></i>
-        </div>
-        
-        <div class="main-panel">
-            <!-- LEFT PANEL: SOURCE DEVICE -->
-            <div class="panel">
-                <div class="panel-title" id="sourceTitle">
-                    <i class="fas fa-laptop"></i> Source Files (Laptop)
+        <!-- STEP 1: CONNECTION -->
+        <div id="step1Content">
+            <div class="connection-box">
+                <h2><i class="fas fa-key"></i> Your Connection Code</h2>
+                <div class="code-display" id="myCode">ABCD</div>
+                <p style="color: #aaa; margin-bottom: 20px;">
+                    Share this code with the other device
+                </p>
+                
+                <div class="action-buttons">
+                    <button onclick="copyMyCode()">
+                        <i class="fas fa-copy"></i> Copy My Code
+                    </button>
+                    <button onclick="generateNewCode()" class="btn-secondary">
+                        <i class="fas fa-redo"></i> New Code
+                    </button>
                 </div>
                 
-                <div class="file-drop-zone" id="sourceDropZone">
-                    <input type="file" id="sourceFileInput" class="file-input" multiple>
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 3em; margin-bottom: 15px; color: #00adb5;"></i>
-                    <h3>Drag & Drop Files Here</h3>
-                    <p>or click to select files</p>
-                    <p style="font-size: 0.9em; color: #aaa; margin-top: 10px;">
-                        Supports: Images, Videos, Documents, etc.
+                <div class="qr-container">
+                    <canvas id="qrCode"></canvas>
+                    <p style="color: #aaa; margin-top: 10px; font-size: 0.9em;">
+                        Scan with phone camera
                     </p>
-                </div>
-                
-                <div class="file-list" id="sourceFileList">
-                    <div class="empty-state">
-                        <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>No files selected yet</p>
-                    </div>
-                </div>
-                
-                <div class="transfer-controls">
-                    <button onclick="clearSourceFiles()" class="btn-secondary">
-                        <i class="fas fa-trash"></i> Clear All
-                    </button>
-                    <button onclick="startTransfer()" id="transferBtn">
-                        <i class="fas fa-paper-plane"></i> Start Transfer
-                    </button>
                 </div>
             </div>
             
-            <!-- RIGHT PANEL: DESTINATION DEVICE -->
-            <div class="panel">
-                <div class="panel-title" id="destinationTitle">
-                    <i class="fas fa-mobile-alt"></i> Destination (Phone)
-                </div>
+            <div class="code-input-section">
+                <h2><i class="fas fa-sign-in-alt"></i> Enter Other Device's Code</h2>
+                <p style="color: #ccc; margin-bottom: 15px;">
+                    Enter the 4-letter code from the other device
+                </p>
                 
-                <div class="connection-section">
-                    <h4>Connection Code</h4>
-                    <div class="connection-code" id="connectionCode">ABCD</div>
-                    <p style="color: #aaa; font-size: 0.9em;">
-                        Enter this code on the other device
-                    </p>
-                    <button onclick="copyConnectionCode()" class="btn-secondary">
-                        <i class="fas fa-copy"></i> Copy Code
+                <div class="input-group">
+                    <input type="text" 
+                           class="code-input" 
+                           id="connectCodeInput" 
+                           placeholder="ABCD" 
+                           maxlength="4"
+                           onkeyup="autoConnect()">
+                    <button onclick="connectToDevice()" id="connectBtn">
+                        <i class="fas fa-plug"></i> Connect
                     </button>
                 </div>
                 
-                <div class="file-list" id="destinationFileList">
-                    <div class="empty-state">
-                        <i class="fas fa-download" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>Received files will appear here</p>
-                        <p style="font-size: 0.8em; color: #666;">
-                            Status: Waiting for connection...
-                        </p>
-                    </div>
+                <div class="device-status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">Enter code above to connect</span>
                 </div>
-                
-                <button onclick="downloadAllFiles()" id="downloadBtn" disabled class="btn-secondary">
-                    <i class="fas fa-download"></i> Download All Files
+            </div>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> How to Connect:</h3>
+                <p><strong>On Laptop:</strong> Copy code above → Share to phone</p>
+                <p><strong>On Phone:</strong> Enter laptop's code → Click Connect</p>
+                <p><strong>Or:</strong> Scan QR code with phone camera</p>
+            </div>
+        </div>
+        
+        <!-- STEP 2: FILE SELECTION -->
+        <div class="file-section" id="step2Content">
+            <h2><i class="fas fa-files"></i> Select Files to Transfer</h2>
+            
+            <div class="device-status">
+                <span class="status-dot connected"></span>
+                <span id="connectedToText">Connected to: ABCD</span>
+            </div>
+            
+            <div class="file-drop-zone" id="fileDropZone">
+                <input type="file" id="fileInput" style="display: none;" multiple>
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3em; margin-bottom: 15px; color: #00adb5;"></i>
+                <h3>Drag & Drop Files Here</h3>
+                <p>or click to select files from your device</p>
+                <p style="font-size: 0.9em; color: #aaa; margin-top: 10px;">
+                    Max 10 files • Up to 100MB each
+                </p>
+            </div>
+            
+            <div class="file-list" id="fileList">
+                <div style="text-align: center; color: #888; padding: 30px;">
+                    <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
+                    <p>No files selected yet</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="startTransfer()" id="transferBtn" disabled>
+                    <i class="fas fa-paper-plane"></i> Start Transfer
+                </button>
+                <button onclick="clearFiles()" class="btn-secondary">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+        </div>
+        
+        <!-- STEP 3: TRANSFER PROGRESS -->
+        <div class="file-section" id="step3Content">
+            <h2><i class="fas fa-sync-alt"></i> Transfer Progress</h2>
+            
+            <div class="device-status">
+                <span class="status-dot connected"></span>
+                <span>Transferring files...</span>
+            </div>
+            
+            <div class="file-list" id="transferList">
+                <!-- Transfer progress will appear here -->
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="downloadAll()" id="downloadBtn" disabled class="btn-secondary">
+                    <i class="fas fa-download"></i> Download All
+                </button>
+                <button onclick="newTransfer()">
+                    <i class="fas fa-plus"></i> New Transfer
                 </button>
             </div>
         </div>
@@ -477,167 +529,186 @@
         <div class="logs" id="logContainer">
             <div class="log-entry">
                 <span style="color: #00adb5;">[SYSTEM]</span>
-                <span> Two-way file transfer initialized</span>
+                <span> Ready to transfer files</span>
             </div>
+        </div>
+        
+        <div class="action-buttons" style="margin-top: 30px;">
+            <button onclick="toggleLogs()" class="btn-small btn-secondary">
+                <i class="fas fa-terminal"></i> Toggle Logs
+            </button>
+            <button onclick="resetAll()" class="btn-small btn-secondary">
+                <i class="fas fa-power-off"></i> Reset All
+            </button>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        // State variables
-        let currentMode = 'laptop-to-phone'; // or 'phone-to-laptop'
-        let sourceFiles = [];
-        let receivedFiles = [];
+        // State
+        let myCode = 'ABCD';
+        let connectedCode = '';
         let isConnected = false;
-        let transferInProgress = false;
-        let connectionCode = generateConnectionCode();
+        let selectedFiles = [];
+        let transferProgress = {};
+        let currentStep = 1;
         
         // DOM Elements
-        const sourceDropZone = document.getElementById('sourceDropZone');
-        const sourceFileInput = document.getElementById('sourceFileInput');
-        const sourceFileList = document.getElementById('sourceFileList');
-        const destinationFileList = document.getElementById('destinationFileList');
-        const connectionDot = document.getElementById('connectionDot');
-        const connectionText = document.getElementById('connectionText');
-        const connectionCodeElement = document.getElementById('connectionCode');
-        const modeIndicator = document.getElementById('modeIndicator');
+        const myCodeElement = document.getElementById('myCode');
+        const connectCodeInput = document.getElementById('connectCodeInput');
+        const connectBtn = document.getElementById('connectBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const step3Content = document.getElementById('step3Content');
+        const fileDropZone = document.getElementById('fileDropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const transferList = document.getElementById('transferList');
         const transferBtn = document.getElementById('transferBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const sourceTitle = document.getElementById('sourceTitle');
-        const destinationTitle = document.getElementById('destinationTitle');
-        const directionArrow = document.getElementById('directionArrow');
+        const connectedToText = document.getElementById('connectedToText');
         const logContainer = document.getElementById('logContainer');
-        
-        // File type icons
-        const fileIcons = {
-            'image': '🖼️',
-            'video': '🎬',
-            'audio': '🎵',
-            'pdf': '📄',
-            'zip': '📦',
-            'rar': '📦',
-            'txt': '📝',
-            'doc': '📋',
-            'xls': '📊',
-            'ppt': '📽️',
-            'default': '📁'
-        };
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateConnectionCode();
-            setupEventListeners();
-            updateUIForMode();
-            log('System ready. Select files to transfer.');
+            generateNewCode();
+            setupFileHandling();
+            updateSteps();
+            log('System ready. Enter connection code to begin.');
         });
         
-        function generateConnectionCode() {
+        function generateNewCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
+            let newCode = '';
             for (let i = 0; i < 4; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+                newCode += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return code;
+            myCode = newCode;
+            myCodeElement.textContent = myCode;
+            
+            // Generate QR Code
+            const qrCanvas = document.getElementById('qrCode');
+            QRCode.toCanvas(qrCanvas, myCode, {
+                width: 150,
+                height: 150,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            });
+            
+            log(`New connection code: ${myCode}`);
         }
         
-        function updateConnectionCode() {
-            connectionCodeElement.textContent = connectionCode;
-        }
-        
-        function setupEventListeners() {
-            // Source file input
-            sourceFileInput.addEventListener('change', handleSourceFileSelect);
-            
-            // Drag and drop for source
-            sourceDropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                sourceDropZone.classList.add('dragover');
-            });
-            
-            sourceDropZone.addEventListener('dragleave', function() {
-                sourceDropZone.classList.remove('dragover');
-            });
-            
-            sourceDropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                sourceDropZone.classList.remove('dragover');
-                handleSourceFileDrop(e.dataTransfer.files);
-            });
-            
-            // Click to select files
-            sourceDropZone.addEventListener('click', function() {
-                sourceFileInput.click();
+        function copyMyCode() {
+            navigator.clipboard.writeText(myCode).then(() => {
+                alert(`Code "${myCode}" copied to clipboard!`);
+                log(`Copied code: ${myCode}`);
             });
         }
         
-        function setMode(mode) {
-            currentMode = mode;
+        function autoConnect() {
+            const code = connectCodeInput.value.toUpperCase();
+            connectCodeInput.value = code;
             
-            // Update mode buttons
-            document.getElementById('modeLaptopToPhone').classList.toggle('active', mode === 'laptop-to-phone');
-            document.getElementById('modePhoneToLaptop').classList.toggle('active', mode === 'phone-to-laptop');
-            
-            updateUIForMode();
-            clearSourceFiles();
-            clearReceivedFiles();
-            
-            log(`Switched to mode: ${mode === 'laptop-to-phone' ? 'Laptop → Phone' : 'Phone → Laptop'}`);
-        }
-        
-        function toggleMode() {
-            const newMode = currentMode === 'laptop-to-phone' ? 'phone-to-laptop' : 'laptop-to-phone';
-            setMode(newMode);
-        }
-        
-        function updateUIForMode() {
-            const isLaptopToPhone = currentMode === 'laptop-to-phone';
-            
-            // Update titles
-            if (isLaptopToPhone) {
-                sourceTitle.innerHTML = '<i class="fas fa-laptop"></i> Source Files (Laptop)';
-                destinationTitle.innerHTML = '<i class="fas fa-mobile-alt"></i> Destination (Phone)';
-                directionArrow.innerHTML = '<i class="fas fa-laptop"></i> <i class="fas fa-long-arrow-alt-right"></i> <i class="fas fa-mobile-alt"></i>';
-                modeIndicator.textContent = 'Mode: Laptop → Phone';
+            if (code.length === 4) {
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect to ' + code;
             } else {
-                sourceTitle.innerHTML = '<i class="fas fa-mobile-alt"></i> Source Files (Phone)';
-                destinationTitle.innerHTML = '<i class="fas fa-laptop"></i> Destination (Laptop)';
-                directionArrow.innerHTML = '<i class="fas fa-mobile-alt"></i> <i class="fas fa-long-arrow-alt-right"></i> <i class="fas fa-laptop"></i>';
-                modeIndicator.textContent = 'Mode: Phone → Laptop';
-            }
-            
-            // Update source drop zone text
-            const dropZoneText = sourceDropZone.querySelector('h3');
-            const dropZoneSubtext = sourceDropZone.querySelector('p');
-            
-            if (isLaptopToPhone) {
-                dropZoneText.textContent = 'Select Files from Laptop';
-                dropZoneSubtext.textContent = 'Drag files from your computer or click to browse';
-            } else {
-                dropZoneText.textContent = 'Select Files from Phone';
-                dropZoneSubtext.textContent = 'Use phone to select files (simulated)';
+                connectBtn.disabled = true;
+                connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect';
             }
         }
         
-        function handleSourceFileSelect(e) {
-            handleSourceFiles(Array.from(e.target.files));
-        }
-        
-        function handleSourceFileDrop(files) {
-            handleSourceFiles(Array.from(files));
-        }
-        
-        function handleSourceFiles(files) {
-            if (files.length === 0) return;
+        function connectToDevice() {
+            const code = connectCodeInput.value.toUpperCase();
             
-            // If phone-to-laptop mode, simulate phone file selection
-            if (currentMode === 'phone-to-laptop') {
-                simulatePhoneFileSelection(files);
+            if (code.length !== 4) {
+                alert('Please enter a 4-character code');
                 return;
             }
             
-            // Add files to source list
+            if (code === myCode) {
+                alert('Cannot connect to yourself! Enter the other device\'s code.');
+                return;
+            }
+            
+            // Simulate connection
+            connectedCode = code;
+            isConnected = true;
+            
+            // Update UI
+            statusDot.className = 'status-dot connected';
+            statusText.textContent = `Connected to device: ${code}`;
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<i class="fas fa-check"></i> Connected';
+            
+            // Show file selection
+            connectedToText.textContent = `Connected to: ${code}`;
+            goToStep(2);
+            
+            log(`Successfully connected to ${code}`);
+            log('You can now select files to transfer');
+        }
+        
+        function setupFileHandling() {
+            // Click to select files
+            fileDropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(Array.from(e.target.files));
+            });
+            
+            // Drag and drop
+            fileDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileDropZone.classList.add('dragover');
+            });
+            
+            fileDropZone.addEventListener('dragleave', () => {
+                fileDropZone.classList.remove('dragover');
+            });
+            
+            fileDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileDropZone.classList.remove('dragover');
+                handleFiles(Array.from(e.dataTransfer.files));
+            });
+        }
+        
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            // Limit to 10 files
+            if (files.length > 10) {
+                alert('Maximum 10 files allowed. Only first 10 will be selected.');
+                files = files.slice(0, 10);
+            }
+            
+            // Check file sizes
+            let totalSize = 0;
+            for (const file of files) {
+                totalSize += file.size;
+                if (file.size > 100 * 1024 * 1024) { // 100MB
+                    alert(`File "${file.name}" is too large (max 100MB)`);
+                    return;
+                }
+            }
+            
+            if (totalSize > 500 * 1024 * 1024) { // 500MB total
+                alert('Total files size exceeds 500MB limit');
+                return;
+            }
+            
+            // Add files
             files.forEach(file => {
-                if (!sourceFiles.some(f => f.name === file.name && f.size === file.size)) {
-                    sourceFiles.push({
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push({
                         file: file,
                         id: Date.now() + Math.random(),
                         progress: 0
@@ -645,35 +716,16 @@
                 }
             });
             
-            updateSourceFileList();
-            log(`Added ${files.length} file(s) from laptop`);
+            updateFileList();
+            log(`Added ${files.length} file(s) to transfer list`);
         }
         
-        function simulatePhoneFileSelection(files) {
-            // In real implementation, this would come from phone
-            // For simulation, we'll add files directly
+        function updateFileList() {
+            fileList.innerHTML = '';
             
-            files.forEach(file => {
-                if (!sourceFiles.some(f => f.name === file.name && f.size === file.size)) {
-                    sourceFiles.push({
-                        file: file,
-                        id: Date.now() + Math.random(),
-                        progress: 0,
-                        fromPhone: true
-                    });
-                }
-            });
-            
-            updateSourceFileList();
-            log(`Simulated ${files.length} file(s) from phone`);
-        }
-        
-        function updateSourceFileList() {
-            sourceFileList.innerHTML = '';
-            
-            if (sourceFiles.length === 0) {
-                sourceFileList.innerHTML = `
-                    <div class="empty-state">
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 30px;">
                         <i class="fas fa-folder-open" style="font-size: 2em; margin-bottom: 10px;"></i>
                         <p>No files selected yet</p>
                     </div>
@@ -684,7 +736,7 @@
             
             transferBtn.disabled = false;
             
-            sourceFiles.forEach((fileData, index) => {
+            selectedFiles.forEach(fileData => {
                 const file = fileData.file;
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
@@ -696,8 +748,8 @@
                 fileItem.innerHTML = `
                     <div class="file-info">
                         <div class="file-icon">${icon}</div>
-                        <div class="file-details">
-                            <span class="file-name" title="${file.name}">${file.name}</span>
+                        <div>
+                            <div class="file-name" title="${file.name}">${file.name}</div>
                             <div class="file-size">${size}</div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${fileData.progress}%"></div>
@@ -706,226 +758,240 @@
                     </div>
                     <div>
                         <i class="fas fa-times" style="cursor: pointer; color: #ff4757;" 
-                           onclick="removeSourceFile('${fileData.id}')"></i>
+                           onclick="removeFile('${fileData.id}')"></i>
                     </div>
                 `;
                 
-                sourceFileList.appendChild(fileItem);
+                fileList.appendChild(fileItem);
             });
         }
         
-        function removeSourceFile(fileId) {
-            const fileIndex = sourceFiles.findIndex(f => f.id === fileId);
-            if (fileIndex !== -1) {
-                const fileName = sourceFiles[fileIndex].file.name;
-                sourceFiles.splice(fileIndex, 1);
-                updateSourceFileList();
+        function getFileIcon(mimeType) {
+            if (mimeType.includes('image')) return '🖼️';
+            if (mimeType.includes('video')) return '🎬';
+            if (mimeType.includes('audio')) return '🎵';
+            if (mimeType.includes('pdf')) return '📄';
+            if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
+            if (mimeType.includes('text')) return '📝';
+            return '📁';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' Bytes';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+        
+        function removeFile(fileId) {
+            const index = selectedFiles.findIndex(f => f.id === fileId);
+            if (index !== -1) {
+                const fileName = selectedFiles[index].file.name;
+                selectedFiles.splice(index, 1);
+                updateFileList();
                 log(`Removed file: ${fileName}`);
             }
         }
         
-        function clearSourceFiles() {
-            sourceFiles = [];
-            updateSourceFileList();
-            log('Cleared all source files');
-        }
-        
-        function getFileIcon(mimeType) {
-            if (mimeType.includes('image')) return fileIcons.image;
-            if (mimeType.includes('video')) return fileIcons.video;
-            if (mimeType.includes('audio')) return fileIcons.audio;
-            if (mimeType.includes('pdf')) return fileIcons.pdf;
-            if (mimeType.includes('zip')) return fileIcons.zip;
-            if (mimeType.includes('rar')) return fileIcons.rar;
-            if (mimeType.includes('text')) return fileIcons.txt;
-            if (mimeType.includes('document') || mimeType.includes('msword')) return fileIcons.doc;
-            if (mimeType.includes('spreadsheet')) return fileIcons.xls;
-            if (mimeType.includes('presentation')) return fileIcons.ppt;
-            return fileIcons.default;
-        }
-        
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        function clearFiles() {
+            selectedFiles = [];
+            updateFileList();
+            log('Cleared all selected files');
         }
         
         function startTransfer() {
-            if (sourceFiles.length === 0) {
-                alert('Please select files first!');
+            if (!isConnected) {
+                alert('Not connected to any device!');
                 return;
             }
             
-            if (transferInProgress) {
-                alert('Transfer already in progress!');
+            if (selectedFiles.length === 0) {
+                alert('No files selected!');
                 return;
             }
             
-            transferInProgress = true;
+            goToStep(3);
             transferBtn.disabled = true;
-            transferBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transferring...';
             
-            updateConnectionStatus(true);
-            log(`Starting transfer of ${sourceFiles.length} file(s)...`);
+            log(`Starting transfer of ${selectedFiles.length} file(s) to ${connectedCode}`);
+            log('Transfer in progress...');
+            
+            // Show transfer progress
+            updateTransferProgress();
             
             // Simulate transfer for each file
-            sourceFiles.forEach((fileData, index) => {
-                simulateFileTransfer(fileData, index);
+            selectedFiles.forEach((fileData, index) => {
+                simulateTransfer(fileData, index);
             });
             
-            // After transfer completes
+            // Enable download after all transfers complete
             setTimeout(() => {
-                transferInProgress = false;
-                transferBtn.disabled = false;
-                transferBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Start Transfer';
-                updateConnectionStatus(false);
-                
-                log('Transfer completed successfully!');
-                alert(`Transfer completed! ${sourceFiles.length} file(s) sent.`);
-            }, sourceFiles.length * 1500 + 1000);
+                downloadBtn.disabled = false;
+                log('Transfer completed! Ready to download files.');
+            }, selectedFiles.length * 1500 + 1000);
         }
         
-        function simulateFileTransfer(fileData, index) {
-            // Simulate progress
+        function simulateTransfer(fileData, index) {
             let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 20;
+            const interval = setInterval(() => {
+                progress += Math.random() * 25;
                 if (progress >= 100) {
                     progress = 100;
-                    clearInterval(progressInterval);
+                    clearInterval(interval);
                     
-                    // Add to received files
-                    addToReceivedFiles(fileData.file);
+                    // Update progress
+                    fileData.progress = 100;
+                    updateTransferProgress();
                     
-                    // Update source file progress
-                    fileData.progress = progress;
-                    const fileElement = document.querySelector(`[data-id="${fileData.id}"] .progress-fill`);
-                    if (fileElement) {
-                        fileElement.style.width = '100%';
-                    }
-                    
-                    log(`✓ Transferred: ${fileData.file.name}`);
+                    log(`✓ Completed: ${fileData.file.name}`);
                 } else {
                     fileData.progress = progress;
-                    const fileElement = document.querySelector(`[data-id="${fileData.id}"] .progress-fill`);
-                    if (fileElement) {
-                        fileElement.style.width = progress + '%';
-                    }
+                    updateTransferProgress();
                 }
-            }, 100);
+            }, 200);
         }
         
-        function addToReceivedFiles(file) {
-            const fileId = 'received_' + Date.now() + Math.random();
-            receivedFiles.push({
-                id: fileId,
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                data: file
-            });
+        function updateTransferProgress() {
+            transferList.innerHTML = '';
             
-            updateReceivedFileList();
-            downloadBtn.disabled = false;
-        }
-        
-        function updateReceivedFileList() {
-            destinationFileList.innerHTML = '';
-            
-            if (receivedFiles.length === 0) {
-                destinationFileList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-download" style="font-size: 2em; margin-bottom: 10px;"></i>
-                        <p>Received files will appear here</p>
+            if (selectedFiles.length === 0) {
+                transferList.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 30px;">
+                        <i class="fas fa-sync-alt fa-spin" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <p>Preparing transfer...</p>
                     </div>
                 `;
-                downloadBtn.disabled = true;
                 return;
             }
             
-            downloadBtn.disabled = false;
-            
-            receivedFiles.forEach(fileData => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.setAttribute('data-id', fileData.id);
+            selectedFiles.forEach(fileData => {
+                const file = fileData.file;
+                const transferItem = document.createElement('div');
+                transferItem.className = 'file-item';
                 
-                const icon = getFileIcon(fileData.type);
-                const size = formatFileSize(fileData.size);
+                const icon = getFileIcon(file.type);
+                const size = formatFileSize(file.size);
                 
-                fileItem.innerHTML = `
+                transferItem.innerHTML = `
                     <div class="file-info">
                         <div class="file-icon">${icon}</div>
-                        <div class="file-details">
-                            <span class="file-name" title="${fileData.name}">${fileData.name}</span>
+                        <div>
+                            <div class="file-name" title="${file.name}">${file.name}</div>
                             <div class="file-size">${size}</div>
-                            <div style="font-size: 0.8em; color: #2ed573;">
-                                <i class="fas fa-check-circle"></i> Ready to download
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${fileData.progress}%"></div>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <i class="fas fa-download" style="cursor: pointer; color: #00adb5;" 
-                           onclick="downloadSingleFile('${fileData.id}')" 
-                           title="Download this file"></i>
+                        ${fileData.progress === 100 ? 
+                          '<i class="fas fa-check" style="color: #2ed573;"></i>' : 
+                          '<i class="fas fa-spinner fa-spin" style="color: #00adb5;"></i>'}
                     </div>
                 `;
                 
-                destinationFileList.appendChild(fileItem);
+                transferList.appendChild(transferItem);
             });
         }
         
-        function downloadSingleFile(fileId) {
-            const fileData = receivedFiles.find(f => f.id === fileId);
-            if (!fileData) return;
+        function downloadAll() {
+            if (selectedFiles.length === 0) {
+                alert('No files to download!');
+                return;
+            }
             
-            // Create and trigger download
-            const blob = new Blob([`Simulated content of ${fileData.name}`], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileData.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            log(`Downloading ${selectedFiles.length} file(s)...`);
             
-            log(`Downloaded: ${fileData.name}`);
-        }
-        
-        function downloadAllFiles() {
-            if (receivedFiles.length === 0) return;
-            
-            receivedFiles.forEach(fileData => {
-                downloadSingleFile(fileData.id);
+            // Simulate download for each file
+            selectedFiles.forEach(fileData => {
+                const file = fileData.file;
+                
+                // Create download link
+                const blob = new Blob([`Content of ${file.name}\nTransferred via Wireless Transfer`], 
+                                     { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                log(`Downloaded: ${file.name}`);
             });
             
-            log(`Downloaded all ${receivedFiles.length} file(s)`);
+            alert(`Downloaded ${selectedFiles.length} file(s) successfully!`);
         }
         
-        function clearReceivedFiles() {
-            receivedFiles = [];
-            updateReceivedFileList();
+        function goToStep(step) {
+            currentStep = step;
+            updateSteps();
         }
         
-        function updateConnectionStatus(connected) {
-            isConnected = connected;
-            connectionDot.className = 'status-dot' + (connected ? ' connected' : '');
-            connectionText.textContent = connected ? 'Connected • Transferring...' : 'Ready to Connect';
+        function updateSteps() {
+            // Update step indicators
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById('step' + i);
+                if (i === currentStep) {
+                    stepElement.classList.add('active');
+                } else {
+                    stepElement.classList.remove('active');
+                }
+            }
+            
+            // Show/hide content
+            step1Content.style.display = currentStep === 1 ? 'block' : 'none';
+            step2Content.style.display = currentStep === 2 ? 'block' : 'none';
+            step3Content.style.display = currentStep === 3 ? 'block' : 'none';
+            
+            if (currentStep === 2) {
+                step2Content.classList.add('active');
+                step3Content.classList.remove('active');
+            } else if (currentStep === 3) {
+                step2Content.classList.remove('active');
+                step3Content.classList.add('active');
+            }
         }
         
-        function copyConnectionCode() {
-            navigator.clipboard.writeText(connectionCode).then(() => {
-                log('Connection code copied to clipboard');
-                alert(`Code "${connectionCode}" copied! Share it with the other device.`);
-            });
+        function newTransfer() {
+            // Reset for new transfer
+            selectedFiles = [];
+            goToStep(2);
+            updateFileList();
+            log('Ready for new file transfer');
+        }
+        
+        function resetAll() {
+            // Complete reset
+            isConnected = false;
+            connectedCode = '';
+            selectedFiles = [];
+            
+            // Reset UI
+            statusDot.className = 'status-dot';
+            statusText.textContent = 'Enter code above to connect';
+            connectCodeInput.value = '';
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect';
+            
+            goToStep(1);
+            updateFileList();
+            
+            log('System reset. Ready for new connection.');
+        }
+        
+        function toggleLogs() {
+            logContainer.classList.toggle('active');
         }
         
         function log(message) {
             const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const timeString = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
             
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
@@ -937,44 +1003,12 @@
             logContainer.appendChild(logEntry);
             logContainer.scrollTop = logContainer.scrollHeight;
             
-            // Keep only last 20 logs
+            // Keep last 15 logs
             const logs = logContainer.querySelectorAll('.log-entry');
-            if (logs.length > 20) {
+            if (logs.length > 15) {
                 logs[0].remove();
             }
         }
-        
-        // For testing: simulate phone sending files
-        function simulatePhoneFiles() {
-            if (currentMode !== 'phone-to-laptop') {
-                alert('Switch to "Phone → Laptop" mode first!');
-                return;
-            }
-            
-            const testFiles = [
-                new File([''], 'photo_from_phone.jpg', { type: 'image/jpeg' }),
-                new File([''], 'video_clip.mp4', { type: 'video/mp4' }),
-                new File([''], 'document.pdf', { type: 'application/pdf' }),
-                new File([''], 'notes.txt', { type: 'text/plain' })
-            ];
-            
-            handleSourceFiles(testFiles);
-        }
-        
-        // Add test button for simulation
-        document.addEventListener('DOMContentLoaded', function() {
-            const testBtn = document.createElement('button');
-            testBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Simulate Phone Files';
-            testBtn.className = 'btn-secondary';
-            testBtn.style.position = 'fixed';
-            testBtn.style.bottom = '20px';
-            testBtn.style.right = '20px';
-            testBtn.style.zIndex = '1000';
-            testBtn.style.width = 'auto';
-            testBtn.style.padding = '10px 15px';
-            testBtn.onclick = simulatePhoneFiles;
-            document.body.appendChild(testBtn);
-        });
     </script>
 </body>
 </html>
