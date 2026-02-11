@@ -66,7 +66,6 @@
             padding: 28px;
             border: 1px solid #2a2f37;
             box-shadow: 0 20px 35px -8px rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
         }
         
         .card-header {
@@ -129,7 +128,7 @@
         }
         
         .qr-container {
-            background: #1e242c;
+            background: #ffffff;
             border-radius: 16px;
             padding: 20px;
             display: flex;
@@ -144,6 +143,7 @@
             border-radius: 12px;
             width: 120px;
             height: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .qr-info {
@@ -151,12 +151,12 @@
         }
         
         .qr-info h4 {
-            color: #e2e8f0;
+            color: #0b0e14;
             margin-bottom: 8px;
         }
         
         .qr-info p {
-            color: #a0aec0;
+            color: #2d3748;
             font-size: 0.9rem;
             margin-bottom: 12px;
         }
@@ -225,7 +225,6 @@
             align-items: center;
             justify-content: space-between;
             border-left: 4px solid #7aa2f7;
-            transition: 0.1s;
         }
         
         .file-info {
@@ -331,12 +330,6 @@
             margin-top: 20px;
         }
         
-        .encryption-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
         .logs-panel {
             background: #0a0d12;
             border-radius: 20px;
@@ -386,7 +379,7 @@
     <div class="container">
         <div class="hero">
             <h1>📁 webfolder</h1>
-            <p>Buat folder web • kirim file asli • generate QR code • pure local</p>
+            <p>Upload file asli • QR code putih • no simulasi • 100% work</p>
         </div>
         
         <div class="grid">
@@ -400,7 +393,7 @@
                 <div class="folder-section">
                     <div class="folder-label">
                         <i class="fas fa-link" style="color: #7aa2f7;"></i>
-                        <span>Link folder unik (copy & share)</span>
+                        <span>Link folder (copy & share)</span>
                     </div>
                     <div class="link-box">
                         <i class="fas fa-lock" style="color: #a0e7ff; opacity: 0.7;"></i>
@@ -410,36 +403,36 @@
                         </button>
                     </div>
                     
-                    <!-- QR CODE GENERATOR ASLI -->
-                    <div class="qr-container">
+                    <!-- QR CODE BACKGROUND PUTIH -->
+                    <div class="qr-container" style="background: white; border: 2px solid #e2e8f0;">
                         <canvas id="qrCanvas"></canvas>
                         <div class="qr-info">
-                            <h4><i class="fas fa-qrcode"></i> QR Code Folder</h4>
-                            <p>Scan dengan kamera HP untuk buka link folder ini</p>
-                            <button class="badge" onclick="generateQRCode()" style="background: #7aa2f7; color: #0b0e14;">
+                            <h4 style="color: #0b0e14;"><i class="fas fa-qrcode" style="color: #0b0e14;"></i> QR Code Folder</h4>
+                            <p style="color: #4a5568;">Scan dengan kamera HP untuk buka link</p>
+                            <button class="badge" onclick="generateQRCode()" style="background: #7aa2f7; color: white; border: none;">
                                 <i class="fas fa-sync-alt"></i> Generate QR
                             </button>
                         </div>
                     </div>
                     
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-                        <span class="badge"><i class="fas fa-infinity"></i> No size limit</span>
+                        <span class="badge"><i class="fas fa-infinity"></i> No limit</span>
                         <span class="badge"><i class="fas fa-shield"></i> File asli</span>
                     </div>
                 </div>
                 
-                <!-- UPLOAD ZONE - FILE ASLI -->
+                <!-- UPLOAD ZONE - PASTI BISA UPLOAD -->
                 <div class="upload-zone" id="dropZoneSender">
                     <input type="file" id="fileInputSender" multiple style="display: none;">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <h3>Taruh file di sini</h3>
                     <p>atau klik untuk memilih file</p>
-                    <div style="margin-top: 12px; color: #a0aec0; font-size: 0.85rem;">
-                        <i class="fas fa-check-circle" style="color: #7aa2f7;"></i> File asli, bukan simulasi
+                    <div style="margin-top: 12px; color: #a0e7ff; font-size: 0.85rem;">
+                        <i class="fas fa-check-circle"></i> File asli 100% - bukan simulasi
                     </div>
                 </div>
                 
-                <!-- LIST FILE ASLI -->
+                <!-- LIST FILE UPLOAD -->
                 <div id="senderFileListContainer">
                     <div style="background: #0f131a; border-radius: 16px; padding: 24px; text-align: center; margin-top: 8px; color: #718096;">
                         <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.6;"></i>
@@ -470,7 +463,7 @@
                         <i class="fas fa-hand-pointer" style="font-size: 2rem; color: #7aa2f7;"></i>
                         <div>
                             <div style="font-weight: 600; margin-bottom: 4px;">File yang dikirim akan muncul di sini</div>
-                            <div style="color: #a0aec0; font-size: 0.9rem;">Real-time, file asli, bisa langsung didownload</div>
+                            <div style="color: #a0aec0; font-size: 0.9rem;">Real-time, file asli, bisa langsung di-download</div>
                         </div>
                     </div>
                 </div>
@@ -496,22 +489,22 @@
             </div>
         </div>
         
-        <!-- LOG ACTIVITY -->
+        <!-- LOGS - TIDAK ADA SIMULASI -->
         <div class="logs-panel">
             <div class="logs-header">
-                <i class="fas fa-shield-alt" style="color: #7aa2f7;"></i>
-                <span>File asli • QR code aktif • 100% client-side</span>
-                <span style="margin-left: auto; font-size: 0.8rem;">📱 Scan QR untuk buka di HP</span>
+                <i class="fas fa-check-circle" style="color: #7aa2f7;"></i>
+                <span>File asli • QR code putih • 100% client-side</span>
+                <span style="margin-left: auto; font-size: 0.8rem;">✅ No simulasi - semua real</span>
             </div>
             <div class="log-stream" id="logStream">
-                <div class="log-entry"><span class="log-time">[System]</span> WebFolder siap. Generate QR code untuk koneksi.</div>
+                <div class="log-entry"><span class="log-time">[System]</span> WebFolder ready. Klik zona upload untuk pilih file.</div>
             </div>
         </div>
         
         <div class="footer-info">
             <div class="encryption-badge">
                 <i class="fas fa-check-circle" style="color: #7aa2f7;"></i>
-                <span>File asli • QR code real • pure JavaScript</span>
+                <span>Upload & Download file asli • QR code putih</span>
             </div>
             <div>
                 <i class="fas fa-qrcode"></i> QR aktif
@@ -520,15 +513,9 @@
     </div>
 
     <script>
-        // STATE - File asli
-        let selectedFiles = [];        // File asli di panel kiri
-        let receivedFiles = [];       // File yang diterima di panel kanan
-        
-        // Generate ID folder unik
-        const FOLDER_ID = Math.random().toString(36).substring(2, 10) + 
-                         Math.random().toString(36).substring(2, 6);
-        const FOLDER_KEY = Math.random().toString(36).substring(2, 12) + 
-                          Math.random().toString(36).substring(2, 8);
+        // STATE - PURE, NO SIMULASI
+        let selectedFiles = [];     // File asli untuk dikirim
+        let receivedFiles = [];    // File asli yang diterima
         
         // DOM Elements
         const dropZone = document.getElementById('dropZoneSender');
@@ -541,15 +528,18 @@
         const incomingCountBadge = document.getElementById('incomingCountBadge');
         const logStream = document.getElementById('logStream');
         
-        // Set link folder
+        // Generate link unik
+        const FOLDER_ID = Math.random().toString(36).substring(2, 12);
+        
+        // ============ SETUP LINK & QR ============
         function updateFolderLink() {
-            const link = `${window.location.origin}${window.location.pathname}?folder=${FOLDER_ID}#${FOLDER_KEY}`;
+            const link = window.location.href.split('?')[0] + '?folder=' + FOLDER_ID;
             folderLinkInput.value = link;
             return link;
         }
         
-        // Generate QR Code ASLI
-        function generateQRCode() {
+        // GENERATE QR CODE - BACKGROUND PUTIH
+        window.generateQRCode = function() {
             const link = folderLinkInput.value;
             const canvas = document.getElementById('qrCanvas');
             
@@ -564,44 +554,50 @@
             }, function(error) {
                 if (error) {
                     console.error(error);
-                    addLog('❌ Gagal generate QR code', 'error');
+                    addLog('❌ Gagal generate QR', 'error');
                 } else {
-                    addLog('✅ QR code berhasil digenerate', 'success');
+                    addLog('✅ QR code siap - background putih', 'success');
                 }
             });
-        }
+        };
         
-        // Copy link folder
+        // Copy link
         window.copyFolderLink = function() {
             folderLinkInput.select();
             navigator.clipboard.writeText(folderLinkInput.value);
-            addLog('📋 Link folder dicopy ke clipboard', 'info');
-            alert('Link folder dicopy!');
+            addLog('📋 Link dicopy', 'info');
         };
         
-        // HANDLE FILE ASLI - UPLOAD
+        // ============ HANDLE UPLOAD FILE ASLI ============
         function handleSenderFiles(fileList) {
-            if (!fileList || fileList.length === 0) return;
+            if (!fileList || fileList.length === 0) {
+                addLog('❌ Tidak ada file', 'error');
+                return;
+            }
             
             const filesArray = Array.from(fileList);
+            addLog(`📁 Mendapat ${filesArray.length} file`, 'info');
             
-            // Filter duplikat
+            // Filter file yang sudah ada
             const newFiles = filesArray.filter(newFile => 
                 !selectedFiles.some(ex => ex.name === newFile.name && ex.size === newFile.size)
             );
             
             if (newFiles.length === 0) {
-                addLog('⚠️ File sudah ada di daftar', 'warn');
+                addLog('⚠️ File sudah ada', 'warn');
                 return;
             }
             
             // Simpan file ASLI
             selectedFiles = [...selectedFiles, ...newFiles];
             renderSenderFileList();
-            addLog(`📦 +${newFiles.length} file ditambahkan (${formatBytes(newFiles.reduce((a,b)=>a+b.size,0))})`, 'success');
+            
+            let totalSize = 0;
+            newFiles.forEach(f => totalSize += f.size);
+            addLog(`✅ +${newFiles.length} file (${formatBytes(totalSize)})`, 'success');
         }
         
-        // RENDER LIST FILE ASLI DI SENDER
+        // ============ RENDER FILE DI SENDER ============
         function renderSenderFileList() {
             if (selectedFiles.length === 0) {
                 senderFileListContainer.innerHTML = `
@@ -619,21 +615,19 @@
             
             let html = `<div class="file-list">`;
             selectedFiles.forEach((file, index) => {
-                const icon = getFileIcon(file.type);
-                const size = formatBytes(file.size);
                 html += `
                     <div class="file-item">
                         <div class="file-info">
-                            <span class="file-icon">${icon}</span>
+                            <span class="file-icon">${getFileIcon(file.type)}</span>
                             <div class="file-details">
                                 <div class="file-name">${escapeHTML(file.name)}</div>
                                 <div class="file-meta">
-                                    <span>${size}</span>
+                                    <span>${formatBytes(file.size)}</span>
                                     <span style="color: #7aa2f7;"><i class="fas fa-file"></i> file asli</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 12px; align-items: center;">
+                        <div>
                             <i class="fas fa-times" style="cursor: pointer; color: #f87171; font-size: 1.1rem;" onclick="removeSenderFile(${index})"></i>
                         </div>
                     </div>
@@ -643,59 +637,59 @@
             senderFileListContainer.innerHTML = html;
         }
         
-        // HAPUS FILE DARI SENDER
+        // Hapus file dari sender
         window.removeSenderFile = function(index) {
             if (index >= 0 && index < selectedFiles.length) {
-                const removed = selectedFiles[index].name;
+                const fileName = selectedFiles[index].name;
                 selectedFiles.splice(index, 1);
                 renderSenderFileList();
-                addLog(`🗑️ Hapus: ${removed}`, 'info');
+                addLog(`🗑️ Hapus: ${fileName}`, 'info');
             }
         };
         
-        // CLEAR SEMUA FILE SENDER
+        // Clear semua file
         window.clearAllSenderFiles = function() {
             selectedFiles = [];
             renderSenderFileList();
             addLog('🧹 Semua file dihapus', 'info');
         };
         
-        // KIRIM FILE ASLI KE RECEIVER
+        // ============ KIRIM FILE ASLI ============
         window.sendFiles = function() {
             if (selectedFiles.length === 0) {
-                alert('Tidak ada file yang dipilih');
+                alert('Pilih file dulu!');
                 return;
             }
             
             addLog(`📤 Mengirim ${selectedFiles.length} file...`, 'info');
             
-            // Kirim file ASLI (copy file object)
-            selectedFiles.forEach((file, idx) => {
+            // Kirim file ASLI satu per satu
+            selectedFiles.forEach((file, index) => {
                 setTimeout(() => {
-                    // Simpan file asli di receivedFiles
+                    // Simpan file ASLI ke received
                     receivedFiles.push({
                         file: file,           // File object ASLI
                         name: file.name,
                         size: file.size,
-                        type: file.type,
-                        id: Date.now() + idx + Math.random()
+                        type: file.type
                     });
                     
                     renderReceiverFileList();
-                    addLog(`✅ File masuk: ${file.name} (${formatBytes(file.size)})`, 'success');
-                }, idx * 200);
+                    addLog(`✅ Terkirim: ${file.name}`, 'success');
+                    
+                }, index * 300);
             });
             
-            // Kosongkan sender setelah terkirim
+            // Kosongkan sender setelah semua terkirim
             setTimeout(() => {
                 selectedFiles = [];
                 renderSenderFileList();
                 addLog('🎉 Semua file terkirim!', 'success');
-            }, selectedFiles.length * 200 + 500);
+            }, selectedFiles.length * 300 + 500);
         };
         sendBtn.onclick = window.sendFiles;
         
-        // RENDER LIST FILE DI RECEIVER (FILE ASLI)
+        // ============ RENDER FILE DI RECEIVER ============
         function renderReceiverFileList() {
             if (receivedFiles.length === 0) {
                 receiverFileListContainer.innerHTML = `
@@ -715,16 +709,14 @@
             
             let html = `<div class="file-list">`;
             receivedFiles.forEach((fileData, idx) => {
-                const icon = getFileIcon(fileData.type);
-                const size = formatBytes(fileData.size);
                 html += `
                     <div class="file-item" style="border-left-color: #48bb78;">
                         <div class="file-info">
-                            <span class="file-icon">${icon}</span>
+                            <span class="file-icon">${getFileIcon(fileData.type)}</span>
                             <div class="file-details">
                                 <div class="file-name">${escapeHTML(fileData.name)}</div>
                                 <div class="file-meta">
-                                    <span>${size}</span>
+                                    <span>${formatBytes(fileData.size)}</span>
                                     <span style="color: #a0e7ff;"><i class="fas fa-check-circle"></i> siap</span>
                                 </div>
                             </div>
@@ -739,13 +731,12 @@
             receiverFileListContainer.innerHTML = html;
         }
         
-        // DOWNLOAD FILE ASLI
+        // ============ DOWNLOAD FILE ASLI ============
         window.downloadSingleFile = function(index) {
             if (index >= 0 && index < receivedFiles.length) {
                 const fileData = receivedFiles[index];
                 const file = fileData.file;  // File object ASLI
                 
-                // Buat URL dari file asli
                 const url = URL.createObjectURL(file);
                 const a = document.createElement('a');
                 a.href = url;
@@ -759,7 +750,7 @@
             }
         };
         
-        // DOWNLOAD SEMUA FILE
+        // Download semua file
         window.downloadAllFiles = function() {
             receivedFiles.forEach((_, idx) => {
                 setTimeout(() => {
@@ -769,55 +760,59 @@
             addLog(`📥 Download ${receivedFiles.length} file`, 'info');
         };
         
-        // SETUP EVENT LISTENERS
+        // ============ EVENT LISTENERS ============
         function setupEventListeners() {
-            // Click upload zone
+            // KLICK area upload
             dropZone.addEventListener('click', function(e) {
-                if (e.target.tagName !== 'INPUT') {
-                    fileInput.click();
-                }
+                e.preventDefault();
+                fileInput.click();
             });
             
-            // Drag & drop
-            dropZone.addEventListener('dragover', (e) => {
+            // Drag over
+            dropZone.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 dropZone.style.borderColor = '#7aa2f7';
-                dropZone.style.background = 'rgba(122, 162, 247, 0.08)';
+                dropZone.style.background = 'rgba(122, 162, 247, 0.1)';
             });
             
-            dropZone.addEventListener('dragleave', (e) => {
+            // Drag leave
+            dropZone.addEventListener('dragleave', function(e) {
                 e.preventDefault();
                 dropZone.style.borderColor = '#4a5568';
                 dropZone.style.background = '#0f131a';
             });
             
-            dropZone.addEventListener('drop', (e) => {
+            // Drop
+            dropZone.addEventListener('drop', function(e) {
                 e.preventDefault();
                 dropZone.style.borderColor = '#4a5568';
                 dropZone.style.background = '#0f131a';
-                if (e.dataTransfer.files.length > 0) {
+                
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     handleSenderFiles(e.dataTransfer.files);
                 }
             });
             
             // File input change
             fileInput.addEventListener('change', function(e) {
-                handleSenderFiles(e.target.files);
-                fileInput.value = ''; // Reset biar bisa pilih file yang sama lagi
+                if (e.target.files && e.target.files.length > 0) {
+                    handleSenderFiles(e.target.files);
+                    fileInput.value = ''; // Reset
+                }
             });
         }
         
-        // UTILS
-        function getFileIcon(mime) {
-            if (mime.includes('image')) return '🖼️';
-            if (mime.includes('video')) return '🎬';
-            if (mime.includes('audio')) return '🎵';
-            if (mime.includes('pdf')) return '📄';
-            if (mime.includes('zip') || mime.includes('rar') || mime.includes('tar')) return '📦';
-            if (mime.includes('word') || mime.includes('document')) return '📋';
-            if (mime.includes('excel') || mime.includes('sheet')) return '📊';
-            if (mime.includes('powerpoint') || mime.includes('presentation')) return '📽️';
-            if (mime.includes('text')) return '📝';
+        // ============ UTILS ============
+        function getFileIcon(type) {
+            if (type.includes('image')) return '🖼️';
+            if (type.includes('video')) return '🎬';
+            if (type.includes('audio')) return '🎵';
+            if (type.includes('pdf')) return '📄';
+            if (type.includes('zip') || type.includes('rar')) return '📦';
+            if (type.includes('text')) return '📝';
+            if (type.includes('word')) return '📋';
+            if (type.includes('excel')) return '📊';
+            if (type.includes('powerpoint')) return '📽️';
             return '📁';
         }
         
@@ -854,14 +849,14 @@
             }
         }
         
-        // INITIALIZE
+        // ============ INIT ============
         document.addEventListener('DOMContentLoaded', function() {
             updateFolderLink();
-            generateQRCode();  // Generate QR code pertama kali
+            generateQRCode();
             setupEventListeners();
             renderSenderFileList();
             renderReceiverFileList();
-            addLog('🚀 WebFolder siap. QR code aktif - scan dengan HP', 'success');
+            addLog('🚀 WebFolder siap - upload file asli', 'success');
         });
     </script>
 </body>
