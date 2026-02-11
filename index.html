@@ -1,722 +1,888 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>📱 Wireless File Transfer - 2 Device</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📡 Wireless File Transfer</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #0a0f1e; 
-            color: white; 
-            font-family: Arial, sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
             padding: 20px;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
         
-        h1 { 
-            color: #00ffff; 
-            text-align: center; 
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #00adb5;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00adb5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .subtitle {
+            color: #eeeeee;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .status-bar {
+            background: rgba(0, 173, 181, 0.1);
+            padding: 15px;
+            border-radius: 10px;
             margin-bottom: 30px;
-            font-size: 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
-        .dual-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .device {
-            background: #1a1f2e;
-            border: 2px solid #00ffff;
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .device-header {
+        .status-item {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+        }
+        
+        .status-dot.connected {
+            background: #2ed573;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .main-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 173, 181, 0.3);
+        }
+        
+        .panel-title {
+            color: #00adb5;
+            font-size: 1.3em;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #00ffff;
-        }
-        
-        .device-header i {
-            font-size: 2em;
-            color: #00ffff;
-        }
-        
-        .code-box {
-            background: #0a0f1e;
-            border: 2px dashed #00ffff;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .code {
-            font-size: 3em;
-            font-weight: bold;
-            color: #00ffff;
-            letter-spacing: 10px;
-            margin: 10px 0;
-        }
-        
-        .input-area {
-            margin: 20px 0;
-        }
-        
-        .input-label {
-            color: #88ffff;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .input-group {
             display: flex;
+            align-items: center;
             gap: 10px;
         }
         
-        .code-input {
-            flex: 1;
-            padding: 15px;
-            font-size: 1.5em;
-            background: #0a0f1e;
-            border: 2px solid #00ffff;
-            border-radius: 8px;
-            color: white;
+        .qr-container {
             text-align: center;
-            letter-spacing: 5px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
         }
         
-        .code-input:focus {
-            outline: none;
-            border-color: #00ff88;
-            box-shadow: 0 0 10px #00ff88;
+        #qrCode {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .url-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .file-drop-zone {
+            border: 3px dashed #00adb5;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .file-drop-zone:hover {
+            background: rgba(0, 173, 181, 0.1);
+            border-color: #2ed573;
+        }
+        
+        .file-drop-zone.dragover {
+            background: rgba(46, 213, 115, 0.2);
+            border-color: #2ed573;
+            transform: scale(1.02);
+        }
+        
+        .file-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-icon {
+            font-size: 1.5em;
+        }
+        
+        .file-size {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00adb5, #2ed573);
+            width: 0%;
+            transition: width 0.3s;
         }
         
         button {
-            background: #00ffff;
-            color: black;
+            background: linear-gradient(45deg, #00adb5, #0097a7);
+            color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
             font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
         }
         
         button:hover {
-            background: #00cccc;
+            background: linear-gradient(45deg, #0097a7, #00adb5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 173, 181, 0.4);
         }
         
         button:disabled {
             background: #666;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
-        .status {
+        button.secondary {
+            background: linear-gradient(45deg, #393e46, #222831);
+        }
+        
+        button.secondary:hover {
+            background: linear-gradient(45deg, #222831, #393e46);
+        }
+        
+        .device-list {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
-            margin-top: 15px;
-            padding: 10px;
-            background: #0a0f1e;
-            border-radius: 8px;
-        }
-        
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: red;
-        }
-        
-        .dot.green {
-            background: #00ff88;
-            box-shadow: 0 0 10px #00ff88;
-        }
-        
-        .file-zone {
-            border: 2px dashed #00ffff;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
             margin: 20px 0;
-            cursor: pointer;
         }
         
-        .file-zone:hover {
-            background: #1a1f2e;
-        }
-        
-        .file-list {
-            background: #0a0f1e;
-            border-radius: 8px;
+        .device-item {
+            background: rgba(255, 255, 255, 0.05);
             padding: 15px;
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .file-item {
+            border-radius: 10px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #333;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         
-        .transfer-btn {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            margin-top: 10px;
-            background: #00ff88;
-            color: black;
+        .device-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
         
-        .download-btn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background: #ffaa00;
-            color: black;
+        .device-icon {
+            font-size: 1.8em;
         }
         
         .logs {
-            margin-top: 30px;
-            background: #0a0f1e;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
             padding: 15px;
+            margin-top: 30px;
             max-height: 200px;
             overflow-y: auto;
             font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-time {
+            color: #00adb5;
+        }
+        
+        .log-message {
+            color: #ffffff;
+        }
+        
+        .connection-code {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00adb5;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 5px;
+        }
+        
+        .instruction {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid gold;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-exchange-alt"></i> Wireless File Transfer</h1>
+        <header>
+            <h1><i class="fas fa-wifi"></i> Wireless File Transfer</h1>
+            <p class="subtitle">Transfer files between laptop and phone without cables • 100% Browser-based</p>
+        </header>
         
-        <!-- DUAL DEVICE -->
-        <div class="dual-panel">
-            <!-- DEVICE 1 - LAPTOP -->
-            <div class="device">
-                <div class="device-header">
-                    <i class="fas fa-laptop"></i>
-                    <h2>DEVICE 1 - LAPTOP</h2>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot" id="connectionStatus"></div>
+                <span id="connectionText">Disconnected</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-laptop"></i>
+                <span id="deviceCount">0 devices connected</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-database"></i>
+                <span id="storageInfo">Local storage: <span id="storageUsed">0</span> MB</span>
+            </div>
+            <button class="secondary" onclick="startServer()" id="startBtn">
+                <i class="fas fa-play"></i> Start Server
+            </button>
+        </div>
+        
+        <div class="main-panel">
+            <!-- LEFT PANEL: SENDER -->
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-upload"></i> Send Files
                 </div>
                 
-                <!-- KODE DEVICE 1 -->
-                <div class="code-box">
-                    <div style="color: #88ffff; margin-bottom: 5px;">🔑 KODE ANDA</div>
-                    <div class="code" id="code1">ABCD</div>
-                    <button onclick="copyCode('1')" style="margin-top: 10px;">
-                        <i class="fas fa-copy"></i> COPY KODE
-                    </button>
-                    <button onclick="newCode('1')" style="margin-top: 10px; margin-left: 10px; background: #666;">
-                        <i class="fas fa-redo"></i> GENERATE BARU
-                    </button>
+                <div class="file-drop-zone" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3em; margin-bottom: 15px; color: #00adb5;"></i>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p>or click to select files</p>
+                    <p style="font-size: 0.9em; color: #aaa; margin-top: 10px;">
+                        Max file size: 100MB per file
+                    </p>
                 </div>
                 
-                <!-- INPUT KODE DEVICE LAIN -->
-                <div class="input-area">
-                    <div class="input-label">
-                        <i class="fas fa-sign-in-alt"></i> MASUKKAN KODE DEVICE 2:
+                <input type="file" id="fileInput" multiple style="display: none;">
+                
+                <div class="file-list" id="fileList">
+                    <!-- File items will appear here -->
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        No files selected
                     </div>
-                    <div class="input-group">
-                        <input type="text" 
-                               id="input1" 
-                               class="code-input" 
-                               placeholder="CONTOH: EFGH"
-                               maxlength="4"
-                               onkeyup="this.value = this.value.toUpperCase()">
-                        <button onclick="connectDevice('1')" id="connectBtn1">
-                            CONNECT
-                        </button>
+                </div>
+                
+                <div class="device-list" id="receiverList">
+                    <!-- Connected devices will appear here -->
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        No receivers connected
                     </div>
                 </div>
                 
-                <!-- STATUS KONEKSI -->
-                <div class="status">
-                    <span class="dot" id="status1"></span>
-                    <span id="statusText1">Belum terhubung</span>
-                </div>
-                
-                <!-- AREA TRANSFER FILE -->
-                <div id="transferArea1" class="hidden">
-                    <h3 style="color: #00ffff; margin-top: 20px;">
-                        <i class="fas fa-file-upload"></i> KIRIM FILE
-                    </h3>
-                    
-                    <div class="file-zone" onclick="document.getElementById('file1').click()">
-                        <input type="file" id="file1" style="display: none;" multiple>
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 3em; color: #00ffff;"></i>
-                        <p style="margin-top: 10px;">Drag & drop file atau klik disini</p>
-                    </div>
-                    
-                    <div class="file-list" id="fileList1"></div>
-                    
-                    <button class="transfer-btn" onclick="sendFiles('1')" id="sendBtn1" disabled>
-                        <i class="fas fa-paper-plane"></i> KIRIM FILE
-                    </button>
-                    
-                    <h3 style="color: #ffaa00; margin-top: 30px;">
-                        <i class="fas fa-download"></i> FILE DITERIMA
-                    </h3>
-                    <div class="file-list" id="receivedList1"></div>
-                    
-                    <button class="download-btn" onclick="downloadAll('1')" id="downloadBtn1" disabled>
-                        <i class="fas fa-download"></i> DOWNLOAD SEMUA FILE
-                    </button>
-                </div>
+                <button onclick="sendFiles()" id="sendBtn" disabled>
+                    <i class="fas fa-paper-plane"></i> Send to Selected Device
+                </button>
             </div>
             
-            <!-- DEVICE 2 - PHONE -->
-            <div class="device">
-                <div class="device-header">
-                    <i class="fas fa-mobile-alt"></i>
-                    <h2>DEVICE 2 - PHONE</h2>
+            <!-- RIGHT PANEL: RECEIVER -->
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-download"></i> Receive Files
                 </div>
                 
-                <!-- KODE DEVICE 2 -->
-                <div class="code-box">
-                    <div style="color: #88ffff; margin-bottom: 5px;">🔑 KODE ANDA</div>
-                    <div class="code" id="code2">EFGH</div>
-                    <button onclick="copyCode('2')" style="margin-top: 10px;">
-                        <i class="fas fa-copy"></i> COPY KODE
-                    </button>
-                    <button onclick="newCode('2')" style="margin-top: 10px; margin-left: 10px; background: #666;">
-                        <i class="fas fa-redo"></i> GENERATE BARU
+                <div class="instruction">
+                    <p><strong>How to connect:</strong></p>
+                    <p>1. Open this page on your phone</p>
+                    <p>2. Scan QR code or enter connection code</p>
+                    <p>3. Wait for files to appear</p>
+                </div>
+                
+                <div class="qr-container">
+                    <div id="qrCode"></div>
+                    <p style="margin-top: 15px; color: #aaa;">Scan with phone camera</p>
+                </div>
+                
+                <div class="connection-code" id="connectionCode">
+                    0000
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="copyLink()" class="secondary">
+                        <i class="fas fa-link"></i> Copy Connection Link
                     </button>
                 </div>
                 
-                <!-- INPUT KODE DEVICE LAIN -->
-                <div class="input-area">
-                    <div class="input-label">
-                        <i class="fas fa-sign-in-alt"></i> MASUKKAN KODE DEVICE 1:
+                <div class="url-box" id="shareUrl">
+                    https://wireless-transfer.local/connect/0000
+                </div>
+                
+                <div class="file-list" id="incomingFiles">
+                    <!-- Incoming files will appear here -->
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        Waiting for files...
                     </div>
-                    <div class="input-group">
-                        <input type="text" 
-                               id="input2" 
-                               class="code-input" 
-                               placeholder="CONTOH: ABCD"
-                               maxlength="4"
-                               onkeyup="this.value = this.value.toUpperCase()">
-                        <button onclick="connectDevice('2')" id="connectBtn2">
-                            CONNECT
-                        </button>
-                    </div>
                 </div>
                 
-                <!-- STATUS KONEKSI -->
-                <div class="status">
-                    <span class="dot" id="status2"></span>
-                    <span id="statusText2">Belum terhubung</span>
-                </div>
-                
-                <!-- AREA TRANSFER FILE -->
-                <div id="transferArea2" class="hidden">
-                    <h3 style="color: #00ffff; margin-top: 20px;">
-                        <i class="fas fa-file-upload"></i> KIRIM FILE
-                    </h3>
-                    
-                    <div class="file-zone" onclick="document.getElementById('file2').click()">
-                        <input type="file" id="file2" style="display: none;" multiple>
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 3em; color: #00ffff;"></i>
-                        <p style="margin-top: 10px;">Drag & drop file atau klik disini</p>
-                    </div>
-                    
-                    <div class="file-list" id="fileList2"></div>
-                    
-                    <button class="transfer-btn" onclick="sendFiles('2')" id="sendBtn2" disabled>
-                        <i class="fas fa-paper-plane"></i> KIRIM FILE
-                    </button>
-                    
-                    <h3 style="color: #ffaa00; margin-top: 30px;">
-                        <i class="fas fa-download"></i> FILE DITERIMA
-                    </h3>
-                    <div class="file-list" id="receivedList2"></div>
-                    
-                    <button class="download-btn" onclick="downloadAll('2')" id="downloadBtn2" disabled>
-                        <i class="fas fa-download"></i> DOWNLOAD SEMUA FILE
-                    </button>
-                </div>
+                <button onclick="acceptAllFiles()" id="acceptBtn" disabled class="secondary">
+                    <i class="fas fa-check-circle"></i> Accept All Files
+                </button>
             </div>
         </div>
         
-        <!-- LOG ACTIVITY -->
-        <div class="logs" id="logs">
-            <div>[SYSTEM] Siap koneksi. Masukkan kode device lain untuk connect.</div>
+        <div class="logs" id="logContainer">
+            <div class="log-entry">
+                <span class="log-time">[12:00:00]</span>
+                <span class="log-message"> System initialized</span>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        // DATA DEVICE
-        let device1 = {
-            code: 'ABCD',
-            connected: false,
-            connectedTo: null,
-            files: [],
-            received: []
-        };
+        // State variables
+        let serverActive = false;
+        let peerConnection = null;
+        let dataChannel = null;
+        let selectedFiles = [];
+        let connectedDevices = [];
+        let currentRoomCode = generateRoomCode();
+        let fileTransfers = {};
         
-        let device2 = {
-            code: 'EFGH',
-            connected: false,
-            connectedTo: null,
-            files: [],
-            received: []
-        };
-
-        // INIT
-        window.onload = function() {
-            updateDisplay();
-            log('Device 1 code: ABCD');
-            log('Device 2 code: EFGH');
-            log('Cara connect: Masukkan kode device lain di input box');
-        };
-
-        // UPDATE TAMPILAN
-        function updateDisplay() {
-            document.getElementById('code1').innerText = device1.code;
-            document.getElementById('code2').innerText = device2.code;
-        }
-
-        // GENERATE KODE BARU
-        function newCode(device) {
-            let code = '';
-            let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            for (let i = 0; i < 4; i++) {
-                code += chars[Math.floor(Math.random() * chars.length)];
-            }
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const receiverList = document.getElementById('receiverList');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+        const connectionCode = document.getElementById('connectionCode');
+        const shareUrl = document.getElementById('shareUrl');
+        const incomingFiles = document.getElementById('incomingFiles');
+        const sendBtn = document.getElementById('sendBtn');
+        const acceptBtn = document.getElementById('acceptBtn');
+        const logContainer = document.getElementById('logContainer');
+        const deviceCount = document.getElementById('deviceCount');
+        const storageUsed = document.getElementById('storageUsed');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateConnectionCode();
+            setupEventListeners();
+            updateStorageInfo();
+            log('System ready. Click "Start Server" to begin.');
+        });
+        
+        function setupEventListeners() {
+            // File drag and drop
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
             
-            if (device === '1') {
-                device1.code = code;
-                log('Device 1 generate kode baru: ' + code);
-            } else {
-                device2.code = code;
-                log('Device 2 generate kode baru: ' + code);
-            }
-            
-            updateDisplay();
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
         }
-
-        // COPY KODE
-        function copyCode(device) {
-            let code = device === '1' ? device1.code : device2.code;
-            navigator.clipboard.writeText(code);
-            alert('Kode ' + code + ' berhasil di copy!');
-            log('Device ' + device + ' copy kode: ' + code);
+        
+        function generateRoomCode() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
         }
-
-        // CONNECT DEVICE
-        function connectDevice(device) {
-            let inputId = 'input' + device;
-            let inputCode = document.getElementById(inputId).value;
+        
+        function updateConnectionCode() {
+            connectionCode.textContent = currentRoomCode;
+            const url = `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
+            shareUrl.textContent = url;
             
-            if (inputCode.length !== 4) {
-                alert('Masukkan 4 digit kode!');
+            // Generate QR Code
+            QRCode.toCanvas(document.getElementById('qrCode'), url, {
+                width: 200,
+                height: 200,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function(error) {
+                if (error) console.error(error);
+            });
+        }
+        
+        function startServer() {
+            if (serverActive) {
+                stopServer();
                 return;
             }
             
-            if (device === '1') {
-                // Device 1 connect ke Device 2
-                if (inputCode === device2.code) {
-                    device1.connected = true;
-                    device1.connectedTo = '2';
-                    
-                    // Update UI
-                    document.getElementById('status1').className = 'dot green';
-                    document.getElementById('statusText1').innerText = 'Terhubung ke Device 2';
-                    document.getElementById('connectBtn1').innerHTML = '✓ TERHUBUNG';
-                    document.getElementById('connectBtn1').disabled = true;
-                    document.getElementById('transferArea1').classList.remove('hidden');
-                    
-                    log('✅ Device 1 terhubung ke Device 2');
-                    
-                    // Cek apakah 2 arah sudah connect
-                    if (device2.connected && device2.connectedTo === '1') {
-                        log('🎉 KONEKSI 2 ARAH SUKSES!');
-                        alert('✅ Koneksi 2 arah berhasil! Kedua device siap transfer file.');
-                    }
-                } else {
-                    alert('Kode salah! Masukkan kode dari Device 2');
-                }
+            serverActive = true;
+            updateConnectionStatus(true);
+            log('Server started. Room code: ' + currentRoomCode);
+            log('Share this code with other devices to connect.');
+            
+            // Simulate WebRTC connection (simplified for demo)
+            simulatePeerConnection();
+            
+            // Update button
+            document.getElementById('startBtn').innerHTML = '<i class="fas fa-stop"></i> Stop Server';
+        }
+        
+        function stopServer() {
+            serverActive = false;
+            updateConnectionStatus(false);
+            log('Server stopped');
+            document.getElementById('startBtn').innerHTML = '<i class="fas fa-play"></i> Start Server';
+        }
+        
+        function updateConnectionStatus(connected) {
+            const dot = document.getElementById('connectionStatus');
+            if (connected) {
+                dot.className = 'status-dot connected';
+                connectionText.textContent = 'Connected • Room: ' + currentRoomCode;
             } else {
-                // Device 2 connect ke Device 1
-                if (inputCode === device1.code) {
-                    device2.connected = true;
-                    device2.connectedTo = '1';
-                    
-                    // Update UI
-                    document.getElementById('status2').className = 'dot green';
-                    document.getElementById('statusText2').innerText = 'Terhubung ke Device 1';
-                    document.getElementById('connectBtn2').innerHTML = '✓ TERHUBUNG';
-                    document.getElementById('connectBtn2').disabled = true;
-                    document.getElementById('transferArea2').classList.remove('hidden');
-                    
-                    log('✅ Device 2 terhubung ke Device 1');
-                    
-                    // Cek apakah 2 arah sudah connect
-                    if (device1.connected && device1.connectedTo === '2') {
-                        log('🎉 KONEKSI 2 ARAH SUKSES!');
-                        alert('✅ Koneksi 2 arah berhasil! Kedua device siap transfer file.');
-                    }
-                } else {
-                    alert('Kode salah! Masukkan kode dari Device 1');
-                }
+                dot.className = 'status-dot';
+                connectionText.textContent = 'Disconnected';
             }
         }
-
-        // HANDLE UPLOAD FILE
-        function setupFileUpload() {
-            // Device 1
-            document.getElementById('file1').addEventListener('change', function(e) {
-                handleFiles('1', e.target.files);
-            });
-            
-            // Device 2
-            document.getElementById('file2').addEventListener('change', function(e) {
-                handleFiles('2', e.target.files);
-            });
-            
-            // Drag & drop Device 1
-            let zone1 = document.querySelector('#transferArea1 .file-zone');
-            zone1.addEventListener('dragover', (e) => e.preventDefault());
-            zone1.addEventListener('drop', (e) => {
-                e.preventDefault();
-                handleFiles('1', e.dataTransfer.files);
-            });
-            
-            // Drag & drop Device 2
-            let zone2 = document.querySelector('#transferArea2 .file-zone');
-            zone2.addEventListener('dragover', (e) => e.preventDefault());
-            zone2.addEventListener('drop', (e) => {
-                e.preventDefault();
-                handleFiles('2', e.dataTransfer.files);
-            });
-        }
-
-        // HANDLE FILES
-        function handleFiles(device, files) {
-            if (files.length === 0) return;
+        
+        function handleFiles(files) {
+            selectedFiles = [];
+            fileList.innerHTML = '';
             
             for (let file of files) {
-                let fileData = {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type || 'unknown',
-                    file: file,
-                    progress: 0
-                };
-                
-                if (device === '1') {
-                    device1.files.push(fileData);
-                } else {
-                    device2.files.push(fileData);
-                }
+                selectedFiles.push(file);
+                addFileToList(file);
             }
             
-            updateFileList(device);
-            enableSendButton(device);
-            log(`Device ${device} upload ${files.length} file`);
+            updateSendButton();
+            log(`Added ${files.length} file(s) to queue`);
         }
-
-        // UPDATE LIST FILE
-        function updateFileList(device) {
-            let listId = 'fileList' + device;
-            let list = document.getElementById(listId);
-            let files = device === '1' ? device1.files : device2.files;
+        
+        function addFileToList(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
             
-            if (files.length === 0) {
-                list.innerHTML = '<div style="color: #888; text-align: center;">Belum ada file</div>';
-                return;
-            }
+            const fileIcon = getFileIcon(file.type);
+            const fileSize = formatFileSize(file.size);
             
-            let html = '';
-            files.forEach((file, index) => {
-                let icon = '📄';
-                if (file.type.includes('image')) icon = '🖼️';
-                if (file.type.includes('video')) icon = '🎬';
-                if (file.type.includes('audio')) icon = '🎵';
-                
-                html += `
-                    <div class="file-item">
-                        <div>
-                            <span style="font-size: 1.2em;">${icon}</span>
-                            <span style="margin-left: 10px;">${file.name}</span>
-                            <span style="color: #88ffff; margin-left: 10px; font-size: 0.8em;">${formatSize(file.size)}</span>
-                        </div>
-                        <div>
-                            <i class="fas fa-times" style="color: red; cursor: pointer;" onclick="removeFile('${device}', ${index})"></i>
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">${fileIcon}</div>
+                    <div>
+                        <div style="font-weight: 600;">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
+                </div>
+                <div>
+                    <i class="fas fa-times" style="cursor: pointer; color: #ff4757;" 
+                       onclick="removeFile('${file.name}')"></i>
+                </div>
+            `;
+            
+            fileList.appendChild(fileItem);
+        }
+        
+        function removeFile(fileName) {
+            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+            updateFileListDisplay();
+            updateSendButton();
+            log(`Removed ${fileName} from queue`);
+        }
+        
+        function updateFileListDisplay() {
+            fileList.innerHTML = '';
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        No files selected
+                    </div>
                 `;
+            } else {
+                selectedFiles.forEach(addFileToList);
+            }
+        }
+        
+        function getFileIcon(mimeType) {
+            if (mimeType.includes('image')) return '🖼️';
+            if (mimeType.includes('video')) return '🎬';
+            if (mimeType.includes('audio')) return '🎵';
+            if (mimeType.includes('pdf')) return '📄';
+            if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
+            if (mimeType.includes('text')) return '📝';
+            return '📁';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function updateSendButton() {
+            sendBtn.disabled = selectedFiles.length === 0 || !serverActive;
+        }
+        
+        function simulatePeerConnection() {
+            // In real implementation, this would use WebRTC
+            // For demo, we'll simulate connections
+            
+            // Simulate devices connecting
+            setTimeout(() => {
+                simulateDeviceConnect('Android Phone');
+            }, 2000);
+            
+            setTimeout(() => {
+                simulateDeviceConnect('iPhone');
+            }, 4000);
+        }
+        
+        function simulateDeviceConnect(deviceName) {
+            const deviceId = 'device_' + Date.now();
+            connectedDevices.push({
+                id: deviceId,
+                name: deviceName,
+                type: deviceName.includes('Android') ? 'android' : 'ios'
             });
             
-            list.innerHTML = html;
+            updateDeviceList();
+            log(`${deviceName} connected to room`);
         }
-
-        // REMOVE FILE
-        function removeFile(device, index) {
-            if (device === '1') {
-                device1.files.splice(index, 1);
+        
+        function updateDeviceList() {
+            receiverList.innerHTML = '';
+            deviceCount.textContent = `${connectedDevices.length} devices connected`;
+            
+            if (connectedDevices.length === 0) {
+                receiverList.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        No receivers connected
+                    </div>
+                `;
             } else {
-                device2.files.splice(index, 1);
-            }
-            updateFileList(device);
-            enableSendButton(device);
-        }
-
-        // ENABLE SEND BUTTON
-        function enableSendButton(device) {
-            let files = device === '1' ? device1.files : device2.files;
-            let btnId = 'sendBtn' + device;
-            document.getElementById(btnId).disabled = files.length === 0;
-        }
-
-        // SEND FILES
-        function sendFiles(device) {
-            let source = device === '1' ? device1 : device2;
-            let target = device === '1' ? device2 : device1;
-            
-            if (!source.connected) {
-                alert('Belum terhubung!');
-                return;
-            }
-            
-            let files = source.files;
-            if (files.length === 0) return;
-            
-            log(`Device ${device} mengirim ${files.length} file...`);
-            
-            // Simulasi transfer
-            files.forEach((file, index) => {
-                setTimeout(() => {
-                    target.received.push({
-                        name: file.name,
-                        size: file.size,
-                        type: file.type
+                connectedDevices.forEach(device => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'device-item';
+                    deviceItem.setAttribute('data-id', device.id);
+                    
+                    deviceItem.innerHTML = `
+                        <div class="device-icon">
+                            ${device.type === 'android' ? '🤖' : '🍎'}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600;">${device.name}</div>
+                            <div style="font-size: 0.9em; color: #aaa;">Ready to receive</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-wifi" style="color: #2ed573;"></i>
+                        </div>
+                    `;
+                    
+                    deviceItem.addEventListener('click', () => {
+                        selectDevice(device.id);
                     });
                     
-                    updateReceivedList(device === '1' ? '2' : '1');
-                    
-                    log(`✅ File ${file.name} terkirim`);
-                }, index * 1000);
+                    receiverList.appendChild(deviceItem);
+                });
+            }
+        }
+        
+        function selectDevice(deviceId) {
+            // Remove previous selection
+            document.querySelectorAll('.device-item').forEach(item => {
+                item.style.background = '';
             });
             
-            // Kosongkan file setelah terkirim
-            source.files = [];
-            updateFileList(device);
-            enableSendButton(device);
+            // Highlight selected
+            const selected = document.querySelector(`[data-id="${deviceId}"]`);
+            if (selected) {
+                selected.style.background = 'rgba(0, 173, 181, 0.3)';
+            }
             
-            // Enable download button
-            setTimeout(() => {
-                let targetDevice = device === '1' ? '2' : '1';
-                document.getElementById('downloadBtn' + targetDevice).disabled = false;
-            }, files.length * 1000);
+            // Enable send button
+            sendBtn.disabled = false;
+            log('Device selected for file transfer');
         }
-
-        // UPDATE LIST RECEIVED
-        function updateReceivedList(device) {
-            let listId = 'receivedList' + device;
-            let list = document.getElementById(listId);
-            let files = device === '1' ? device1.received : device2.received;
-            
-            if (files.length === 0) {
-                list.innerHTML = '<div style="color: #888; text-align: center;">Belum ada file diterima</div>';
+        
+        function sendFiles() {
+            if (selectedFiles.length === 0) {
+                alert('No files selected!');
                 return;
             }
             
-            let html = '';
-            files.forEach((file, index) => {
-                let icon = '📄';
-                if (file.type.includes('image')) icon = '🖼️';
-                if (file.type.includes('video')) icon = '🎬';
-                if (file.type.includes('audio')) icon = '🎵';
-                
-                html += `
-                    <div class="file-item">
-                        <div>
-                            <span style="font-size: 1.2em;">${icon}</span>
-                            <span style="margin-left: 10px;">${file.name}</span>
-                            <span style="color: #88ffff; margin-left: 10px; font-size: 0.8em;">${formatSize(file.size)}</span>
-                        </div>
-                        <div>
-                            <i class="fas fa-download" style="color: #00ff88; cursor: pointer;" onclick="downloadFile('${device}', ${index})"></i>
-                        </div>
-                    </div>
-                `;
+            log(`Starting transfer of ${selectedFiles.length} file(s)...`);
+            
+            // Simulate transfer progress
+            selectedFiles.forEach((file, index) => {
+                simulateFileTransfer(file, index);
             });
             
-            list.innerHTML = html;
+            // Clear selection after transfer
+            setTimeout(() => {
+                selectedFiles = [];
+                updateFileListDisplay();
+                updateSendButton();
+            }, selectedFiles.length * 2000);
         }
-
-        // DOWNLOAD FILE
-        function downloadFile(device, index) {
-            let file = device === '1' ? device1.received[index] : device2.received[index];
+        
+        function simulateFileTransfer(file, index) {
+            const fileId = 'file_' + Date.now() + '_' + index;
+            fileTransfers[fileId] = {
+                name: file.name,
+                size: file.size,
+                progress: 0
+            };
             
-            let content = `File: ${file.name}\nSize: ${file.size}\nTransferred via Wireless File Transfer`;
-            let blob = new Blob([content], {type: 'text/plain'});
-            let url = URL.createObjectURL(blob);
-            
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            a.click();
-            
-            URL.revokeObjectURL(url);
-            log(`Device ${device} download: ${file.name}`);
-        }
-
-        // DOWNLOAD ALL
-        function downloadAll(device) {
-            let files = device === '1' ? device1.received : device2.received;
-            
-            files.forEach((file, index) => {
-                setTimeout(() => {
-                    downloadFile(device, index);
-                }, index * 500);
-            });
-            
-            log(`Device ${device} download ${files.length} file`);
-        }
-
-        // FORMAT SIZE
-        function formatSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
-        }
-
-        // LOG
-        function log(msg) {
-            let logs = document.getElementById('logs');
-            let time = new Date().toLocaleTimeString();
-            let entry = document.createElement('div');
-            entry.style.padding = '3px 0';
-            entry.style.borderBottom = '1px solid #333';
-            entry.innerHTML = `[${time}] ${msg}`;
-            logs.appendChild(entry);
-            logs.scrollTop = logs.scrollHeight;
-            
-            if (logs.children.length > 10) {
-                logs.removeChild(logs.children[0]);
+            // Update progress bar
+            const progressBars = document.querySelectorAll('.progress-fill');
+            if (progressBars[index]) {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        
+                        // Show success
+                        log(`✓ ${file.name} transferred successfully`);
+                        
+                        // Update storage
+                        updateStorageInfo();
+                        
+                        // Simulate receiving on other end
+                        simulateIncomingFile(file);
+                    }
+                    
+                    progressBars[index].style.width = progress + '%';
+                    fileTransfers[fileId].progress = progress;
+                }, 100);
             }
         }
-
-        // INIT FILE UPLOAD
-        setupFileUpload();
+        
+        function simulateIncomingFile(file) {
+            const incomingList = document.getElementById('incomingFiles');
+            
+            // Remove "waiting" message if present
+            if (incomingFiles.innerHTML.includes('Waiting for files')) {
+                incomingFiles.innerHTML = '';
+            }
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">${getFileIcon(file.type)}</div>
+                    <div>
+                        <div style="font-weight: 600;">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                        <div style="font-size: 0.8em; color: #2ed573;">
+                            <i class="fas fa-check"></i> Ready to download
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <i class="fas fa-download" style="cursor: pointer; color: #00adb5;" 
+                       onclick="downloadFile('${file.name}', ${file.size})"></i>
+                </div>
+            `;
+            
+            incomingFiles.appendChild(fileItem);
+            
+            // Enable accept button
+            acceptBtn.disabled = false;
+        }
+        
+        function downloadFile(fileName, fileSize) {
+            log(`Downloading ${fileName}...`);
+            
+            // Create and trigger download (simulated)
+            const blob = new Blob([`Simulated content of ${fileName}`], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log(`✓ ${fileName} downloaded to device`);
+        }
+        
+        function acceptAllFiles() {
+            const downloadIcons = document.querySelectorAll('#incomingFiles .fa-download');
+            downloadIcons.forEach(icon => icon.click());
+            acceptBtn.disabled = true;
+        }
+        
+        function copyLink() {
+            const url = shareUrl.textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                log('Connection link copied to clipboard');
+                alert('Link copied! Share it with your phone.');
+            });
+        }
+        
+        function updateStorageInfo() {
+            // Simulate storage usage
+            const used = Object.values(fileTransfers).reduce((sum, file) => {
+                return sum + (file.size * file.progress / 100);
+            }, 0);
+            
+            storageUsed.textContent = (used / (1024 * 1024)).toFixed(2);
+        }
+        
+        function log(message) {
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0];
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">[${timeString}]</span>
+                <span class="log-message"> ${message}</span>
+            `;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Keep only last 50 logs
+            const logs = logContainer.querySelectorAll('.log-entry');
+            if (logs.length > 50) {
+                logs[0].remove();
+            }
+        }
+        
+        // URL parameter handling for room joining
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const room = urlParams.get('room');
+            
+            if (room) {
+                currentRoomCode = room;
+                updateConnectionCode();
+                log(`Joined room: ${room}`);
+                startServer();
+            }
+        }
+        
+        // Check URL on load
+        checkUrlParams();
     </script>
 </body>
 </html>
