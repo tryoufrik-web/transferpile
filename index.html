@@ -25,6 +25,7 @@
         .peer-status { background: #1a1e2a; border-radius: 40px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; border: 1px solid #4a5568; }
         .peer-dot { width: 14px; height: 14px; border-radius: 50%; background: #ff4757; transition: 0.2s; }
         .peer-dot.connected { background: #2ed573; box-shadow: 0 0 12px #2ed573; animation: pulse 1.5s infinite; }
+        .peer-dot.warning { background: #ffa502; box-shadow: 0 0 12px #ffa502; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
         .upload-zone { border: 2px dashed #4a5568; border-radius: 20px; padding: 36px 20px; text-align: center; cursor: pointer; background: #0f131a; margin-bottom: 20px; }
         .upload-zone:hover { border-color: #7aa2f7; background: rgba(122,162,247,0.05); }
@@ -43,17 +44,18 @@
         .log-entry { padding: 6px 0; border-bottom: 1px solid #1e242c; display: flex; gap: 12px; }
         .log-time { color: #7aa2f7; }
         .footer-info { display: flex; justify-content: space-between; padding: 20px 0 0; color: #718096; border-top: 1px solid #2d3748; margin-top: 20px; }
-        .flex { display: flex; align-items: center; gap: 8px; }
+        .flex { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .mt-2 { margin-top: 12px; }
         .retry-btn { background: #ffa502; border: none; color: black; padding: 6px 12px; border-radius: 30px; font-size: 0.8rem; cursor: pointer; }
         .retry-btn:hover { background: #ffb142; }
+        .server-select { background: #0a0d12; border: 1px solid #4a5568; color: white; padding: 8px 12px; border-radius: 30px; font-size: 0.8rem; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="hero"><h1>📁 webfolder · peer</h1><p>QR = ID peer • koneksi langsung • file asli</p></div>
+        <div class="hero"><h1>📁 webfolder · peer</h1><p>Multi-server • TURN fallback • Koneksi stabil</p></div>
         <div class="grid">
             <!-- SENDER (LAPTOP) -->
             <div class="card">
@@ -77,6 +79,14 @@
                             <p>Scan dengan HP untuk terima file</p>
                             <button class="badge" onclick="generateQR()" style="background:#7aa2f7; color:white;"><i class="fas fa-sync-alt"></i> Buat QR</button>
                         </div>
+                    </div>
+                    <div class="flex mt-2">
+                        <span class="badge">Server:</span>
+                        <select id="serverSelect" class="server-select" onchange="switchServer()">
+                            <option value="peerjs.com">peerjs.com (default)</option>
+                            <option value="0.peerjs.com">0.peerjs.com</option>
+                            <option value="peerjs.xyz">peerjs.xyz (mirror)</option>
+                        </select>
                     </div>
                 </div>
                 <!-- UPLOAD -->
@@ -117,6 +127,7 @@
                 <div class="flex mt-2">
                     <button class="retry-btn" onclick="retryConnection()"><i class="fas fa-redo-alt"></i> Coba Sambung Ulang</button>
                     <button class="badge" onclick="resetReceiverPeer()" style="background:#555;"><i class="fas fa-power-off"></i> Reset</button>
+                    <button class="badge" onclick="testConnection()" style="background:#2ed573; color:black;"><i class="fas fa-globe"></i> Test Koneksi</button>
                 </div>
                 <div class="incoming-area" style="margin-top:20px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
@@ -131,25 +142,56 @@
             </div>
         </div>
         <div class="logs-panel">
-            <div class="logs-header"><i class="fas fa-shield-alt"></i> Peer-to-peer • WebRTC • file asli</div>
+            <div class="logs-header"><i class="fas fa-shield-alt"></i> Peer-to-peer • WebRTC • TURN fallback</div>
             <div class="log-stream" id="logStream">
                 <div class="log-entry"><span class="log-time">[System]</span> Inisialisasi...</div>
             </div>
         </div>
         <div class="footer-info">
-            <div><i class="fas fa-check-circle" style="color:#7aa2f7;"></i> QR = link koneksi langsung</div>
-            <div><i class="fas fa-qrcode"></i> QR otomatis muncul</div>
+            <div><i class="fas fa-check-circle" style="color:#7aa2f7;"></i> Koneksi via PeerJS + STUN + TURN</div>
+            <div><i class="fas fa-qrcode"></i> QR = link koneksi langsung</div>
         </div>
     </div>
 
     <script>
+        // ==================== KONFIGURASI ====================
+        const PEER_SERVERS = {
+            'peerjs.com': { host: 'peerjs.com', port: 443, secure: true },
+            '0.peerjs.com': { host: '0.peerjs.com', port: 443, secure: true },
+            'peerjs.xyz': { host: 'peerjs.xyz', port: 443, secure: true }
+        };
+        
+        // ICE Servers dengan TURN fallback gratis dari metered.ca
+        const ICE_SERVERS = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.services.mozilla.com' },
+                // TURN fallback (gratis, rate limited)
+                {
+                    urls: 'turn:openrelay.metered.ca:80',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: 'turn:openrelay.metered.ca:443',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                }
+            ]
+        };
+
         // ==================== STATE ====================
         let peer = null;
         let conn = null;
         let isConnected = false;
         let selectedFiles = [];
         let receivedFiles = [];
-        let currentPeerId = '';   // ID peer sender
+        let currentPeerId = '';
+        let currentServer = 'peerjs.com';
 
         // Receiver state
         let receiverPeer = null;
@@ -173,23 +215,23 @@
         const incomingCountBadge = document.getElementById('incomingCountBadge');
         const logStream = document.getElementById('logStream');
         const targetPeerIdInput = document.getElementById('targetPeerId');
-
-        // ==================== ICE SERVERS (STUN) ====================
-        const iceServers = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.services.mozilla.com' }
-            ]
-        };
+        const serverSelect = document.getElementById('serverSelect');
 
         // ==================== GENERATE ID UNIK ====================
         function generatePeerId() {
             return 'wf-' + Math.random().toString(36).substring(2, 10);
         }
+
+        // ==================== SWITCH SERVER ====================
+        window.switchServer = function() {
+            currentServer = serverSelect.value;
+            addLog(`🔄 Ganti server ke: ${currentServer}`);
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            initPeer();
+        };
 
         // ==================== INISIALISASI PEER (SENDER) ====================
         function initPeer() {
@@ -198,16 +240,24 @@
             peerIdInput.value = requestedId;
             peerStatus.innerText = 'Membuat peer...';
             peerDot.classList.remove('connected');
+            peerDot.classList.remove('warning');
 
-            // LANGSUNG generate QR dari ID yang diminta
+            // Generate QR dari ID
             generateQRFromId(requestedId);
-            addLog('🔄 Mencoba menggunakan ID: ' + requestedId);
+            addLog(`🔄 Mencoba server ${currentServer} dengan ID: ${requestedId}`);
+
+            const serverConfig = PEER_SERVERS[currentServer];
+            if (!serverConfig) {
+                addLog('❌ Server tidak dikenal');
+                return;
+            }
 
             peer = new Peer(requestedId, {
-                host: 'peerjs.com',
-                port: 443,
-                secure: true,
-                config: iceServers
+                host: serverConfig.host,
+                port: serverConfig.port,
+                secure: serverConfig.secure,
+                config: ICE_SERVERS,
+                debug: 2 // tampilkan log
             });
 
             peer.on('open', function(id) {
@@ -215,7 +265,8 @@
                 peerIdInput.value = id;
                 peerStatus.innerText = 'Siap, ID: ' + id;
                 peerDot.classList.add('connected');
-                addLog('✅ Peer siap. ID: ' + id);
+                peerDot.classList.remove('warning');
+                addLog('✅ Peer siap. ID: ' + id + ' via ' + currentServer);
                 if (id !== requestedId) {
                     generateQRFromId(id);
                 }
@@ -246,6 +297,7 @@
             peer.on('error', function(err) {
                 console.error(err);
                 addLog('❌ Peer error: ' + (err.type || err));
+                
                 if (err.type === 'unavailable-id') {
                     const newId = generatePeerId();
                     currentPeerId = newId;
@@ -254,10 +306,22 @@
                     generateQRFromId(newId);
                     addLog('🔄 ID sudah ada, ganti ke: ' + newId);
                     peer.reconnect();
-                } else if (err.type === 'network' || err.message?.includes('network')) {
-                    peerStatus.innerText = 'Gagal koneksi ke server, coba lagi...';
-                    addLog('⚠️ Network error, mencoba reconnect...');
-                    setTimeout(() => peer.reconnect(), 2000);
+                } else if (err.type === 'network' || err.message?.includes('network') || err.message?.includes('server')) {
+                    peerStatus.innerText = '⚠️ Gagal konek ke server, coba lain...';
+                    peerDot.classList.add('warning');
+                    addLog('⚠️ Network error. Mencoba server alternatif...');
+                    // Coba server lain
+                    const servers = Object.keys(PEER_SERVERS);
+                    const currentIdx = servers.indexOf(currentServer);
+                    const nextIdx = (currentIdx + 1) % servers.length;
+                    currentServer = servers[nextIdx];
+                    serverSelect.value = currentServer;
+                    addLog(`🔄 Beralih ke server: ${currentServer}`);
+                    setTimeout(() => {
+                        peer.destroy();
+                        peer = null;
+                        initPeer();
+                    }, 1500);
                 }
             });
         }
@@ -275,6 +339,14 @@
             if (currentPeerId) generateQRFromId(currentPeerId);
         };
 
+        // ==================== TEST KONEKSI INTERNET ====================
+        window.testConnection = function() {
+            addLog('🔄 Testing koneksi ke PeerJS server...');
+            fetch('https://' + currentServer + '/peerjs/id', { mode: 'no-cors' })
+                .then(() => addLog('✅ Server ' + currentServer + ' reachable'))
+                .catch(() => addLog('❌ Server ' + currentServer + ' tidak dapat dijangkau'));
+        };
+
         // ==================== RECEIVER SIDE ====================
         function checkUrlForAutoConnect() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -282,7 +354,7 @@
             if (targetId) {
                 targetPeerIdInput.value = targetId;
                 addLog('🔍 Auto-connect ke: ' + targetId);
-                connectToPeer();
+                setTimeout(() => connectToPeer(), 500);
             }
         }
 
@@ -292,20 +364,22 @@
 
             receiverPeerStatus.innerText = 'Menghubungi ' + targetId + '...';
             receiverPeerDot.classList.remove('connected');
+            receiverPeerDot.classList.remove('warning');
 
             if (receiverPeer) receiverPeer.destroy();
             receiverPeer = new Peer(generatePeerId(), {
-                host: 'peerjs.com',
-                port: 443,
-                secure: true,
-                config: iceServers
+                host: PEER_SERVERS[currentServer].host,
+                port: PEER_SERVERS[currentServer].port,
+                secure: PEER_SERVERS[currentServer].secure,
+                config: ICE_SERVERS
             });
 
             receiverPeer.on('open', function(id) {
-                addLog('📱 Receiver peer siap: ' + id);
+                addLog('📱 Receiver peer siap: ' + id + ' via ' + currentServer);
                 const connection = receiverPeer.connect(targetId, {
                     reliable: true,
-                    serialization: 'json'
+                    serialization: 'json',
+                    metadata: { role: 'receiver' }
                 });
                 receiverConn = connection;
 
@@ -338,6 +412,7 @@
                 receiverPeerStatus.innerText = 'Gagal koneksi ke server';
                 addLog('❌ Receiver peer error: ' + (err.type || err));
                 receiverPeerDot.classList.remove('connected');
+                receiverPeerDot.classList.add('warning');
             });
         };
 
@@ -348,7 +423,7 @@
                 connectToPeer();
             } else {
                 addLog('❌ Gagal setelah ' + MAX_RETRY + ' kali. Reset dan coba lagi.');
-                alert('Gagal koneksi. Coba reset receiver.');
+                alert('Gagal koneksi. Coba reset receiver atau ganti server.');
             }
         };
 
@@ -359,6 +434,7 @@
             retryCount = 0;
             receiverPeerStatus.innerText = 'Belum tersambung';
             receiverPeerDot.classList.remove('connected');
+            receiverPeerDot.classList.remove('warning');
             addLog('🔄 Receiver di-reset');
         };
 
@@ -575,6 +651,7 @@
             checkUrlForAutoConnect();
             renderSenderFileList();
             renderReceiverFileList();
+            addLog('💡 Tips: Jika gagal, ganti server atau klik "Test Koneksi"');
         };
     </script>
 </body>
