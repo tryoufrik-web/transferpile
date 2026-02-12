@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebDrop · Stabil + Dua Arah</title>
-    <!-- PeerJS (1 server, peerjs.com) -->
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>📦 WebDrop · QR Signaling (No PeerJS)</title>
+    <!-- SimplePeer – library WebRTC ringan, tanpa server signaling -->
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <!-- QRCode untuk generate & scan -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"></script>
     <style>
-        /* ===== CSS SAMA PERSIS DENGAN ASLI ===== */
+        /* ===== CSS SAMA PERSIS DENGAN ASLI (sedikit tambahan) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background: #0b1120; color: white; display: flex; justify-content: center; padding: 20px; }
         .container { max-width: 750px; width: 100%; }
@@ -44,7 +47,10 @@
         .toast { position: fixed; top: 20px; right: 20px; background: #1e293b; border-left: 6px solid #3b82f6; border-radius: 16px; padding: 14px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 350px; z-index: 9999; display: none; }
         .toast.show { display: block; animation: slideIn 0.3s; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .qr-scanner { background: #0f172a; border-radius: 16px; padding: 16px; margin-top: 16px; border: 2px solid #3b82f6; }
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; }
         hr { border: 1px solid #334155; margin: 20px 0; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -52,30 +58,55 @@
         <!-- ========== STATUS HEADER ========== -->
         <div class="status-bar">
             <span class="dot" id="connectionDot"></span>
-            <span id="statusText">Memulai Peer...</span>
+            <span id="statusText">Inisialisasi...</span>
             <span style="margin-left: auto; display: flex; gap: 6px;">
                 <span class="badge" id="roleBadge">-</span>
                 <span class="badge" id="deviceCount">0 device</span>
             </span>
         </div>
 
-        <!-- ========== ROOM & KONEKSI ========== -->
+        <!-- ========== KONEKSI VIA QR ========== -->
         <div class="card">
-            <h3><span>🚪</span> Room / Kode</h3>
-            <div class="flex-row">
-                <input type="text" id="roomInput" placeholder="Masukkan kode room (contoh: kantor123)" value="demo" autocomplete="off">
-                <button onclick="joinRoom()" style="width: auto; padding: 14px 32px;">Join</button>
+            <h3><span>🔗</span> Koneksi Peer‑to‑Peer</h3>
+            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                <button onclick="initiatorMode()" id="initiatorBtn" style="flex: 1;">🔵 Saya Host</button>
+                <button onclick="receiverMode()" id="receiverBtn" style="flex: 1;" class="secondary">🟢 Saya Member</button>
             </div>
-            <div class="qr-container" id="qrContainer" style="display: none;">
-                <img id="qrImage" src="" alt="QR Code">
-                <div style="flex:1;">
-                    <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR untuk join</div>
-                    <div style="font-size:0.85rem; color:#2d3a4a; margin:8px 0;">Buka kamera HP, arahkan ke QR</div>
-                    <button class="badge" onclick="generateQR()" style="background:#3b82f6; color:white;">↻ Buat QR</button>
+
+            <!-- PANEL HOST: generate QR offer -->
+            <div id="hostPanel" class="hidden">
+                <div class="label">1. Host: generate kode QR</div>
+                <button onclick="createOffer()" id="createOfferBtn">🎫 Buat QR Koneksi</button>
+                <div id="hostQRContainer" class="qr-container" style="display: none;">
+                    <img id="hostQRImage" src="" alt="QR Offer">
+                    <div style="flex:1;">
+                        <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR ini dari HP</div>
+                        <div style="font-size:0.85rem; color:#2d3a4a;">Member scan, lalu akan muncul QR balasan</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- PANEL MEMBER: scan offer, generate answer -->
+            <div id="memberPanel" class="hidden">
+                <div class="label">1. Member: scan QR dari Host</div>
+                <div id="reader" style="width: 100%;"></div>
+                <div id="answerQRContainer" class="qr-container" style="display: none; margin-top: 16px;">
+                    <img id="answerQRImage" src="" alt="QR Answer">
+                    <div style="flex:1;">
+                        <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR ini dengan Host</div>
+                        <div style="font-size:0.85rem; color:#2d3a4a;">Host scan untuk menyelesaikan koneksi</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL HOST: scan answer -->
+            <div id="hostAnswerPanel" class="hidden">
+                <div class="label">2. Host: scan QR balasan dari Member</div>
+                <div id="hostReader" style="width: 100%;"></div>
+            </div>
+
             <div style="margin-top: 16px;">
-                <div class="label">ID Peer Kamu</div>
+                <div class="label">ID Peer Kamu (random)</div>
                 <div class="code-box">
                     <span id="myPeerId">-</span>
                     <button class="badge" onclick="copyMyId()" style="background: #475569;">Copy</button>
@@ -136,7 +167,7 @@
 
     <script>
         // ==================================================
-        //   KONFIGURASI ICE SERVER (STABIL!)
+        //   KONFIGURASI ICE (STUN/TURN) – SAMA SEPERTI SEBELUMNYA
         // ==================================================
         const ICE_CONFIG = {
             iceServers: [
@@ -144,33 +175,26 @@
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                // TURN gratis untuk bantu koneksi di jaringan ketat
                 { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
 
         // ========== STATE ==========
-        let peer;                   // Peer utama
-        let myId;                 // ID Peer sendiri
-        let roomCode;            // Kode room (dari input)
-        let roomHostId = null;   // ID host yang diharapkan (room-{code})
-        let actualHostId = null; // ID host yang sebenarnya (untuk QR)
-        let isHost = false;      // Apakah kita host?
-        let connections = {};    // Semua koneksi aktif (key = peerId, value = DataConnection)
-        let currentTarget = null; // Peer ID tujuan pengiriman
-        let selectedFiles = [];   // File yang akan dikirim
-        let receivedFiles = [];   // File yang diterima
+        let peer;                 // SimplePeer instance (hanya untuk 1 koneksi)
+        let myId = generatePeerId();
+        let isInitiator = false;  // true = host, false = member
+        let connections = {};     // peerId -> { peer: SimplePeer, dc: DataChannel }
+        let currentTarget = null;
+        let selectedFiles = [];
+        let receivedFiles = [];
 
-        // DOM elements
+        // DOM
         const connectionDot = document.getElementById('connectionDot');
         const statusText = document.getElementById('statusText');
         const roleBadge = document.getElementById('roleBadge');
         const deviceCountSpan = document.getElementById('deviceCount');
         const myPeerIdSpan = document.getElementById('myPeerId');
-        const roomInput = document.getElementById('roomInput');
-        const qrContainer = document.getElementById('qrContainer');
-        const qrImage = document.getElementById('qrImage');
         const deviceListContainer = document.getElementById('deviceListContainer');
         const targetDeviceSelect = document.getElementById('targetDeviceSelect');
         const pickFileBtn = document.getElementById('pickFileBtn');
@@ -183,263 +207,218 @@
         const selectedSizeSpan = document.getElementById('selectedSize');
         const toast = document.getElementById('toast');
 
+        // QR elements
+        const hostPanel = document.getElementById('hostPanel');
+        const memberPanel = document.getElementById('memberPanel');
+        const hostAnswerPanel = document.getElementById('hostAnswerPanel');
+        const hostQRContainer = document.getElementById('hostQRContainer');
+        const hostQRImage = document.getElementById('hostQRImage');
+        const answerQRContainer = document.getElementById('answerQRContainer');
+        const answerQRImage = document.getElementById('answerQRImage');
+        let html5Qrcode = null;
+        let hostHtml5Qrcode = null;
+
         // ========== INIT ==========
         window.onload = function() {
-            if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
-            showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
-            checkUrlParam();
+            myPeerIdSpan.innerText = myId;
+            showToast('🟢 Pilih peran: Host (buat QR) atau Member (scan QR).', 'info');
+            statusText.innerText = 'Pilih peran';
+            connectionDot.classList.remove('connected');
         };
 
-        // ========== TOAST ==========
-        function showToast(msg, type = 'info') {
-            toast.innerHTML = msg;
-            toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        // ========== GENERATE ID ==========
         function generatePeerId() {
-            return 'wf-' + Math.random().toString(36).substring(2, 10);
+            return 'device-' + Math.random().toString(36).substring(2, 10);
         }
 
-        // ========== JOIN ROOM ==========
-        window.joinRoom = function() {
-            const code = roomInput.value.trim();
-            if (!code) { alert('Masukkan kode room!'); return; }
-            roomCode = code;
-            roomHostId = 'room-' + code;
+        // ========== MODE HOST ==========
+        window.initiatorMode = function() {
+            isInitiator = true;
+            roleBadge.innerText = 'HOST';
+            statusText.innerText = 'Mode Host';
+            connectionDot.classList.remove('connected');
+            hostPanel.classList.remove('hidden');
+            memberPanel.classList.add('hidden');
+            hostAnswerPanel.classList.add('hidden');
+            showToast('👑 Host: klik "Buat QR Koneksi"', 'info');
+        };
 
-            if (peer) peer.destroy();
-            // Buat peer dengan ID random
-            peer = new Peer(undefined, { config: ICE_CONFIG });
+        // ========== MODE MEMBER ==========
+        window.receiverMode = function() {
+            isInitiator = false;
+            roleBadge.innerText = 'MEMBER';
+            statusText.innerText = 'Mode Member';
+            connectionDot.classList.remove('connected');
+            hostPanel.classList.add('hidden');
+            memberPanel.classList.remove('hidden');
+            hostAnswerPanel.classList.add('hidden');
+            startQRScanner();
+        };
 
-            peer.on('open', (id) => {
-                myId = id;
-                myPeerIdSpan.innerText = myId;
-                statusText.innerText = 'Peer siap';
+        // ========== HOST: BUAT OFFER ==========
+        window.createOffer = function() {
+            // Inisialisasi SimplePeer sebagai initiator
+            peer = new SimplePeer({
+                initiator: true,
+                trickle: false,
+                config: ICE_CONFIG
+            });
+
+            peer.on('signal', (data) => {
+                // Ketika signal (offer) siap, encode jadi QR
+                const offerStr = JSON.stringify(data);
+                QRCode.toCanvas(hostQRImage, offerStr, { width: 200 }, (err) => {
+                    if (err) {
+                        showToast('❌ Gagal generate QR', 'error');
+                        return;
+                    }
+                    hostQRContainer.style.display = 'flex';
+                    showToast('✅ QR siap! Member scan QR ini.', 'success');
+                });
+            });
+
+            peer.on('connect', () => {
                 connectionDot.classList.add('connected');
-                showToast(`✅ Peer siap, ID: ${id}`, 'success');
-
-                // Coba connect ke host
-                attemptConnectToHost();
+                statusText.innerText = 'Host terhubung dengan Member';
+                // Set up data channel
+                peer.send(JSON.stringify({ type: 'peerId', id: myId }));
+                setupPeerEvents(peer, 'member-1');
+                // Hentikan scanner di host
+                if (hostHtml5Qrcode) {
+                    hostHtml5Qrcode.stop();
+                    hostHtml5Qrcode = null;
+                }
+                hostAnswerPanel.classList.add('hidden');
+                showToast('🔗 Koneksi terestabilisasi!', 'success');
             });
 
             peer.on('error', (err) => {
                 console.error(err);
-                showToast(`❌ Peer error: ${err.type}`, 'error');
-                // Tidak ada auto-switch server, hanya retry manual via tombol Join
-            });
-
-            peer.on('connection', (conn) => {
-                // Koneksi masuk dari peer lain
-                connections[conn.peer] = conn;
-                setupConnection(conn);
-                updateDeviceList();
-                if (isHost) {
-                    // Jika host, broadcast daftar device ke semua
-                    broadcastDeviceList();
-                }
+                showToast(`❌ Peer error: ${err}`, 'error');
             });
         };
 
-        // ========== ATTEMPT CONNECT TO HOST (DENGAN RETRY EKSPONENSIAL) ==========
-        function attemptConnectToHost(retries = 10, baseDelay = 1000) {
-            if (!roomHostId) return;
-            if (isHost) return;
-            
-            let attempt = 0;
-            let hostConn = null;
-            
-            const tryConnect = () => {
-                attempt++;
-                hostConn = peer.connect(roomHostId);
-                
-                const timeoutId = setTimeout(() => {
-                    if (!hostConn.open) {
-                        hostConn.close();
-                        handleFailure();
-                    }
-                }, 5000);
+        // ========== MEMBER: SCAN QR OFFER ==========
+        function startQRScanner() {
+            html5Qrcode = new Html5Qrcode("reader");
+            html5Qrcode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    // QR terbaca = offer dari host
+                    html5Qrcode.stop();
+                    html5Qrcode = null;
+                    showToast('✅ QR offer terbaca, membuat answer...', 'success');
 
-                hostConn.on('open', () => {
-                    clearTimeout(timeoutId);
-                    showToast(`🔗 Terhubung ke host ${roomHostId}`, 'success');
-                    isHost = false;
-                    roleBadge.innerText = 'MEMBER';
-                    connections[roomHostId] = hostConn;
-                    setupConnection(hostConn);
-                    hostConn.send({ type: 'join', id: myId });
-                    hostConn.send({ type: 'list-request' });
-                });
+                    // Parse offer
+                    const offer = JSON.parse(decodedText);
+                    
+                    // Inisialisasi SimplePeer sebagai receiver
+                    peer = new SimplePeer({
+                        initiator: false,
+                        trickle: false,
+                        config: ICE_CONFIG
+                    });
 
-                hostConn.on('error', (err) => {
-                    clearTimeout(timeoutId);
-                    handleFailure();
-                });
-            };
+                    peer.on('signal', (data) => {
+                        // answer siap, encode jadi QR
+                        const answerStr = JSON.stringify(data);
+                        QRCode.toCanvas(answerQRImage, answerStr, { width: 200 }, (err) => {
+                            answerQRContainer.style.display = 'flex';
+                            showToast('✅ QR answer siap! Host scan QR ini.', 'success');
+                        });
+                    });
 
-            const handleFailure = () => {
-                if (attempt < retries) {
-                    const delay = baseDelay * Math.pow(1.5, attempt - 1);
-                    showToast(`🔄 Host tidak merespon, percobaan ${attempt}/${retries}...`, 'info');
-                    setTimeout(tryConnect, delay);
-                } else {
-                    // Gagal total, tanya user
-                    if (confirm(`❌ Host ${roomHostId} tidak ditemukan setelah ${retries} kali percobaan.\nJadikan device ini sebagai host?`)) {
-                        becomeHost();
-                    } else {
-                        showToast('❌ Gagal terhubung ke host. Coba lagi nanti.', 'error');
-                    }
-                }
-            };
+                    peer.on('connect', () => {
+                        connectionDot.classList.add('connected');
+                        statusText.innerText = 'Member terhubung dengan Host';
+                        peer.send(JSON.stringify({ type: 'peerId', id: myId }));
+                        setupPeerEvents(peer, 'host');
+                        showToast('🔗 Koneksi terestabilisasi!', 'success');
+                    });
 
-            tryConnect();
+                    peer.on('error', (err) => {
+                        showToast(`❌ Peer error: ${err}`, 'error');
+                    });
+
+                    // Set remote offer
+                    peer.signal(offer);
+                },
+                (error) => { /* ignore */ }
+            );
         }
 
-        // ========== BECOME HOST ==========
-        function becomeHost() {
-            isHost = true;
-            roleBadge.innerText = 'HOST';
-            showToast(`👑 Menjadi host room: ${roomCode}`, 'success');
-            peer.destroy();
-            peer = new Peer(roomHostId, { config: ICE_CONFIG });
-            
-            peer.on('open', (id) => {
-                roomHostId = id;
-                actualHostId = id;   // ID host yang sebenarnya
-                myId = id;
-                myPeerIdSpan.innerText = myId;
-                statusText.innerText = 'Host siap';
-                connectionDot.classList.add('connected');
-                // QR dengan ID host sebenarnya
-                generateQRWithId(actualHostId);
-                qrContainer.style.display = 'flex';
-                showToast(`✅ Host siap dengan ID: ${id}`, 'success');
-            });
-
-            peer.on('connection', (conn) => {
-                connections[conn.peer] = conn;
-                setupConnection(conn);
-                updateDeviceList();
-                // 🔥 WAJIB: kirim daftar device ke member baru
-                const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
-                if (ids.length > 0) {
-                    conn.send({ type: 'device-list', ids });
-                }
-                broadcastDeviceList();
-            });
-
-            peer.on('error', (err) => {
-                showToast(`❌ Host error: ${err.type}`, 'error');
-                if (err.type === 'unavailable-id') {
-                    // ID sudah dipakai, generate ID baru
-                    roomHostId = 'room-' + roomCode + '-' + Math.random().toString(36).substring(2,5);
-                    becomeHost();
-                }
-            });
+        // ========== HOST: SCAN QR ANSWER ==========
+        function startHostScanner() {
+            hostHtml5Qrcode = new Html5Qrcode("hostReader");
+            hostHtml5Qrcode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    hostHtml5Qrcode.stop();
+                    hostHtml5Qrcode = null;
+                    showToast('✅ QR answer terbaca, koneksi final...', 'success');
+                    const answer = JSON.parse(decodedText);
+                    if (peer) {
+                        peer.signal(answer);
+                    }
+                },
+                (error) => { /* ignore */ }
+            );
         }
 
-        // ========== SETUP SATU KONEKSI ==========
-        function setupConnection(conn) {
-            if (!conn) return;
-            connections[conn.peer] = conn;
+        // ========== SETUP EVENTS UNTUK PEER ==========
+        function setupPeerEvents(peerInstance, peerId) {
+            // Simpan koneksi
+            connections[peerId] = { peer: peerInstance, dc: null };
+            updateDeviceList();
 
             let fileBuffer = [];
             let fileMeta = null;
             let fileProgress = 0;
 
-            conn.on('data', (data) => {
-                if (data.type === 'join' && isHost) {
-                    // Member baru join
-                    if (!connections[data.id]) {
-                        connections[data.id] = null; // nanti akan terkoneksi otomatis
-                    }
-                    updateDeviceList();
-                    broadcastDeviceList();
-                    // 🔥 KIRIM device-list LANGSUNG ke member baru
-                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
-                    if (ids.length > 0) {
-                        conn.send({ type: 'device-list', ids });
-                    }
-                }
-                else if (data.type === 'list-request' && isHost) {
-                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
-                    conn.send({ type: 'device-list', ids });
-                }
-                else if (data.type === 'device-list') {
-                    // Terima daftar device dari host, lalu konek ke mereka
-                    data.ids.forEach(id => {
-                        if (!connections[id] && id !== myId) {
-                            // Jeda agar tidak overload
-                            setTimeout(() => {
-                                const newConn = peer.connect(id);
-                                setupConnection(newConn);
-                            }, 300);
+            peerInstance.on('data', (data) => {
+                // Data dari SimplePeer bisa string atau Buffer (ArrayBuffer)
+                if (typeof data === 'string') {
+                    try {
+                        const msg = JSON.parse(data);
+                        if (msg.type === 'peerId') {
+                            // Daftarkan dengan ID asli
+                            delete connections[peerId];
+                            connections[msg.id] = { peer: peerInstance, dc: null };
+                            updateDeviceList();
+                        } else if (msg.type === 'file-meta') {
+                            fileMeta = msg;
+                            fileBuffer = [];
+                            fileProgress = 0;
+                            showToast(`📥 Menerima: ${msg.name}`, 'info');
+                        } else if (msg.type === 'file-end') {
+                            if (fileMeta) {
+                                const blob = new Blob(fileBuffer, { type: fileMeta.mime });
+                                const file = new File([blob], fileMeta.name, { type: fileMeta.mime });
+                                receivedFiles.push({ file, name: fileMeta.name, size: fileMeta.size, type: fileMeta.mime });
+                                renderReceivedFiles();
+                                showToast(`✅ Selesai menerima: ${fileMeta.name}`, 'success');
+                            }
+                            fileMeta = null;
+                            fileBuffer = [];
                         }
-                    });
-                }
-                else if (data.type === 'file-meta') {
-                    fileMeta = data;
-                    fileBuffer = [];
-                    fileProgress = 0;
-                    showToast(`📥 Menerima: ${data.name}`, 'info');
-                }
-                else if (data instanceof ArrayBuffer) {
-                    fileBuffer.push(data);
+                    } catch (e) {}
+                } else {
+                    // data adalah buffer (Uint8Array / ArrayBuffer)
                     if (fileMeta) {
-                        fileProgress += data.byteLength;
+                        fileBuffer.push(data);
+                        fileProgress += data.byteLength || data.length;
+                        // update progress global (optional)
                     }
                 }
-                else if (data.type === 'file-end') {
-                    if (fileMeta) {
-                        const blob = new Blob(fileBuffer, { type: fileMeta.mime });
-                        const file = new File([blob], fileMeta.name, { type: fileMeta.mime });
-                        receivedFiles.push({
-                            file: file,
-                            name: fileMeta.name,
-                            size: fileMeta.size,
-                            type: fileMeta.mime,
-                            blob: blob
-                        });
-                        renderReceivedFiles();
-                        showToast(`✅ Selesai menerima: ${fileMeta.name}`, 'success');
-                    }
-                    fileMeta = null;
-                    fileBuffer = [];
-                }
-            });
-
-            conn.on('close', () => {
-                delete connections[conn.peer];
-                updateDeviceList();
-                if (isHost) broadcastDeviceList();
-                showToast(`⚠️ Device ${conn.peer?.substring(0,8) || 'unknown'} terputus`, 'error');
-            });
-
-            conn.on('error', (err) => {
-                showToast(`⚠️ Koneksi error: ${err}`, 'error');
             });
         }
 
-        // ========== BROADCAST DAFTAR DEVICE (HOST) ==========
-        function broadcastDeviceList() {
-            if (!isHost) return;
-            const ids = Object.keys(connections).filter(id => id !== myId);
-            Object.values(connections).forEach(c => {
-                if (c && c.open) {
-                    c.send({ type: 'device-list', ids });
-                }
-            });
-            updateDeviceList();
-        }
-
-        // ========== UPDATE UI DEVICE LIST ==========
+        // ========== UPDATE UI DEVICE ==========
         function updateDeviceList() {
-            const deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
+            const deviceList = Object.keys(connections);
             deviceCountSpan.innerText = deviceList.length + ' device';
 
-            // Render daftar device di panel
             let html = '';
             if (deviceList.length === 0) {
                 html = '<div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>';
@@ -457,19 +436,16 @@
             }
             deviceListContainer.innerHTML = html;
 
-            // Update dropdown
             let options = '<option value="">-- Pilih device target --</option>';
             deviceList.forEach(id => {
                 options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id.substring(0,8)}...</option>`;
             });
             targetDeviceSelect.innerHTML = options;
 
-            // Enable/disable tombol kirim
             pickFileBtn.disabled = !currentTarget;
             sendBtn.disabled = !currentTarget || selectedFiles.length === 0;
         }
 
-        // ========== SELECT TARGET ==========
         window.selectTarget = function(id) {
             currentTarget = id;
             updateDeviceList();
@@ -480,45 +456,13 @@
             updateDeviceList();
         });
 
-        // ========== QR CODE DENGAN ID HOST SEBENARNYA ==========
-        function generateQRWithId(hostId) {
-            if (!hostId) return;
-            const url = window.location.origin + window.location.pathname + '?connect=' + encodeURIComponent(hostId);
-            const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
-            qrImage.src = qrApi;
-            qrContainer.style.display = 'flex';
-        }
-        window.generateQR = function() {
-            if (actualHostId) {
-                generateQRWithId(actualHostId);
-            } else if (roomHostId) {
-                generateQRWithId(roomHostId);
-            }
-        };
-
-        // ========== AUTO JOIN DARI URL ==========
-        function checkUrlParam() {
-            const params = new URLSearchParams(window.location.search);
-            const connectId = params.get('connect');
-            const roomParam = params.get('room');
-            if (connectId) {
-                roomInput.value = 'via QR';
-                roomHostId = connectId;
-                if (!peer) joinRoom();
-                else attemptConnectToHost();
-            } else if (roomParam) {
-                roomInput.value = roomParam;
-                joinRoom();
-            }
-        }
-
         // ========== COPY ID ==========
         window.copyMyId = function() {
             navigator.clipboard.writeText(myId);
             showToast('📋 ID peer dicopy', 'success');
         };
 
-        // ========== PICK FILE (WAJIB BUKA FILE MANAGER) ==========
+        // ========== FILE HANDLING (SAMA PERSIS) ==========
         window.pickFile = function() {
             if (!currentTarget) { showToast('❌ Pilih device target dulu!', 'error'); return; }
             fileInput.click();
@@ -530,7 +474,7 @@
                 );
                 selectedFiles = [...selectedFiles, ...newFiles];
                 renderSelectedFiles();
-                e.target.value = ''; // reset
+                e.target.value = '';
             }
         });
 
@@ -562,22 +506,16 @@
             sendBtn.disabled = !currentTarget;
         }
 
-        window.removeFile = function(index) {
-            selectedFiles.splice(index, 1);
-            renderSelectedFiles();
-        };
-        window.clearSelectedFiles = function() {
-            selectedFiles = [];
-            renderSelectedFiles();
-        };
+        window.removeFile = function(index) { selectedFiles.splice(index, 1); renderSelectedFiles(); };
+        window.clearSelectedFiles = function() { selectedFiles = []; renderSelectedFiles(); };
 
         // ========== KIRIM FILE ==========
         window.sendFiles = async function() {
             if (!currentTarget) { showToast('❌ Pilih target!', 'error'); return; }
             if (selectedFiles.length === 0) { showToast('❌ Tidak ada file!', 'error'); return; }
 
-            const conn = connections[currentTarget];
-            if (!conn || !conn.open) { showToast('❌ Koneksi ke target tidak tersedia', 'error'); return; }
+            const conn = connections[currentTarget]?.peer;
+            if (!conn) { showToast('❌ Koneksi ke target tidak tersedia', 'error'); return; }
 
             let totalSent = 0;
             const totalSize = selectedFiles.reduce((a,b)=>a+b.size,0);
@@ -597,21 +535,26 @@
                     const buffer = e.target.result;
                     const CHUNK = 256 * 1024; // 256KB
 
-                    conn.send({ type: 'file-meta', name: file.name, size: file.size, mime: file.type });
+                    conn.send(JSON.stringify({ 
+                        type: 'file-meta', 
+                        name: file.name, 
+                        size: file.size, 
+                        mime: file.type 
+                    }));
 
                     let offset = 0;
                     const chunkInterval = setInterval(() => {
                         if (offset >= buffer.byteLength) {
                             clearInterval(chunkInterval);
-                            conn.send({ type: 'file-end' });
+                            conn.send(JSON.stringify({ type: 'file-end' }));
                             resolve();
                             return;
                         }
                         const chunk = buffer.slice(offset, offset + CHUNK);
+                        // SimplePeer bisa kirim Buffer langsung
                         conn.send(chunk);
                         offset += chunk.byteLength;
 
-                        // Update progress
                         const percent = ((sentBefore + offset) / totalSize) * 100;
                         globalProgress.style.width = percent + '%';
                         progressText.innerText = Math.round(percent) + '%';
@@ -664,7 +607,6 @@
             if (type.includes('text')) return '📝';
             return '📁';
         }
-
         function formatBytes(bytes) {
             if (bytes === 0) return '0 B';
             const k = 1024;
@@ -672,10 +614,47 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
         }
-
         function escapeHTML(s) {
             return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
         }
+        function showToast(msg, type = 'info') {
+            toast.innerHTML = msg;
+            toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ========== TOMBOL KHUSUS HOST SCAN ANSWER ==========
+        // Override: setelah member generate answer, host harus scan
+        // Kita panggil startHostScanner() dari host
+        // Perbaiki alur: setelah host buat QR offer, dia juga harus siap scan answer.
+        // Sederhananya: host klik "Buat QR", lalu otomatis tampilkan scanner answer.
+        // Mari kita modifikasi sedikit:
+        window.createOffer = function() {
+            // ... sama seperti sebelumnya
+            peer = new SimplePeer({ initiator: true, trickle: false, config: ICE_CONFIG });
+            peer.on('signal', (data) => {
+                const offerStr = JSON.stringify(data);
+                QRCode.toCanvas(hostQRImage, offerStr, { width: 200 }, (err) => {
+                    if (err) { showToast('❌ Gagal generate QR', 'error'); return; }
+                    hostQRContainer.style.display = 'flex';
+                    showToast('✅ QR siap! Setelah member scan, dia akan generate QR balasan. Scan QR itu di sini.', 'info');
+                    // Tampilkan panel scanner untuk answer
+                    hostAnswerPanel.classList.remove('hidden');
+                    startHostScanner();
+                });
+            });
+            peer.on('connect', () => {
+                connectionDot.classList.add('connected');
+                statusText.innerText = 'Host terhubung dengan Member';
+                peer.send(JSON.stringify({ type: 'peerId', id: myId }));
+                setupPeerEvents(peer, 'member-1');
+                if (hostHtml5Qrcode) { hostHtml5Qrcode.stop(); hostHtml5Qrcode = null; }
+                hostAnswerPanel.classList.add('hidden');
+                showToast('🔗 Koneksi terestabilisasi!', 'success');
+            });
+            peer.on('error', (err) => { showToast(`❌ Peer error: ${err}`, 'error'); });
+        };
 
         // FontAwesome
         const faLink = document.createElement('link');
