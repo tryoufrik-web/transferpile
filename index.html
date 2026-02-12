@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebDrop · Multi‑Server + HP Fix</title>
-    <!-- PeerJS -->
+    <title>📦 WebDrop · Stabil + Dua Arah</title>
+    <!-- PeerJS (1 server, peerjs.com) -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* ===== CSS LENGKAP SAMA PERSIS SEPERTI ASLI ===== */
+        /* ===== CSS SAMA PERSIS DENGAN ASLI ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background: #0b1120; color: white; display: flex; justify-content: center; padding: 20px; }
         .container { max-width: 750px; width: 100%; }
@@ -136,7 +136,7 @@
 
     <script>
         // ==================================================
-        //   KONFIGURASI ICE SERVER (STABIL UNTUK HP)
+        //   KONFIGURASI ICE SERVER (STABIL!)
         // ==================================================
         const ICE_CONFIG = {
             iceServers: [
@@ -144,34 +144,23 @@
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                // TURN gratis – membantu koneksi di jaringan seluler
+                // TURN gratis untuk bantu koneksi di jaringan ketat
                 { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
 
-        // ========== MULTI-SERVER PEERJS ==========
-        const PEER_SERVERS = [
-            { host: 'peerjs.com', port: 443, secure: true, key: 'peerjs' },
-            { host: '0.peerjs.com', port: 443, secure: true, key: 'peerjs' },
-            { host: 'peerjs.xyz', port: 443, secure: true, key: 'peerjs' }
-        ];
-        let currentServerIndex = 0;
-        let serverRetryCount = 0;
-        const MAX_SERVER_RETRY = 3;
-
         // ========== STATE ==========
-        let peer;
-        let myId;
-        let roomCode;
-        let roomHostId = null;
-        let actualHostId = null;   // ID host yang sebenarnya (untuk QR)
-        let isHost = false;
-        let connections = {};
-        let deviceList = [];
-        let currentTarget = null;
-        let selectedFiles = [];
-        let receivedFiles = [];
+        let peer;                   // Peer utama
+        let myId;                 // ID Peer sendiri
+        let roomCode;            // Kode room (dari input)
+        let roomHostId = null;   // ID host yang diharapkan (room-{code})
+        let actualHostId = null; // ID host yang sebenarnya (untuk QR)
+        let isHost = false;      // Apakah kita host?
+        let connections = {};    // Semua koneksi aktif (key = peerId, value = DataConnection)
+        let currentTarget = null; // Peer ID tujuan pengiriman
+        let selectedFiles = [];   // File yang akan dikirim
+        let receivedFiles = [];   // File yang diterima
 
         // DOM elements
         const connectionDot = document.getElementById('connectionDot');
@@ -214,79 +203,6 @@
             return 'wf-' + Math.random().toString(36).substring(2, 10);
         }
 
-        // ========== CREATE PEER DENGAN SERVER TERTENTU ==========
-        function createPeer(id, serverIndex) {
-            const s = PEER_SERVERS[serverIndex];
-            return new Peer(id, {
-                host: s.host,
-                port: s.port,
-                secure: s.secure,
-                key: s.key,
-                config: ICE_CONFIG
-            });
-        }
-
-        // ========== GANTI SERVER OTOMATIS ==========
-        function switchPeerServer() {
-            currentServerIndex = (currentServerIndex + 1) % PEER_SERVERS.length;
-            serverRetryCount++;
-            showToast(`🔄 Ganti server ke ${PEER_SERVERS[currentServerIndex].host}`, 'info');
-            if (serverRetryCount > MAX_SERVER_RETRY * PEER_SERVERS.length) {
-                showToast('❌ Semua server gagal. Periksa koneksi internet.', 'error');
-                return;
-            }
-            if (isHost) {
-                // Host harus daftar ulang dengan ID yang sama (atau baru jika bentrok)
-                peer.destroy();
-                peer = createPeer(roomHostId, currentServerIndex);
-                peer.on('open', (id) => {
-                    roomHostId = id;
-                    actualHostId = id;
-                    myId = id;
-                    myPeerIdSpan.innerText = myId;
-                    statusText.innerText = 'Host siap (server baru)';
-                    connectionDot.classList.add('connected');
-                    generateQRWithId(actualHostId);
-                    qrContainer.style.display = 'flex';
-                    showToast(`✅ Host siap dengan ID: ${id}`, 'success');
-                });
-                peer.on('connection', (conn) => {
-                    connections[conn.peer] = conn;
-                    setupConnection(conn);
-                    updateDeviceList();
-                    broadcastDeviceList();
-                });
-                peer.on('error', (err) => {
-                    if (err.type === 'unavailable-id') {
-                        roomHostId = 'room-' + roomCode + '-' + Math.random().toString(36).substring(2,5);
-                        becomeHost();
-                    } else {
-                        switchPeerServer(); // coba server lain
-                    }
-                });
-            } else {
-                // Member: reconnect dengan server baru
-                if (peer) peer.destroy();
-                peer = createPeer(undefined, currentServerIndex);
-                peer.on('open', (id) => {
-                    myId = id;
-                    myPeerIdSpan.innerText = myId;
-                    statusText.innerText = 'Peer siap';
-                    connectionDot.classList.add('connected');
-                    // Coba konek ke host lagi
-                    attemptConnectToHost();
-                });
-                peer.on('error', (err) => {
-                    switchPeerServer();
-                });
-                peer.on('connection', (conn) => {
-                    connections[conn.peer] = conn;
-                    setupConnection(conn);
-                    updateDeviceList();
-                });
-            }
-        }
-
         // ========== JOIN ROOM ==========
         window.joinRoom = function() {
             const code = roomInput.value.trim();
@@ -295,9 +211,8 @@
             roomHostId = 'room-' + code;
 
             if (peer) peer.destroy();
-            serverRetryCount = 0;
-            currentServerIndex = 0;
-            peer = createPeer(undefined, currentServerIndex);
+            // Buat peer dengan ID random
+            peer = new Peer(undefined, { config: ICE_CONFIG });
 
             peer.on('open', (id) => {
                 myId = id;
@@ -313,23 +228,23 @@
             peer.on('error', (err) => {
                 console.error(err);
                 showToast(`❌ Peer error: ${err.type}`, 'error');
-                if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.message?.includes('WebSocket')) {
-                    switchPeerServer();
-                }
+                // Tidak ada auto-switch server, hanya retry manual via tombol Join
             });
 
             peer.on('connection', (conn) => {
+                // Koneksi masuk dari peer lain
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
                 if (isHost) {
+                    // Jika host, broadcast daftar device ke semua
                     broadcastDeviceList();
                 }
             });
         };
 
-        // ========== ATTEMPT CONNECT TO HOST (DENGAN RETRY) ==========
-        function attemptConnectToHost(retries = 7, baseDelay = 1000) {
+        // ========== ATTEMPT CONNECT TO HOST (DENGAN RETRY EKSPONENSIAL) ==========
+        function attemptConnectToHost(retries = 10, baseDelay = 1000) {
             if (!roomHostId) return;
             if (isHost) return;
             
@@ -370,6 +285,7 @@
                     showToast(`🔄 Host tidak merespon, percobaan ${attempt}/${retries}...`, 'info');
                     setTimeout(tryConnect, delay);
                 } else {
+                    // Gagal total, tanya user
                     if (confirm(`❌ Host ${roomHostId} tidak ditemukan setelah ${retries} kali percobaan.\nJadikan device ini sebagai host?`)) {
                         becomeHost();
                     } else {
@@ -387,15 +303,16 @@
             roleBadge.innerText = 'HOST';
             showToast(`👑 Menjadi host room: ${roomCode}`, 'success');
             peer.destroy();
-            peer = createPeer(roomHostId, currentServerIndex);
+            peer = new Peer(roomHostId, { config: ICE_CONFIG });
             
             peer.on('open', (id) => {
                 roomHostId = id;
-                actualHostId = id;
+                actualHostId = id;   // ID host yang sebenarnya
                 myId = id;
                 myPeerIdSpan.innerText = myId;
                 statusText.innerText = 'Host siap';
                 connectionDot.classList.add('connected');
+                // QR dengan ID host sebenarnya
                 generateQRWithId(actualHostId);
                 qrContainer.style.display = 'flex';
                 showToast(`✅ Host siap dengan ID: ${id}`, 'success');
@@ -416,10 +333,9 @@
             peer.on('error', (err) => {
                 showToast(`❌ Host error: ${err.type}`, 'error');
                 if (err.type === 'unavailable-id') {
+                    // ID sudah dipakai, generate ID baru
                     roomHostId = 'room-' + roomCode + '-' + Math.random().toString(36).substring(2,5);
                     becomeHost();
-                } else if (err.type === 'network' || err.message?.includes('WebSocket')) {
-                    switchPeerServer();
                 }
             });
         }
@@ -452,10 +368,10 @@
                     conn.send({ type: 'device-list', ids });
                 }
                 else if (data.type === 'device-list') {
-                    // Terima daftar device dari host
+                    // Terima daftar device dari host, lalu konek ke mereka
                     data.ids.forEach(id => {
                         if (!connections[id] && id !== myId) {
-                            // Sambungkan ke device tersebut (beri jeda)
+                            // Jeda agar tidak overload
                             setTimeout(() => {
                                 const newConn = peer.connect(id);
                                 setupConnection(newConn);
@@ -520,9 +436,10 @@
 
         // ========== UPDATE UI DEVICE LIST ==========
         function updateDeviceList() {
-            deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
+            const deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
             deviceCountSpan.innerText = deviceList.length + ' device';
 
+            // Render daftar device di panel
             let html = '';
             if (deviceList.length === 0) {
                 html = '<div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>';
@@ -604,7 +521,7 @@
         // ========== PICK FILE (WAJIB BUKA FILE MANAGER) ==========
         window.pickFile = function() {
             if (!currentTarget) { showToast('❌ Pilih device target dulu!', 'error'); return; }
-            fileInput.click(); // 🔥 PASTI BUKA FILE EXPLORER
+            fileInput.click();
         };
         fileInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
@@ -613,7 +530,7 @@
                 );
                 selectedFiles = [...selectedFiles, ...newFiles];
                 renderSelectedFiles();
-                e.target.value = ''; // reset agar bisa pilih file sama lagi
+                e.target.value = ''; // reset
             }
         });
 
