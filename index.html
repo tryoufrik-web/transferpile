@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebShare · INdonesian</title>
+    <title>📦 WebShare · BETA 0.2 </title>
     <!-- PeerJS -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -435,7 +435,6 @@
             <p><i class="fas fa-download"></i> <strong>Terima file:</strong> Otomatis masuk, klik icon download.</p>
             <p><i class="fas fa-arrows-alt-h"></i> <strong>Semua device</strong> bisa kirim & terima (tidak hanya host).</p>
             <p><i class="fas fa-bolt"></i> <strong>Speed booster:</strong> Kecepatan adaptif, parallel send.</p>
-            <p><i class="fas fa-bolt"></i> <strong>Devinfo:</strong> im from indonesian.</p>
             <hr>
             <p style="font-style: italic; color: #94a3b8;">Klik ikon <i class="fas fa-minus"></i> untuk minimize.</p>
         </div>
@@ -448,7 +447,7 @@
         // ========== KONFIGURASI ICE SERVER (STABIL!) ==========
         const ICE_CONFIG = {
             iceServers: [
-                { urls: 'stun:stun.cloudflare.com:3478' },        // Cloudflare STUN
+                { urls: 'stun:stun.cloudflare.com:3478' },
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
@@ -457,7 +456,7 @@
             ]
         };
 
-        // ========== BOOST SETTINGS (SPEED BOOSTER) ==========
+        // ========== BOOST SETTINGS ==========
         const CHUNK_SIZES = [262144, 524288, 1048576];
         let currentChunkIndex = 0;
         const MAX_PARALLEL = 2;
@@ -500,11 +499,7 @@
             const tips = document.getElementById('floatingTips');
             tips.classList.toggle('minimized');
             const btn = document.getElementById('toggleTipsBtn');
-            if (tips.classList.contains('minimized')) {
-                btn.innerHTML = '<i class="fas fa-plus"></i>';
-            } else {
-                btn.innerHTML = '<i class="fas fa-minus"></i>';
-            }
+            btn.innerHTML = tips.classList.contains('minimized') ? '<i class="fas fa-plus"></i>' : '<i class="fas fa-minus"></i>';
         };
 
         // ========== INIT ==========
@@ -519,6 +514,11 @@
             toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6';
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ========== GENERATE ID ==========
+        function generatePeerId() {
+            return 'wf-' + Math.random().toString(36).substring(2, 10);
         }
 
         // ========== JOIN ROOM ==========
@@ -538,11 +538,33 @@
                 connectionDot.classList.add('connected');
                 showToast(`✅ Peer siap, ID: ${id}`, 'success');
 
-                const hostConn = peer.connect(roomHostId);
-                const timeout = setTimeout(() => becomeHost(), 2000);
+                // Coba connect ke host
+                attemptConnectToHost();
+            });
 
+            peer.on('error', (err) => {
+                console.error(err);
+                showToast(`❌ Peer error: ${err.type}`, 'error');
+            });
+
+            peer.on('connection', (conn) => {
+                // Koneksi masuk dari peer lain (host atau member lain)
+                connections[conn.peer] = conn;
+                setupConnection(conn);
+                updateDeviceList();
+                if (isHost) {
+                    broadcastDeviceList();
+                }
+            });
+        };
+
+        function attemptConnectToHost(retries = 3) {
+            if (!roomHostId) return;
+            const hostConn = peer.connect(roomHostId);
+            let attempts = 0;
+            const tryConnect = () => {
                 hostConn.on('open', () => {
-                    clearTimeout(timeout);
+                    showToast(`🔗 Terhubung ke host ${roomHostId}`, 'success');
                     isHost = false;
                     roleBadge.innerText = 'MEMBER';
                     connections[roomHostId] = hostConn;
@@ -550,21 +572,26 @@
                     hostConn.send({ type: 'join', id: myId });
                     hostConn.send({ type: 'list-request' });
                 });
-                hostConn.on('error', () => becomeHost());
-            });
-
-            peer.on('connection', (conn) => {
-                connections[conn.peer] = conn;
-                setupConnection(conn);
-                updateDeviceList();
-                if (isHost) broadcastDeviceList();
-            });
-        };
+                hostConn.on('error', (err) => {
+                    attempts++;
+                    if (attempts < retries) {
+                        setTimeout(() => {
+                            showToast(`🔄 Coba ulang koneksi ke host... (${attempts}/${retries})`, 'info');
+                            attemptConnectToHost(retries - attempts);
+                        }, 1000);
+                    } else {
+                        // Gagal semua percobaan, jadi host
+                        becomeHost();
+                    }
+                });
+            };
+            tryConnect();
+        }
 
         function becomeHost() {
             isHost = true;
             roleBadge.innerText = 'HOST';
-            showToast(`👑 Menjadi host room: ${roomHostId}`, 'success');
+            showToast(`👑 Menjadi host room: ${roomCode}`, 'success');
             peer.destroy();
             peer = new Peer(roomHostId, { config: ICE_CONFIG });
             peer.on('open', (id) => {
@@ -575,12 +602,15 @@
                 connectionDot.classList.add('connected');
                 generateQR();
                 qrContainer.style.display = 'flex';
+                // Host tidak perlu connect ke siapapun, cukup tunggu koneksi masuk
             });
             peer.on('connection', (conn) => {
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
-                broadcastDeviceList();
+                // Langsung kirim daftar device ke member baru
+                const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
+                conn.send({ type: 'device-list', ids });
             });
         }
 
@@ -594,19 +624,29 @@
 
             conn.on('data', (data) => {
                 if (data.type === 'join' && isHost) {
-                    if (!connections[data.id]) connections[data.id] = null;
+                    // Member baru join, langsung kirim daftar device yang sudah ada
+                    if (!connections[data.id]) {
+                        connections[data.id] = null; // nanti akan terkoneksi otomatis
+                    }
                     updateDeviceList();
                     broadcastDeviceList();
+                    // Kirim daftar device ke member baru
+                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
+                    conn.send({ type: 'device-list', ids });
                 }
                 else if (data.type === 'list-request' && isHost) {
                     const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
                     conn.send({ type: 'device-list', ids });
                 }
                 else if (data.type === 'device-list') {
+                    // Member terima daftar device dari host, lalu konek ke mereka
                     data.ids.forEach(id => {
                         if (!connections[id] && id !== myId) {
-                            const newConn = peer.connect(id);
-                            setupConnection(newConn);
+                            // Coba konek ke device lain
+                            setTimeout(() => {
+                                const newConn = peer.connect(id);
+                                setupConnection(newConn);
+                            }, 200); // jeda biar ga overload
                         }
                     });
                 }
@@ -639,16 +679,22 @@
                 delete connections[conn.peer];
                 updateDeviceList();
                 if (isHost) broadcastDeviceList();
-                showToast(`⚠️ Device ${conn.peer} terputus`, 'error');
+                showToast(`⚠️ Device ${conn.peer.substring(0,8)}... terputus`, 'error');
+            });
+
+            conn.on('error', (err) => {
+                showToast(`⚠️ Koneksi error: ${err}`, 'error');
             });
         }
 
-        // ========== BROADCAST DEVICE LIST ==========
+        // ========== BROADCAST DAFTAR DEVICE (HOST) ==========
         function broadcastDeviceList() {
             if (!isHost) return;
             const ids = Object.keys(connections).filter(id => id !== myId);
             Object.values(connections).forEach(c => {
-                if (c && c.open) c.send({ type: 'device-list', ids });
+                if (c && c.open) {
+                    c.send({ type: 'device-list', ids });
+                }
             });
             updateDeviceList();
         }
@@ -667,7 +713,7 @@
                     html += `<div class="device-item ${isSelected ? 'selected' : ''}" onclick="selectTarget('${id}')">
                                 <div style="display:flex; align-items:center; gap:12px;">
                                     <span style="font-size:1.4rem;">📱</span>
-                                    <span style="font-family:monospace;">${id}</span>
+                                    <span style="font-family:monospace;">${id.substring(0,8)}...</span>
                                 </div>
                                 <span class="badge" style="background:${isSelected ? '#fbbf24' : '#334155'}; color:black;">${isSelected ? '✓' : 'Pilih'}</span>
                             </div>`;
@@ -677,7 +723,7 @@
 
             let options = '<option value="">-- Pilih device target --</option>';
             deviceList.forEach(id => {
-                options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id}</option>`;
+                options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id.substring(0,8)}...</option>`;
             });
             targetDeviceSelect.innerHTML = options;
 
