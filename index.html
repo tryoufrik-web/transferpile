@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebDrop · SCROL DOWN FOR Tips</title>
+    <title>📦 WebShare · INdonesian</title>
     <!-- PeerJS -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -19,6 +19,8 @@
             display: flex;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            min-height: 100vh;
         }
         .container {
             max-width: 750px;
@@ -239,39 +241,98 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        .tip-card {
-            background: #0f172a;
-            border-left: 6px solid #fbbf24;
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-top: 24px;
+
+        /* ===== FLOATING TIPS – MINIMALIS & ESTETIK ===== */
+        .floating-tips {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 280px;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.4);
+            color: #f1f5f9;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        .floating-tips.minimized {
+            width: 56px;
+            height: 56px;
+            padding: 12px;
+            border-radius: 30px;
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #3b82f6;
+            backdrop-filter: none;
         }
-        .tip-icon {
-            font-size: 2rem;
-            color: #fbbf24;
+        .floating-tips.minimized .tips-content,
+        .floating-tips.minimized .tips-header h4 {
+            display: none;
         }
-        .tip-content {
-            flex: 1;
+        .floating-tips.minimized::after {
+            content: "💬";
+            font-size: 1.8rem;
+            line-height: 1;
         }
-        .tip-content h4 {
-            color: #fbbf24;
-            margin-bottom: 8px;
+        .tips-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
-        .tip-content p {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-            margin-bottom: 6px;
+        .tips-header h4 {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+        .tips-header button {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            transition: 0.2s;
+        }
+        .tips-header button:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+        .tips-content p {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+        .tips-content i {
+            color: #fbbf24;
+            font-size: 0.8rem;
+            min-width: 16px;
         }
         hr {
-            border: 1px solid #334155;
-            margin: 20px 0;
+            border: 0.5px solid #334155;
+            margin: 16px 0;
+        }
+
+        @media (max-width: 640px) {
+            .floating-tips {
+                bottom: 16px;
+                right: 16px;
+                width: 260px;
+            }
         }
     </style>
 </head>
@@ -357,64 +418,63 @@
                 <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada file diterima</div>
             </div>
         </div>
-
-        <!-- ========== TIPS & PANDUAN ========== -->
-        <div class="tip-card">
-            <div class="tip-icon">💡</div>
-            <div class="tip-content">
-                <h4>📘 Panduan Cepat</h4>
-                <p>✅ <strong>Host:</strong> Masukkan kode room, klik Join → QR muncul, bagikan ke teman.</p>
-                <p>✅ <strong>Member:</strong> Scan QR atau ketik kode yang sama, klik Join.</p>
-                <p>✅ <strong>Kirim file:</strong> Pilih device target → klik "Pilih File" → pilih file → klik "Kirim Sekarang".</p>
-                <p>✅ <strong>Terima file:</strong> File masuk otomatis ke daftar, klik icon download untuk simpan.</p>
-                <p>✅ <strong>Member juga bisa kirim:</strong> Semua device di room bisa saling kirim file, tidak hanya host.</p>
-                <p>⚡ <strong>Tips:</strong> Koneksi lebih stabil pakai WiFi yang sama. Kecepatan transfer otomatis naik/turun.</p>
-            </div>
-        </div>
-
-        <!-- ========== TOAST NOTIFIKASI ========== -->
-        <div id="toast" class="toast"></div>
     </div>
 
+    <!-- ===== FLOATING TIPS – MINIMALIS, ESTETIK, BISA DI-MINIMIZE ===== -->
+    <div class="floating-tips" id="floatingTips">
+        <div class="tips-header">
+            <h4><i class="fas fa-lightbulb" style="color: #fbbf24;"></i> Panduan Cepat</h4>
+            <button onclick="toggleTips()" id="toggleTipsBtn">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+        <div class="tips-content">
+            <p><i class="fas fa-crown"></i> <strong>Host:</strong> Ketik kode room, Join → QR muncul, bagikan.</p>
+            <p><i class="fas fa-users"></i> <strong>Member:</strong> Scan QR / ketik kode sama, Join.</p>
+            <p><i class="fas fa-share-alt"></i> <strong>Kirim file:</strong> Pilih target → "Pilih File" → "Kirim Sekarang".</p>
+            <p><i class="fas fa-download"></i> <strong>Terima file:</strong> Otomatis masuk, klik icon download.</p>
+            <p><i class="fas fa-arrows-alt-h"></i> <strong>Semua device</strong> bisa kirim & terima (tidak hanya host).</p>
+            <p><i class="fas fa-bolt"></i> <strong>Speed booster:</strong> Kecepatan adaptif, parallel send.</p>
+            <p><i class="fas fa-bolt"></i> <strong>Devinfo:</strong> im from indonesian.</p>
+            <hr>
+            <p style="font-style: italic; color: #94a3b8;">Klik ikon <i class="fas fa-minus"></i> untuk minimize.</p>
+        </div>
+    </div>
+
+    <!-- ========== TOAST NOTIFIKASI ========== -->
+    <div id="toast" class="toast"></div>
+
     <script>
-        // ==================================================
-        //   KONFIGURASI ICE SERVER (STABIL!)
-        // ==================================================
+        // ========== KONFIGURASI ICE SERVER (STABIL!) ==========
         const ICE_CONFIG = {
             iceServers: [
                 { urls: 'stun:stun.cloudflare.com:3478' },        // Cloudflare STUN
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
-                // TURN gratis dari Metered.ca (untuk koneksi di jaringan ketat)
                 { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
 
         // ========== BOOST SETTINGS (SPEED BOOSTER) ==========
-        const CHUNK_SIZES = [262144, 524288, 1048576]; // 256KB, 512KB, 1MB
-        let currentChunkIndex = 0;   // Mulai dari 256KB
-        const MAX_PARALLEL = 2;      // Kirim 2 file sekaligus
-        let speedElement = null;    // Untuk menampilkan kecepatan
+        const CHUNK_SIZES = [262144, 524288, 1048576];
+        let currentChunkIndex = 0;
+        const MAX_PARALLEL = 2;
+        let speedElement = null;
 
         // ========== STATE ==========
-        let peer;                   // Peer utama
-        let myId;                 // ID Peer sendiri
-        let roomCode;            // Kode room (dari input)
-        let roomHostId = null;   // ID host room (room-{code})
-        let isHost = false;      // Apakah kita host?
-        let connections = {};    // Semua koneksi aktif (key = peerId, value = DataConnection)
-        let deviceList = [];     // Daftar ID peer selain diri sendiri
+        let peer;
+        let myId;
+        let roomCode;
+        let roomHostId = null;
+        let isHost = false;
+        let connections = {};
+        let currentTarget = null;
+        let selectedFiles = [];
+        let receivedFiles = [];
 
-        // File states
-        let selectedFiles = [];       // Array of File objects
-        let currentTarget = null;    // Peer ID tujuan pengiriman
-
-        // Received files
-        let receivedFiles = [];      // Array of {file, name, size, type, blob}
-
-        // DOM elements
+        // ========== DOM ==========
         const connectionDot = document.getElementById('connectionDot');
         const statusText = document.getElementById('statusText');
         const roleBadge = document.getElementById('roleBadge');
@@ -431,13 +491,24 @@
         const selectedFileListDiv = document.getElementById('selectedFileList');
         const receivedListContainer = document.getElementById('receivedListContainer');
         const globalProgress = document.getElementById('globalProgress');
-        let progressText = document.getElementById('progressText');      // diubah jadi let agar bisa di-reassign
-        let selectedSizeSpan = document.getElementById('selectedSize'); // diubah jadi let
+        let progressText = document.getElementById('progressText');
+        let selectedSizeSpan = document.getElementById('selectedSize');
         const toast = document.getElementById('toast');
+
+        // ========== FLOATING TIPS TOGGLE ==========
+        window.toggleTips = function() {
+            const tips = document.getElementById('floatingTips');
+            tips.classList.toggle('minimized');
+            const btn = document.getElementById('toggleTipsBtn');
+            if (tips.classList.contains('minimized')) {
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+            } else {
+                btn.innerHTML = '<i class="fas fa-minus"></i>';
+            }
+        };
 
         // ========== INIT ==========
         window.onload = function() {
-            // Auto-generate room code random jika kosong
             if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
             showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
         };
@@ -455,10 +526,9 @@
             const code = roomInput.value.trim();
             if (!code) { alert('Masukkan kode room!'); return; }
             roomCode = code;
-            roomHostId = 'room-' + code;   // ID host tetap
+            roomHostId = 'room-' + code;
 
             if (peer) peer.destroy();
-            // Buat peer dengan ID random dulu
             peer = new Peer(undefined, { config: ICE_CONFIG });
 
             peer.on('open', (id) => {
@@ -468,45 +538,22 @@
                 connectionDot.classList.add('connected');
                 showToast(`✅ Peer siap, ID: ${id}`, 'success');
 
-                // Coba connect ke host
                 const hostConn = peer.connect(roomHostId);
-                const timeout = setTimeout(() => {
-                    // Jika tidak ada respons → jadi host
-                    becomeHost();
-                }, 2000);
+                const timeout = setTimeout(() => becomeHost(), 2000);
 
                 hostConn.on('open', () => {
                     clearTimeout(timeout);
                     isHost = false;
                     roleBadge.innerText = 'MEMBER';
-                    showToast(`🔗 Terhubung ke host ${roomHostId}`, 'success');
-                    // Kirim sinyal join
-                    hostConn.send({ type: 'join', id: myId });
-                    // Simpan koneksi host
                     connections[roomHostId] = hostConn;
                     setupConnection(hostConn);
-                    // Minta daftar device
+                    hostConn.send({ type: 'join', id: myId });
                     hostConn.send({ type: 'list-request' });
                 });
-
-                hostConn.on('error', (err) => {
-                    clearTimeout(timeout);
-                    becomeHost();
-                });
-            });
-
-            peer.on('error', (err) => {
-                console.error(err);
-                showToast(`❌ Peer error: ${err.type}`, 'error');
-                if (err.type === 'unavailable-id' && isHost) {
-                    // ID host sudah dipakai? Tambah random suffix
-                    roomHostId = 'room-' + code + '-' + Math.random().toString(36).substring(2,4);
-                    becomeHost();
-                }
+                hostConn.on('error', () => becomeHost());
             });
 
             peer.on('connection', (conn) => {
-                // Koneksi masuk dari peer lain
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
@@ -518,7 +565,6 @@
             isHost = true;
             roleBadge.innerText = 'HOST';
             showToast(`👑 Menjadi host room: ${roomHostId}`, 'success');
-            // Re-inisialisasi peer dengan ID host
             peer.destroy();
             peer = new Peer(roomHostId, { config: ICE_CONFIG });
             peer.on('open', (id) => {
@@ -527,7 +573,6 @@
                 myPeerIdSpan.innerText = myId;
                 statusText.innerText = 'Host siap';
                 connectionDot.classList.add('connected');
-                // Tampilkan QR
                 generateQR();
                 qrContainer.style.display = 'flex';
             });
@@ -535,14 +580,12 @@
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
-                // Broadcast daftar device ke semua anggota
                 broadcastDeviceList();
             });
         }
 
-        // ========== SETUP SATU KONEKSI ==========
+        // ========== SETUP KONEKSI ==========
         function setupConnection(conn) {
-            if (!conn) return;
             connections[conn.peer] = conn;
 
             let fileBuffer = [];
@@ -551,23 +594,17 @@
 
             conn.on('data', (data) => {
                 if (data.type === 'join' && isHost) {
-                    // Member baru join
-                    if (!connections[data.id]) {
-                        connections[data.id] = null; // nanti akan terkoneksi otomatis
-                    }
+                    if (!connections[data.id]) connections[data.id] = null;
                     updateDeviceList();
                     broadcastDeviceList();
                 }
                 else if (data.type === 'list-request' && isHost) {
-                    // Kirim daftar device ke yang minta
                     const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
                     conn.send({ type: 'device-list', ids });
                 }
                 else if (data.type === 'device-list') {
-                    // Terima daftar device dari host
                     data.ids.forEach(id => {
                         if (!connections[id] && id !== myId) {
-                            // Sambungkan ke device tersebut
                             const newConn = peer.connect(id);
                             setupConnection(newConn);
                         }
@@ -583,20 +620,13 @@
                     fileBuffer.push(data);
                     if (fileMeta) {
                         fileProgress += data.byteLength;
-                        // Update progress bar di sini? (opsional)
                     }
                 }
                 else if (data.type === 'file-end') {
                     if (fileMeta) {
                         const blob = new Blob(fileBuffer, { type: fileMeta.mime });
                         const file = new File([blob], fileMeta.name, { type: fileMeta.mime });
-                        receivedFiles.push({
-                            file: file,
-                            name: fileMeta.name,
-                            size: fileMeta.size,
-                            type: fileMeta.mime,
-                            blob: blob
-                        });
+                        receivedFiles.push({ file, name: fileMeta.name, size: fileMeta.size, type: fileMeta.mime });
                         renderReceivedFiles();
                         showToast(`✅ Selesai menerima: ${fileMeta.name}`, 'success');
                     }
@@ -611,30 +641,23 @@
                 if (isHost) broadcastDeviceList();
                 showToast(`⚠️ Device ${conn.peer} terputus`, 'error');
             });
-
-            conn.on('error', (err) => {
-                showToast(`⚠️ Koneksi error: ${err}`, 'error');
-            });
         }
 
-        // ========== BROADCAST DAFTAR DEVICE (HOST) ==========
+        // ========== BROADCAST DEVICE LIST ==========
         function broadcastDeviceList() {
             if (!isHost) return;
             const ids = Object.keys(connections).filter(id => id !== myId);
             Object.values(connections).forEach(c => {
-                if (c && c.open) {
-                    c.send({ type: 'device-list', ids });
-                }
+                if (c && c.open) c.send({ type: 'device-list', ids });
             });
             updateDeviceList();
         }
 
-        // ========== UPDATE UI DEVICE LIST ==========
+        // ========== UPDATE UI DEVICE ==========
         function updateDeviceList() {
-            deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
+            const deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
             deviceCountSpan.innerText = deviceList.length + ' device';
 
-            // Render daftar device di panel
             let html = '';
             if (deviceList.length === 0) {
                 html = '<div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>';
@@ -646,36 +669,33 @@
                                     <span style="font-size:1.4rem;">📱</span>
                                     <span style="font-family:monospace;">${id}</span>
                                 </div>
-                                <span class="badge" style="background:${isSelected ? '#fbbf24' : '#334155'}; color:black;">${isSelected ? '✓ Terpilih' : 'Pilih'}</span>
+                                <span class="badge" style="background:${isSelected ? '#fbbf24' : '#334155'}; color:black;">${isSelected ? '✓' : 'Pilih'}</span>
                             </div>`;
                 });
             }
             deviceListContainer.innerHTML = html;
 
-            // Update dropdown
             let options = '<option value="">-- Pilih device target --</option>';
             deviceList.forEach(id => {
                 options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id}</option>`;
             });
             targetDeviceSelect.innerHTML = options;
 
-            // Enable/disable tombol kirim
             pickFileBtn.disabled = !currentTarget;
             sendBtn.disabled = !currentTarget || selectedFiles.length === 0;
         }
 
-        // ========== SELECT TARGET ==========
         window.selectTarget = function(id) {
             currentTarget = id;
             updateDeviceList();
-            showToast(`🎯 Target: ${id}`, 'info');
+            showToast(`🎯 Target: ${id.substring(0,8)}...`, 'info');
         };
         targetDeviceSelect.addEventListener('change', (e) => {
             currentTarget = e.target.value;
             updateDeviceList();
         });
 
-        // ========== QR CODE GENERATION ==========
+        // ========== QR CODE ==========
         window.generateQR = function() {
             if (!roomHostId) return;
             const url = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(roomCode);
@@ -685,15 +705,11 @@
         };
 
         // ========== AUTO JOIN DARI URL ==========
-        function checkUrlParam() {
+        (function checkUrlParam() {
             const params = new URLSearchParams(window.location.search);
             const roomParam = params.get('room');
-            if (roomParam) {
-                roomInput.value = roomParam;
-                joinRoom();
-            }
-        }
-        checkUrlParam();
+            if (roomParam) { roomInput.value = roomParam; joinRoom(); }
+        })();
 
         // ========== COPY ID ==========
         window.copyMyId = function() {
@@ -701,17 +717,10 @@
             showToast('📋 ID peer dicopy', 'success');
         };
 
-        // ========== PICK FILE (DENGAN FALLBACK ANTI GAGAL) ==========
+        // ========== PICK FILE (ANTI GAGAL) ==========
         window.pickFile = function() {
-            if (!currentTarget) { 
-                showToast('❌ Pilih device target dulu!', 'error'); 
-                return; 
-            }
-            
-            // ===== METODE 1: KLIK LANGSUNG =====
+            if (!currentTarget) { showToast('❌ Pilih device target dulu!', 'error'); return; }
             fileInput.click();
-
-            // ===== METODE 2: FALLBACK JIKA GAGAL =====
             const fallbackTimer = setTimeout(() => {
                 if (fileInput.files.length === 0) {
                     const newInput = document.createElement('input');
@@ -723,7 +732,6 @@
                     newInput.style.opacity = '0';
                     newInput.style.pointerEvents = 'none';
                     newInput.style.zIndex = '-9999';
-
                     newInput.addEventListener('change', function(ev) {
                         if (ev.target.files.length > 0) {
                             const newFiles = Array.from(ev.target.files).filter(f => 
@@ -736,15 +744,11 @@
                         }
                         document.body.removeChild(newInput);
                     }, { once: true });
-
                     document.body.appendChild(newInput);
                     newInput.click();
                 }
             }, 400);
-
-            fileInput.addEventListener('change', function() {
-                clearTimeout(fallbackTimer);
-            }, { once: true });
+            fileInput.addEventListener('change', function() { clearTimeout(fallbackTimer); }, { once: true });
         };
 
         fileInput.addEventListener('change', function(e) {
@@ -754,7 +758,7 @@
                 );
                 selectedFiles = [...selectedFiles, ...newFiles];
                 renderSelectedFiles();
-                e.target.value = ''; // reset agar bisa pilih file sama lagi
+                e.target.value = '';
             }
         });
 
@@ -769,10 +773,9 @@
             let html = '';
             selectedFiles.forEach((f, i) => {
                 totalSize += f.size;
-                const icon = getFileIcon(f.type);
                 html += `<div class="file-item">
                             <div class="file-info">
-                                <span class="file-icon">${icon}</span>
+                                <span class="file-icon">${getFileIcon(f.type)}</span>
                                 <div class="file-details">
                                     <div class="file-name">${escapeHTML(f.name)}</div>
                                     <div class="file-meta">${formatBytes(f.size)}</div>
@@ -786,16 +789,10 @@
             sendBtn.disabled = !currentTarget;
         }
 
-        window.removeFile = function(index) {
-            selectedFiles.splice(index, 1);
-            renderSelectedFiles();
-        };
-        window.clearSelectedFiles = function() {
-            selectedFiles = [];
-            renderSelectedFiles();
-        };
+        window.removeFile = function(index) { selectedFiles.splice(index, 1); renderSelectedFiles(); };
+        window.clearSelectedFiles = function() { selectedFiles = []; renderSelectedFiles(); };
 
-        // ========== KIRIM FILE DENGAN BOOST (PARALLEL + ADAPTIVE CHUNK) ==========
+        // ========== KIRIM FILE DENGAN BOOST ==========
         window.sendFiles = async function() {
             if (!currentTarget) { showToast('❌ Pilih target!', 'error'); return; }
             if (selectedFiles.length === 0) { showToast('❌ Tidak ada file!', 'error'); return; }
@@ -803,22 +800,18 @@
             const conn = connections[currentTarget];
             if (!conn || !conn.open) { showToast('❌ Koneksi ke target tidak tersedia', 'error'); return; }
 
-            // ===== BUAT ELEMEN SPEED METER JIKA BELUM ADA =====
             if (!speedElement) {
                 speedElement = document.createElement('span');
                 speedElement.id = 'speedText';
                 speedElement.style.color = '#94a3b8';
                 speedElement.style.fontSize = '0.85rem';
                 speedElement.innerText = '0 KB/s';
-                
-                // Cari container progress dan sisipkan elemen speed
                 const progressContainer = document.querySelector('.progress-bar').parentNode;
                 const infoDiv = document.querySelector('.progress-bar + div');
                 if (infoDiv) {
                     infoDiv.style.display = 'flex';
                     infoDiv.style.justifyContent = 'space-between';
                     infoDiv.innerHTML = `<span id="progressText">-</span> <span id="speedText">0 KB/s</span> <span id="selectedSize">0 KB</span>`;
-                    // Re-assign referensi
                     progressText = document.getElementById('progressText');
                     selectedSizeSpan = document.getElementById('selectedSize');
                     speedElement = document.getElementById('speedText');
@@ -835,7 +828,6 @@
             const totalSize = selectedFiles.reduce((a,b)=>a+b.size,0);
             const startTime = performance.now();
 
-            // PARALLEL SEND - MAX 2 FILE SEKALIGUS
             for (let i = 0; i < selectedFiles.length; i += MAX_PARALLEL) {
                 const batch = selectedFiles.slice(i, i + MAX_PARALLEL);
                 await Promise.all(batch.map(file => sendOneFileBoosted(conn, file, totalSent, totalSize, startTime)));
@@ -850,14 +842,12 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const buffer = e.target.result;
-                    
-                    // ADAPTIVE CHUNK: deteksi kecepatan
                     const elapsed = (performance.now() - startTime) / 1000;
                     const speed = (sentBefore / elapsed) || 0;
                     if (speed > 500 * 1024 && currentChunkIndex < CHUNK_SIZES.length - 1) {
-                        currentChunkIndex++; // Naik ke chunk lebih besar
+                        currentChunkIndex++;
                     } else if (speed < 100 * 1024 && currentChunkIndex > 0) {
-                        currentChunkIndex--; // Turun ke chunk lebih kecil
+                        currentChunkIndex--;
                     }
                     const CHUNK = CHUNK_SIZES[currentChunkIndex];
 
@@ -874,12 +864,10 @@
                         conn.send(chunk);
                         offset += chunk.byteLength;
 
-                        // Update global progress
                         const percent = ((sentBefore + offset) / totalSize) * 100;
                         globalProgress.style.width = percent + '%';
                         progressText.innerText = Math.round(percent) + '%';
                         
-                        // Hitung kecepatan
                         const currentElapsed = (performance.now() - startTime) / 1000;
                         const currentSpeed = (sentBefore + offset) / currentElapsed / 1024;
                         if (speedElement) speedElement.innerText = Math.round(currentSpeed) + ' KB/s';
@@ -900,10 +888,9 @@
             }
             let html = '';
             receivedFiles.forEach((f, i) => {
-                const icon = getFileIcon(f.type);
                 html += `<div class="file-item" style="border-left-color:#22c55e;">
                             <div class="file-info">
-                                <span class="file-icon">${icon}</span>
+                                <span class="file-icon">${getFileIcon(f.type)}</span>
                                 <div class="file-details">
                                     <div class="file-name">${escapeHTML(f.name)}</div>
                                     <div class="file-meta">${formatBytes(f.size)}</div>
@@ -948,7 +935,7 @@
             return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
         }
 
-        // FontAwesome untuk icon (opsional)
+        // FontAwesome
         const faLink = document.createElement('link');
         faLink.rel = 'stylesheet';
         faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css';
@@ -956,17 +943,3 @@
     </script>
 </body>
 </html>
-
-<!-- ========== TIPS & PANDUAN ========== -->
-<div class="tip-card">
-    <div class="tip-icon">💡</div>
-    <div class="tip-content">
-        <h4>📘 Panduan Cepat</h4>
-        <p>✅ <strong>Host:</strong> Masukkan kode room, klik Join → QR muncul, bagikan ke teman.</p>
-        <p>✅ <strong>Member:</strong> Scan QR atau ketik kode yang sama, klik Join.</p>
-        <p>✅ <strong>Kirim file:</strong> Pilih device target → klik "Pilih File" → pilih file → klik "Kirim Sekarang".</p>
-        <p>✅ <strong>Terima file:</strong> File masuk otomatis ke daftar, klik icon download untuk simpan.</p>
-        <p>✅ <strong>Member juga bisa kirim:</strong> Semua device di room bisa saling kirim file, tidak hanya host.</p>
-        <p>⚡ <strong>Tips:</strong> Koneksi lebih stabil pakai WiFi yang sama. Kecepatan transfer otomatis naik/turun.</p>
-    </div>
-</div>
