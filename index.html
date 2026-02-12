@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebDrop · BETA 0,25</title>
+    <title>📦 WebDrop · Multi‑Server + QR Fix</title>
     <!-- PeerJS -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* ===== CSS LENGKAP (sama seperti sebelumnya, ringkas) ===== */
+        /* ===== CSS LENGKAP (sama seperti sebelumnya) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: #0b1120; color: white; display: flex; justify-content: center; padding: 20px; position: relative; min-height: 100vh; }
         .container { max-width: 750px; width: 100%; }
@@ -80,8 +80,8 @@
             <div class="qr-container" id="qrContainer" style="display: none;">
                 <img id="qrImage" src="" alt="QR Code">
                 <div style="flex:1;">
-                    <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR untuk join</div>
-                    <div style="font-size:0.85rem; color:#2d3a4a; margin:8px 0;">Buka kamera HP, arahkan ke QR</div>
+                    <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR untuk connect langsung</div>
+                    <div style="font-size:0.85rem; color:#2d3a4a; margin:8px 0;">QR berisi ID host sebenarnya, bukan hanya kode room</div>
                     <button class="badge" onclick="generateQR()" style="background:#3b82f6; color:white;">↻ Buat QR</button>
                 </div>
             </div>
@@ -164,6 +164,27 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // ==================================================
+        //   MULTI‑SERVER PEERJS – FALLBACK OTOMATIS
+        // ==================================================
+        const PEER_SERVERS = [
+            { host: 'peerjs.com', port: 443, secure: true, key: 'peerjs' },
+            { host: '0.peerjs.com', port: 443, secure: true, key: 'peerjs' },
+            { host: 'peerjs.xyz', port: 443, secure: true, key: 'peerjs' }
+        ];
+        let currentServerIndex = 0;
+
+        function createPeer(id, serverIndex) {
+            const s = PEER_SERVERS[serverIndex];
+            return new Peer(id, {
+                host: s.host,
+                port: s.port,
+                secure: s.secure,
+                key: s.key,
+                config: ICE_CONFIG
+            });
+        }
+
         // ========== KONFIGURASI ICE ==========
         const ICE_CONFIG = {
             iceServers: [
@@ -186,7 +207,8 @@
         let peer;
         let myId;
         let roomCode;
-        let roomHostId = null;
+        let roomHostId = null;      // ID host yang diharapkan (room-{code})
+        let actualHostId = null;    // ID host yang sebenarnya (bisa berbeda jika bentrok)
         let isHost = false;
         let connections = {};
         let currentTarget = null;
@@ -226,6 +248,7 @@
         window.onload = function() {
             if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
             showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
+            checkUrlParam(); // auto join dari URL
         };
 
         // ========== TOAST ==========
@@ -249,7 +272,9 @@
             roomHostId = 'room-' + code;
 
             if (peer) peer.destroy();
-            peer = new Peer(undefined, { config: ICE_CONFIG });
+            // Mulai dengan server index 0
+            currentServerIndex = 0;
+            peer = createPeer(undefined, currentServerIndex);
 
             peer.on('open', (id) => {
                 myId = id;
@@ -265,6 +290,10 @@
             peer.on('error', (err) => {
                 console.error(err);
                 showToast(`❌ Peer error: ${err.type}`, 'error');
+                // Coba ganti server jika error network / unavailable-id
+                if (err.type === 'network' || err.type === 'unavailable-id' || err.message?.includes('WebSocket')) {
+                    switchPeerServer();
+                }
             });
 
             peer.on('connection', (conn) => {
@@ -272,14 +301,65 @@
                 setupConnection(conn);
                 updateDeviceList();
                 if (isHost) {
+                    // 🔥 HOST: kirim device-list ke member baru
+                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
+                    if (ids.length > 0) {
+                        conn.send({ type: 'device-list', ids });
+                    }
                     broadcastDeviceList();
                 }
             });
         };
 
+        // ========== GANTI SERVER PEERJS ==========
+        function switchPeerServer() {
+            currentServerIndex = (currentServerIndex + 1) % PEER_SERVERS.length;
+            showToast(`🔄 Ganti server ke ${PEER_SERVERS[currentServerIndex].host}`, 'info');
+            if (isHost) {
+                // Jika host, kita harus daftar ulang dengan ID host yang sama
+                peer.destroy();
+                peer = createPeer(roomHostId, currentServerIndex);
+                peer.on('open', (id) => {
+                    roomHostId = id;
+                    myId = id;
+                    actualHostId = id;
+                    myPeerIdSpan.innerText = myId;
+                    statusText.innerText = 'Host siap (server baru)';
+                    connectionDot.classList.add('connected');
+                    generateQRWithId(actualHostId); // QR baru dengan ID terbaru
+                    qrContainer.style.display = 'flex';
+                });
+                peer.on('connection', (conn) => {
+                    connections[conn.peer] = conn;
+                    setupConnection(conn);
+                    updateDeviceList();
+                    const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
+                    if (ids.length > 0) conn.send({ type: 'device-list', ids });
+                    broadcastDeviceList();
+                });
+            } else {
+                // Jika member, reconnect ulang
+                peer.destroy();
+                peer = createPeer(undefined, currentServerIndex);
+                peer.on('open', (id) => {
+                    myId = id;
+                    myPeerIdSpan.innerText = myId;
+                    statusText.innerText = 'Peer siap (server baru)';
+                    connectionDot.classList.add('connected');
+                    attemptConnectToHost();
+                });
+                peer.on('connection', (conn) => {
+                    connections[conn.peer] = conn;
+                    setupConnection(conn);
+                    updateDeviceList();
+                });
+            }
+        }
+
         // ========== ATTEMPT CONNECT TO HOST (DENGAN RETRY & BACKOFF) ==========
-        function attemptConnectToHost(retries = 5, baseDelay = 1000) {
+        function attemptConnectToHost(retries = 7, baseDelay = 1000) {
             if (!roomHostId) return;
+            if (isHost) return; // host tidak perlu connect ke diri sendiri
             
             let attempt = 0;
             let hostConn = null;
@@ -289,12 +369,11 @@
                 hostConn = peer.connect(roomHostId);
                 
                 const timeoutId = setTimeout(() => {
-                    // Jika tidak ada respon dalam 3 detik, anggap gagal
                     if (!hostConn.open) {
                         hostConn.close();
                         handleFailure();
                     }
-                }, 3000);
+                }, 4000);
 
                 hostConn.on('open', () => {
                     clearTimeout(timeoutId);
@@ -303,6 +382,8 @@
                     roleBadge.innerText = 'MEMBER';
                     connections[roomHostId] = hostConn;
                     setupConnection(hostConn);
+                    
+                    // 🔥 WAJIB: kirim join dan minta daftar device
                     hostConn.send({ type: 'join', id: myId });
                     hostConn.send({ type: 'list-request' });
                 });
@@ -315,13 +396,13 @@
 
             const handleFailure = () => {
                 if (attempt < retries) {
-                    const delay = baseDelay * Math.pow(1.5, attempt - 1); // exponential backoff
-                    showToast(`🔄 Host tidak merespon, percobaan ${attempt}/${retries} dalam ${Math.round(delay/1000)}s...`, 'info');
+                    const delay = baseDelay * Math.pow(1.5, attempt - 1);
+                    showToast(`🔄 Host tidak merespon, percobaan ${attempt}/${retries}...`, 'info');
                     setTimeout(() => {
                         tryConnect();
                     }, delay);
                 } else {
-                    // Gagal semua, tanya user
+                    // Gagal total, tanya user
                     if (confirm(`❌ Host ${roomHostId} tidak ditemukan setelah ${retries} kali percobaan.\nJadikan device ini sebagai host?`)) {
                         becomeHost();
                     } else {
@@ -339,33 +420,42 @@
             roleBadge.innerText = 'HOST';
             showToast(`👑 Menjadi host room: ${roomCode}`, 'success');
             peer.destroy();
-            peer = new Peer(roomHostId, { config: ICE_CONFIG });
+            peer = createPeer(roomHostId, currentServerIndex);
+            
             peer.on('open', (id) => {
                 roomHostId = id;
+                actualHostId = id;   // ID host yang sebenarnya
                 myId = id;
                 myPeerIdSpan.innerText = myId;
                 statusText.innerText = 'Host siap';
                 connectionDot.classList.add('connected');
-                generateQR();
+                
+                // 🔥 QR di-generate dengan ID host yang SEBENARNYA
+                generateQRWithId(actualHostId);
                 qrContainer.style.display = 'flex';
                 showToast(`✅ Host siap dengan ID: ${id}`, 'success');
             });
+
             peer.on('connection', (conn) => {
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
-                // Langsung kirim daftar device ke member baru
+                // 🔥 KIRIM device-list ke member baru
                 const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
                 if (ids.length > 0) {
                     conn.send({ type: 'device-list', ids });
                 }
+                broadcastDeviceList();
             });
+
             peer.on('error', (err) => {
                 showToast(`❌ Host error: ${err.type}`, 'error');
-                // Jika ID sudah dipakai, generate ID baru dengan suffix
                 if (err.type === 'unavailable-id') {
-                    roomHostId = 'room-' + roomCode + '-' + Math.random().toString(36).substring(2,4);
+                    // ID sudah dipakai, generate ID baru dengan suffix
+                    roomHostId = 'room-' + roomCode + '-' + Math.random().toString(36).substring(2,5);
                     becomeHost();
+                } else if (err.type === 'network' || err.message?.includes('WebSocket')) {
+                    switchPeerServer();
                 }
             });
         }
@@ -380,20 +470,25 @@
 
             conn.on('data', (data) => {
                 if (data.type === 'join' && isHost) {
+                    // 🔥 Catat member baru
                     if (!connections[data.id]) {
                         connections[data.id] = null;
                     }
                     updateDeviceList();
                     broadcastDeviceList();
-                    // Kirim daftar device ke member baru
+                    
+                    // 🔥 KIRIM device-list LANGSUNG ke member ini
                     const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
-                    conn.send({ type: 'device-list', ids });
+                    if (ids.length > 0) {
+                        conn.send({ type: 'device-list', ids });
+                    }
                 }
                 else if (data.type === 'list-request' && isHost) {
                     const ids = Object.keys(connections).filter(id => id !== myId && id !== conn.peer);
                     conn.send({ type: 'device-list', ids });
                 }
                 else if (data.type === 'device-list') {
+                    // Member terima daftar device, konek ke mereka
                     data.ids.forEach(id => {
                         if (!connections[id] && id !== myId) {
                             setTimeout(() => {
@@ -492,21 +587,44 @@
             updateDeviceList();
         });
 
-        // ========== QR CODE ==========
-        window.generateQR = function() {
-            if (!roomHostId) return;
-            const url = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(roomCode);
+        // ========== QR CODE DENGAN ID HOST SEBENARNYA ==========
+        function generateQRWithId(hostId) {
+            if (!hostId) return;
+            const url = window.location.origin + window.location.pathname + '?connect=' + encodeURIComponent(hostId);
             const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
             qrImage.src = qrApi;
             qrContainer.style.display = 'flex';
+        }
+
+        // Override generateQR lama, panggil yang baru
+        window.generateQR = function() {
+            if (actualHostId) {
+                generateQRWithId(actualHostId);
+            } else if (roomHostId) {
+                generateQRWithId(roomHostId);
+            }
         };
 
         // ========== AUTO JOIN DARI URL ==========
-        (function checkUrlParam() {
+        function checkUrlParam() {
             const params = new URLSearchParams(window.location.search);
-            const roomParam = params.get('room');
-            if (roomParam) { roomInput.value = roomParam; joinRoom(); }
-        })();
+            const connectId = params.get('connect');  // QR dengan ID spesifik
+            const roomParam = params.get('room');     // kode room manual
+
+            if (connectId) {
+                roomInput.value = 'via QR';
+                roomHostId = connectId;
+                // Join langsung ke ID tersebut
+                if (!peer) {
+                    joinRoom(); // akan memanggil attemptConnectToHost
+                } else {
+                    attemptConnectToHost();
+                }
+            } else if (roomParam) {
+                roomInput.value = roomParam;
+                joinRoom();
+            }
+        }
 
         // ========== COPY ID ==========
         window.copyMyId = function() {
