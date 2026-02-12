@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 WebDrop · STABIL</title>
+    <title>📦 WebDrop · Member Kirim + Tips</title>
     <!-- PeerJS -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -239,6 +239,36 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        .tip-card {
+            background: #0f172a;
+            border-left: 6px solid #fbbf24;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .tip-icon {
+            font-size: 2rem;
+            color: #fbbf24;
+        }
+        .tip-content {
+            flex: 1;
+        }
+        .tip-content h4 {
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+        .tip-content p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         hr {
             border: 1px solid #334155;
             margin: 20px 0;
@@ -325,6 +355,20 @@
             <h3><span>📥</span> File Diterima</h3>
             <div id="receivedListContainer" class="received-list">
                 <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada file diterima</div>
+            </div>
+        </div>
+
+        <!-- ========== TIPS & PANDUAN ========== -->
+        <div class="tip-card">
+            <div class="tip-icon">💡</div>
+            <div class="tip-content">
+                <h4>📘 Panduan Cepat</h4>
+                <p>✅ <strong>Host:</strong> Masukkan kode room, klik Join → QR muncul, bagikan ke teman.</p>
+                <p>✅ <strong>Member:</strong> Scan QR atau ketik kode yang sama, klik Join.</p>
+                <p>✅ <strong>Kirim file:</strong> Pilih device target → klik "Pilih File" → pilih file → klik "Kirim Sekarang".</p>
+                <p>✅ <strong>Terima file:</strong> File masuk otomatis ke daftar, klik icon download untuk simpan.</p>
+                <p>✅ <strong>Member juga bisa kirim:</strong> Semua device di room bisa saling kirim file, tidak hanya host.</p>
+                <p>⚡ <strong>Tips:</strong> Koneksi lebih stabil pakai WiFi yang sama. Kecepatan transfer otomatis naik/turun.</p>
             </div>
         </div>
 
@@ -466,6 +510,7 @@
                 connections[conn.peer] = conn;
                 setupConnection(conn);
                 updateDeviceList();
+                if (isHost) broadcastDeviceList();
             });
         };
 
@@ -563,7 +608,7 @@
             conn.on('close', () => {
                 delete connections[conn.peer];
                 updateDeviceList();
-                broadcastDeviceList();
+                if (isHost) broadcastDeviceList();
                 showToast(`⚠️ Device ${conn.peer} terputus`, 'error');
             });
 
@@ -911,3 +956,17 @@
     </script>
 </body>
 </html>
+
+<!-- ========== TIPS & PANDUAN ========== -->
+<div class="tip-card">
+    <div class="tip-icon">💡</div>
+    <div class="tip-content">
+        <h4>📘 Panduan Cepat</h4>
+        <p>✅ <strong>Host:</strong> Masukkan kode room, klik Join → QR muncul, bagikan ke teman.</p>
+        <p>✅ <strong>Member:</strong> Scan QR atau ketik kode yang sama, klik Join.</p>
+        <p>✅ <strong>Kirim file:</strong> Pilih device target → klik "Pilih File" → pilih file → klik "Kirim Sekarang".</p>
+        <p>✅ <strong>Terima file:</strong> File masuk otomatis ke daftar, klik icon download untuk simpan.</p>
+        <p>✅ <strong>Member juga bisa kirim:</strong> Semua device di room bisa saling kirim file, tidak hanya host.</p>
+        <p>⚡ <strong>Tips:</strong> Koneksi lebih stabil pakai WiFi yang sama. Kecepatan transfer otomatis naik/turun.</p>
+    </div>
+</div>
