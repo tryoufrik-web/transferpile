@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>⚡ WebDrop • Super Cepat + Stabil</title>
+    <title>📦 WebDrop · Super Stabil + Cepat</title>
     <!-- PeerJS -->
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -14,51 +14,51 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         body {
-            background: #0a0c10;
+            background: #0b1120;
             color: white;
             display: flex;
             justify-content: center;
             padding: 20px;
         }
         .container {
-            max-width: 800px;
+            max-width: 750px;
             width: 100%;
         }
         .card {
-            background: #14181f;
+            background: #1e293b;
             border-radius: 24px;
             padding: 24px;
             margin-bottom: 24px;
-            border: 1px solid #2a3744;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
         }
         h3 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        .flex-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
+        .label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
         }
         input, .code-box {
-            background: #0e1319;
-            border: 1px solid #2d3a4a;
-            border-radius: 40px;
-            padding: 14px 20px;
-            color: white;
             width: 100%;
-            outline: none;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 40px;
+            color: white;
             font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
         }
         input:focus {
             border-color: #3b82f6;
-            background: #1a212a;
+            background: #1e293b;
         }
         button {
             background: #3b82f6;
@@ -69,11 +69,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             width: 100%;
+            margin-top: 12px;
         }
         button:hover {
             background: #2563eb;
@@ -81,44 +82,38 @@
             box-shadow: 0 8px 20px rgba(59,130,246,0.4);
         }
         button.secondary {
-            background: #2d3a4a;
+            background: #334155;
         }
         button.secondary:hover {
-            background: #40566a;
+            background: #475569;
+        }
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .code-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 8px 12px;
+        }
+        .code-box span {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #94a3b8;
         }
         .badge {
-            background: #2d3a4a;
+            background: #334155;
             border-radius: 30px;
-            padding: 6px 16px;
+            padding: 6px 14px;
             font-size: 0.8rem;
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
-        .status-bar {
-            background: #1a212a;
-            border-radius: 40px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #3a4a5a;
-        }
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #f43f5e;
-            transition: 0.2s;
-        }
-        .dot.connected {
-            background: #22c55e;
-            box-shadow: 0 0 10px #22c55e;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
-        
         .qr-container {
             background: white;
             border-radius: 16px;
@@ -136,16 +131,14 @@
             border-radius: 12px;
             object-fit: contain;
         }
-
-        /* FILE LIST PREVIEW */
-        .file-list {
-            margin-top: 16px;
+        .device-list, .file-list, .received-list {
+            margin-top: 12px;
             max-height: 250px;
             overflow-y: auto;
             border-radius: 16px;
         }
-        .file-item {
-            background: #1e2630;
+        .device-item, .file-item, .received-item {
+            background: #263340;
             border-radius: 16px;
             padding: 14px 18px;
             margin-bottom: 8px;
@@ -153,6 +146,15 @@
             align-items: center;
             justify-content: space-between;
             border-left: 4px solid #3b82f6;
+            transition: 0.2s;
+        }
+        .device-item:hover {
+            background: #334155;
+            border-left-color: #60a5fa;
+        }
+        .device-item.selected {
+            background: #1e3a5f;
+            border-left-color: #fbbf24;
         }
         .file-info {
             display: flex;
@@ -161,8 +163,13 @@
             flex: 1;
             min-width: 0;
         }
-        .file-icon { font-size: 1.8rem; }
-        .file-details { flex: 1; min-width: 0; }
+        .file-icon {
+            font-size: 1.8rem;
+        }
+        .file-details {
+            flex: 1;
+            min-width: 0;
+        }
         .file-name {
             font-weight: 500;
             white-space: nowrap;
@@ -173,14 +180,12 @@
             font-size: 0.75rem;
             color: #94a3b8;
         }
-
-        /* PROGRESS BAR PER FILE */
         .progress-bar {
             width: 100%;
             height: 6px;
             background: #1e293b;
             border-radius: 6px;
-            margin-top: 6px;
+            margin-top: 8px;
             overflow: hidden;
         }
         .progress-fill {
@@ -189,30 +194,30 @@
             width: 0%;
             transition: width 0.2s;
         }
-
-        /* DEVICE LIST */
-        .device-list {
-            margin-top: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .device-item {
-            background: #1e2630;
-            border-radius: 16px;
-            padding: 14px 18px;
-            margin-bottom: 8px;
+        .status-bar {
+            background: #1a2634;
+            border-radius: 40px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            border-left: 4px solid #4b5e77;
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        .device-item.selected {
-            background: #1e3a5f;
-            border-left-color: #fbbf24;
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f43f5e;
         }
-
-        /* TOAST NOTIFICATION */
+        .dot.connected {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
         .toast {
             position: fixed;
             top: 20px;
@@ -226,70 +231,69 @@
             z-index: 9999;
             display: none;
         }
-        .toast.show { display: block; animation: slideIn 0.3s; }
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-
-        /* RECEIVED LIST */
-        .received-item {
-            background: #1e2630;
-            border-radius: 16px;
-            padding: 14px 18px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-left: 4px solid #22c55e;
+        hr {
+            border: 1px solid #334155;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- STATUS BAR -->
+        <!-- ========== STATUS HEADER ========== -->
         <div class="status-bar">
             <span class="dot" id="connectionDot"></span>
             <span id="statusText">Memulai Peer...</span>
-            <span style="margin-left: auto;" class="badge" id="roleBadge">-</span>
+            <span style="margin-left: auto; display: flex; gap: 6px;">
+                <span class="badge" id="roleBadge">-</span>
+                <span class="badge" id="deviceCount">0 device</span>
+            </span>
         </div>
 
-        <!-- ROOM -->
+        <!-- ========== ROOM & KONEKSI ========== -->
         <div class="card">
-            <h3>🚪 Room / Kode</h3>
+            <h3><span>🚪</span> Room / Kode</h3>
             <div class="flex-row">
-                <input type="text" id="roomInput" placeholder="Masukkan kode room (contoh: kantor123)" value="demo" autocomplete="off">
+                <input type="text" id="roomInput" placeholder="Masukkan kode room" value="demo" autocomplete="off">
                 <button onclick="joinRoom()" style="width: auto; padding: 14px 32px;">Join</button>
             </div>
             <div class="qr-container" id="qrContainer" style="display: none;">
                 <img id="qrImage" src="" alt="QR Code">
                 <div style="flex:1;">
                     <div style="font-weight: 600; color:#0b0e14;">🔳 Scan QR untuk join</div>
-                    <div style="font-size:0.85rem; color:#2d3a4a;">Buka kamera HP, arahkan ke QR</div>
+                    <div style="font-size:0.85rem; color:#2d3a4a; margin:8px 0;">Buka kamera HP, arahkan ke QR</div>
+                    <button class="badge" onclick="generateQR()" style="background:#3b82f6; color:white;">↻ Buat QR</button>
                 </div>
             </div>
             <div style="margin-top: 16px;">
-                <div class="badge">ID Kamu:</div>
-                <div class="code-box" style="display: flex; justify-content: space-between; margin-top: 8px;">
-                    <span id="myPeerId" style="font-family: monospace;">-</span>
+                <div class="label">ID Peer Kamu</div>
+                <div class="code-box">
+                    <span id="myPeerId">-</span>
                     <button class="badge" onclick="copyMyId()" style="background: #475569;">Copy</button>
                 </div>
             </div>
         </div>
 
-        <!-- DEVICE LIST -->
+        <!-- ========== DEVICE DI ROOM ========== -->
         <div class="card">
-            <h3>📱 Device di Room</h3>
+            <h3><span>📱</span> Device di Room</h3>
             <div id="deviceListContainer" class="device-list">
                 <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>
             </div>
         </div>
 
-        <!-- KIRIM FILE + PREVIEW LIST -->
+        <!-- ========== FILE YANG AKAN DIKIRIM ========== -->
         <div class="card">
-            <h3>📤 Kirim File</h3>
-            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <button onclick="pickFile()" id="pickFileBtn" disabled style="flex: 2;">
+            <h3><span>📤</span> Kirim File</h3>
+            <div style="display: flex; gap: 12px;">
+                <button id="pickFileBtn" disabled style="flex: 2;">
                     <i class="fas fa-file"></i> Pilih File
                 </button>
                 <button onclick="clearSelectedFiles()" class="secondary" style="flex: 1;">
@@ -297,69 +301,62 @@
                 </button>
             </div>
             <input type="file" id="fileInput" multiple style="display: none;">
-            
-            <!-- LIST FILE YANG DIPILIH (PREVIEW) -->
-            <div id="selectedFileList" class="file-list"></div>
-            
-            <!-- TOTAL UKURAN -->
-            <div style="display: flex; justify-content: space-between; margin: 12px 0;">
-                <span class="badge">Total:</span>
-                <span id="selectedSize">0 KB</span>
+            <div id="selectedFileList" class="file-list" style="margin-top: 20px;"></div>
+            <div style="margin-top: 16px;">
+                <div class="label">Device tujuan</div>
+                <select id="targetDeviceSelect" style="width:100%; padding:14px; background:#0f172a; border:1px solid #334155; border-radius:40px; color:white;">
+                    <option value="">-- Pilih device target --</option>
+                </select>
             </div>
-
-            <!-- PILIH TARGET -->
-            <select id="targetDeviceSelect" style="width:100%; padding:14px; background:#0e1319; border:1px solid #2d3a4a; border-radius:40px; color:white; margin: 12px 0;">
-                <option value="">-- Pilih device target --</option>
-            </select>
-
-            <!-- TOMBOL KIRIM -->
-            <button onclick="sendFiles()" id="sendBtn" disabled>
+            <button onclick="sendFiles()" id="sendBtn" disabled style="margin-top: 20px;">
                 <i class="fas fa-paper-plane"></i> Kirim Sekarang
             </button>
-
-            <!-- PROGRESS BAR GLOBAL -->
-            <div style="margin-top: 16px;">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="globalProgress"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                    <span id="progressText">-</span>
-                    <span id="speedText">0 KB/s</span>
-                </div>
+            <div class="progress-bar" style="margin-top: 16px;">
+                <div class="progress-fill" id="globalProgress"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                <span id="progressText">-</span>
+                <span id="selectedSize">0 KB</span>
+                <span id="speedText">0 KB/s</span>
             </div>
         </div>
 
-        <!-- FILE DITERIMA + DOWNLOAD SATU-SATU -->
+        <!-- ========== FILE DITERIMA ========== -->
         <div class="card">
-            <h3>📥 File Diterima</h3>
-            <div id="receivedListContainer" class="file-list"></div>
+            <h3><span>📥</span> File Diterima</h3>
+            <div id="receivedListContainer" class="received-list">
+                <div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada file diterima</div>
+            </div>
             <button onclick="downloadAllFiles()" id="downloadAllBtn" disabled class="secondary" style="margin-top: 16px;">
                 <i class="fas fa-file-export"></i> Download Semua File
             </button>
         </div>
+
+        <!-- ========== TOAST NOTIFIKASI ========== -->
+        <div id="toast" class="toast"></div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast"></div>
-
     <script>
-        // ========== KONFIGURASI ICE + TURN + BOOST ==========
+        // ==================================================
+        //   KONFIGURASI ICE SERVER + BOOST
+        // ==================================================
         const ICE_CONFIG = {
             iceServers: [
                 { urls: 'stun:stun.cloudflare.com:3478' },
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
                 { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
             ]
         };
 
-        // BOOST SPEED: Adaptive chunk size + parallel send
-        const CHUNK_SIZES = [262144, 524288, 1048576]; // 256KB, 512KB, 1MB
-        let currentChunkIndex = 0; // Mulai dari 256KB
-        const MAX_PARALLEL = 2;     // Kirim 2 file sekaligus
+        // Adaptive chunk size (256KB, 512KB, 1MB)
+        const CHUNK_SIZES = [262144, 524288, 1048576];
+        let currentChunkIndex = 0;
+        const MAX_PARALLEL = 2; // Kirim 2 file sekaligus
 
-        // STATE
+        // ========== STATE ==========
         let peer;
         let myId;
         let roomCode;
@@ -371,10 +368,11 @@
         let selectedFiles = [];
         let receivedFiles = [];
 
-        // DOM
+        // DOM elements
         const connectionDot = document.getElementById('connectionDot');
         const statusText = document.getElementById('statusText');
         const roleBadge = document.getElementById('roleBadge');
+        const deviceCountSpan = document.getElementById('deviceCount');
         const myPeerIdSpan = document.getElementById('myPeerId');
         const roomInput = document.getElementById('roomInput');
         const qrContainer = document.getElementById('qrContainer');
@@ -393,17 +391,60 @@
         const toast = document.getElementById('toast');
         const downloadAllBtn = document.getElementById('downloadAllBtn');
 
+        // ========== INIT ==========
+        window.onload = function() {
+            if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
+            showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
+            setupFilePicker();
+        };
+
         // ========== TOAST ==========
         function showToast(msg, type = 'info') {
             toast.innerHTML = msg;
             toast.style.borderLeftColor = type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#3b82f6';
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3500);
+            setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // ========== GENERATE ID ==========
-        function generatePeerId() {
-            return 'wf-' + Math.random().toString(36).substring(2, 10);
+        // ========== FILE PICKER - PASTI BUKA FILE MANAGER ==========
+        function setupFilePicker() {
+            if (!pickFileBtn || !fileInput) return;
+
+            // Hapus onclick dari HTML, pakai event listener
+            pickFileBtn.removeAttribute('onclick');
+            
+            pickFileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!currentTarget) {
+                    showToast('❌ Pilih device target dulu!', 'error');
+                    return;
+                }
+                
+                // Click langsung
+                fileInput.click();
+
+                // Fallback: jika dalam 200ms tidak ada perubahan, klik ulang
+                const timeout = setTimeout(() => {
+                    if (fileInput.files.length === 0) {
+                        fileInput.click();
+                    }
+                }, 200);
+
+                fileInput.addEventListener('change', function() {
+                    clearTimeout(timeout);
+                }, { once: true });
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const newFiles = Array.from(e.target.files).filter(f => 
+                        !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                    );
+                    selectedFiles = [...selectedFiles, ...newFiles];
+                    renderSelectedFiles();
+                    e.target.value = ''; // reset
+                }
+            });
         }
 
         // ========== JOIN ROOM ==========
@@ -444,6 +485,15 @@
                 updateDeviceList();
                 if (isHost) broadcastDeviceList();
             });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                showToast(`❌ Peer error: ${err.type}`, 'error');
+                if (err.type === 'unavailable-id' && isHost) {
+                    roomHostId = 'room-' + code + '-' + Math.random().toString(36).substring(2,4);
+                    becomeHost();
+                }
+            });
         };
 
         function becomeHost() {
@@ -476,8 +526,6 @@
             let fileBuffer = [];
             let fileMeta = null;
             let fileProgress = 0;
-            let fileStartTime = 0;
-            let fileChunks = [];
 
             conn.on('data', (data) => {
                 if (data.type === 'join' && isHost) {
@@ -501,17 +549,12 @@
                     fileMeta = data;
                     fileBuffer = [];
                     fileProgress = 0;
-                    fileStartTime = performance.now();
                     showToast(`📥 Menerima: ${data.name}`, 'info');
                 }
                 else if (data instanceof ArrayBuffer) {
                     fileBuffer.push(data);
-                    fileProgress += data.byteLength;
                     if (fileMeta) {
-                        // Hitung kecepatan
-                        const elapsed = (performance.now() - fileStartTime) / 1000;
-                        const speed = fileProgress / elapsed / 1024;
-                        speedText.innerText = `${Math.round(speed)} KB/s`;
+                        fileProgress += data.byteLength;
                     }
                 }
                 else if (data.type === 'file-end') {
@@ -522,8 +565,7 @@
                             file: file,
                             name: fileMeta.name,
                             size: fileMeta.size,
-                            type: fileMeta.mime,
-                            blob: blob
+                            type: fileMeta.mime
                         });
                         renderReceivedFiles();
                         showToast(`✅ Selesai menerima: ${fileMeta.name}`, 'success');
@@ -551,10 +593,11 @@
             updateDeviceList();
         }
 
-        // ========== UPDATE UI DEVICE ==========
+        // ========== UPDATE UI DEVICE LIST ==========
         function updateDeviceList() {
             deviceList = Object.keys(connections).filter(id => id !== myId && id !== roomHostId);
-            
+            deviceCountSpan.innerText = deviceList.length + ' device';
+
             let html = '';
             if (deviceList.length === 0) {
                 html = '<div style="color: #94a3b8; padding: 20px; text-align: center;">Belum ada device lain</div>';
@@ -566,13 +609,12 @@
                                     <span style="font-size:1.4rem;">📱</span>
                                     <span style="font-family:monospace;">${id.substring(0,8)}...</span>
                                 </div>
-                                <span class="badge">${isSelected ? '✓' : 'Pilih'}</span>
+                                <span class="badge" style="background:${isSelected ? '#fbbf24' : '#334155'}; color:black;">${isSelected ? '✓' : 'Pilih'}</span>
                             </div>`;
                 });
             }
             deviceListContainer.innerHTML = html;
 
-            // Update dropdown
             let options = '<option value="">-- Pilih device target --</option>';
             deviceList.forEach(id => {
                 options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id.substring(0,8)}...</option>`;
@@ -583,44 +625,40 @@
             sendBtn.disabled = !currentTarget || selectedFiles.length === 0;
         }
 
-        window.selectTarget = function(id) { currentTarget = id; updateDeviceList(); };
-        targetDeviceSelect.addEventListener('change', (e) => { currentTarget = e.target.value; updateDeviceList(); });
+        window.selectTarget = function(id) {
+            currentTarget = id;
+            updateDeviceList();
+            showToast(`🎯 Target: ${id.substring(0,8)}...`, 'info');
+        };
+        targetDeviceSelect.addEventListener('change', (e) => {
+            currentTarget = e.target.value;
+            updateDeviceList();
+        });
 
         // ========== QR CODE ==========
-        function generateQR() {
+        window.generateQR = function() {
             if (!roomHostId) return;
             const url = window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(roomCode);
             const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=1&data=${encodeURIComponent(url)}&t=${Date.now()}`;
             qrImage.src = qrApi;
             qrContainer.style.display = 'flex';
-        }
-        window.generateQR = generateQR;
+        };
 
         // ========== AUTO JOIN DARI URL ==========
         (function checkUrlParam() {
             const params = new URLSearchParams(window.location.search);
             const roomParam = params.get('room');
-            if (roomParam) { roomInput.value = roomParam; joinRoom(); }
+            if (roomParam) {
+                roomInput.value = roomParam;
+                joinRoom();
+            }
         })();
 
         // ========== COPY ID ==========
-        window.copyMyId = function() { navigator.clipboard.writeText(myId); showToast('📋 ID peer dicopy', 'success'); };
-
-        // ========== PICK FILE ==========
-        window.pickFile = function() {
-            if (!currentTarget) { showToast('❌ Pilih device target dulu!', 'error'); return; }
-            fileInput.click();
+        window.copyMyId = function() {
+            navigator.clipboard.writeText(myId);
+            showToast('📋 ID peer dicopy', 'success');
         };
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                const newFiles = Array.from(e.target.files).filter(f => 
-                    !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
-                );
-                selectedFiles = [...selectedFiles, ...newFiles];
-                renderSelectedFiles();
-                e.target.value = '';
-            }
-        });
 
         // ========== RENDER FILE LIST (PREVIEW) ==========
         function renderSelectedFiles() {
@@ -634,9 +672,10 @@
             let html = '';
             selectedFiles.forEach((f, i) => {
                 totalSize += f.size;
+                const icon = getFileIcon(f.type);
                 html += `<div class="file-item">
                             <div class="file-info">
-                                <span class="file-icon">${getFileIcon(f.type)}</span>
+                                <span class="file-icon">${icon}</span>
                                 <div class="file-details">
                                     <div class="file-name">${escapeHTML(f.name)}</div>
                                     <div class="file-meta">${formatBytes(f.size)}</div>
@@ -650,10 +689,16 @@
             sendBtn.disabled = !currentTarget;
         }
 
-        window.removeFile = function(index) { selectedFiles.splice(index, 1); renderSelectedFiles(); };
-        window.clearSelectedFiles = function() { selectedFiles = []; renderSelectedFiles(); };
+        window.removeFile = function(index) {
+            selectedFiles.splice(index, 1);
+            renderSelectedFiles();
+        };
+        window.clearSelectedFiles = function() {
+            selectedFiles = [];
+            renderSelectedFiles();
+        };
 
-        // ========== BOOSTED SEND FILES (PARALLEL + ADAPTIVE CHUNK) ==========
+        // ========== BOOSTED SEND FILES (PARALLEL + ADAPTIVE) ==========
         window.sendFiles = async function() {
             if (!currentTarget) { showToast('❌ Pilih target!', 'error'); return; }
             if (selectedFiles.length === 0) { showToast('❌ Tidak ada file!', 'error'); return; }
@@ -661,9 +706,8 @@
             const conn = connections[currentTarget];
             if (!conn || !conn.open) { showToast('❌ Koneksi ke target tidak tersedia', 'error'); return; }
 
-            showToast(`📤 Mengirim ${selectedFiles.length} file ke ${currentTarget}...`, 'info');
+            showToast(`📤 Mengirim ${selectedFiles.length} file...`, 'info');
             
-            // Reset progress
             globalProgress.style.width = '0%';
             progressText.innerText = '0%';
             
@@ -671,7 +715,7 @@
             const totalSize = selectedFiles.reduce((a,b)=>a+b.size,0);
             const startTime = performance.now();
 
-            // PARALLEL SEND - MAX 2 FILE SEKALIGUS
+            // PARALLEL SEND (MAX 2 FILE SEKALIGUS)
             for (let i = 0; i < selectedFiles.length; i += MAX_PARALLEL) {
                 const batch = selectedFiles.slice(i, i + MAX_PARALLEL);
                 await Promise.all(batch.map(file => sendOneFileBoosted(conn, file, totalSent, totalSize, startTime)));
@@ -710,7 +754,7 @@
                         conn.send(chunk);
                         offset += chunk.byteLength;
 
-                        // Update progress
+                        // Update global progress
                         const percent = ((sentBefore + offset) / totalSize) * 100;
                         globalProgress.style.width = percent + '%';
                         progressText.innerText = Math.round(percent) + '%';
@@ -728,7 +772,7 @@
             });
         }
 
-        // ========== RENDER FILE DITERIMA + DOWNLOAD SATU-SATU ==========
+        // ========== RENDER FILE DITERIMA + DOWNLOAD ==========
         function renderReceivedFiles() {
             if (receivedFiles.length === 0) {
                 receivedListContainer.innerHTML = '<div style="color:#94a3b8; padding:20px; text-align:center;">Belum ada file diterima</div>';
@@ -737,24 +781,23 @@
             }
             let html = '';
             receivedFiles.forEach((f, i) => {
-                html += `<div class="received-item">
+                const icon = getFileIcon(f.type);
+                html += `<div class="file-item" style="border-left-color:#22c55e;">
                             <div class="file-info">
-                                <span class="file-icon">${getFileIcon(f.type)}</span>
+                                <span class="file-icon">${icon}</span>
                                 <div class="file-details">
                                     <div class="file-name">${escapeHTML(f.name)}</div>
                                     <div class="file-meta">${formatBytes(f.size)}</div>
                                 </div>
                             </div>
-                            <div style="display:flex; gap:8px;">
-                                <i class="fas fa-download" style="color:#3b82f6; cursor:pointer; padding:8px;" onclick="downloadSingle(${i})" title="Download file ini"></i>
-                            </div>
+                            <i class="fas fa-download" style="color:#3b82f6; cursor:pointer; padding:8px;" onclick="downloadReceived(${i})"></i>
                         </div>`;
             });
             receivedListContainer.innerHTML = html;
             downloadAllBtn.disabled = false;
         }
 
-        window.downloadSingle = function(index) {
+        window.downloadReceived = function(index) {
             const f = receivedFiles[index];
             const url = URL.createObjectURL(f.file);
             const a = document.createElement('a');
@@ -766,7 +809,7 @@
         };
 
         window.downloadAllFiles = function() {
-            receivedFiles.forEach((_, i) => setTimeout(() => downloadSingle(i), i * 300));
+            receivedFiles.forEach((_, i) => setTimeout(() => downloadReceived(i), i * 200));
             showToast(`📥 Download ${receivedFiles.length} file`, 'info');
         };
 
