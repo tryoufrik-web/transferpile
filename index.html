@@ -235,11 +235,11 @@
             </div>
         </div>
 
-        <!-- KIRIM FILE -->
+        <!-- ===== KIRIM FILE – STRUKTUR BARU (YANG KAMU MINTA) ===== -->
         <div class="card">
-            <h3>📤 Kirim File</h3>
-            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                <button id="pickFileBtn" disabled style="flex: 2;">
+            <h3><span>📤</span> Kirim File</h3>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="pickFile()" id="pickFileBtn" disabled style="flex: 2;">
                     <i class="fas fa-file"></i> Pilih File
                 </button>
                 <button onclick="clearSelectedFiles()" class="secondary" style="flex: 1;">
@@ -247,28 +247,22 @@
                 </button>
             </div>
             <input type="file" id="fileInput" multiple style="display: none;">
-            
-            <!-- PREVIEW FILE -->
-            <div id="selectedFileList" class="file-list"></div>
-            
-            <!-- TOTAL UKURAN -->
-            <div style="display: flex; justify-content: space-between; margin: 12px 0;">
-                <span class="badge">Total:</span>
-                <span id="selectedSize">0 KB</span>
+            <div id="selectedFileList" class="file-list" style="margin-top: 20px;"></div>
+            <div style="margin-top: 16px;">
+                <div class="label">Device tujuan</div>
+                <select id="targetDeviceSelect" style="width:100%; padding:14px; background:#0f172a; border:1px solid #334155; border-radius:40px; color:white;">
+                    <option value="">-- Pilih device target --</option>
+                </select>
             </div>
-
-            <!-- TOMBOL KIRIM -->
-            <button onclick="sendFiles()" id="sendBtn" disabled>
+            <button onclick="sendFiles()" id="sendBtn" disabled style="margin-top: 20px;">
                 <i class="fas fa-paper-plane"></i> Kirim Sekarang
             </button>
-
-            <!-- PROGRESS + SPEED -->
-            <div class="progress" style="margin-top: 16px;">
-                <div class="bar" id="progressBar"></div>
+            <div class="progress-bar" style="margin-top: 16px;">
+                <div class="progress-fill" id="globalProgress"></div>
             </div>
-            <div class="speed">
-                <span id="progressText">0%</span>
-                <span id="speedText">0 KB/s</span>
+            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                <span id="progressText">-</span>
+                <span id="selectedSize">0 KB</span>
             </div>
         </div>
 
@@ -323,12 +317,58 @@
         const fileInput = document.getElementById('fileInput');
         const selectedFileListDiv = document.getElementById('selectedFileList');
         const receivedListContainer = document.getElementById('receivedListContainer');
-        const progressBar = document.getElementById('progressBar');
+        const globalProgress = document.getElementById('globalProgress');
         const progressText = document.getElementById('progressText');
-        const speedText = document.getElementById('speedText');
         const selectedSizeSpan = document.getElementById('selectedSize');
         const downloadAllBtn = document.getElementById('downloadAllBtn');
         const qrDiv = document.getElementById('qrcode');
+        const targetDeviceSelect = document.getElementById('targetDeviceSelect');
+
+        // ========== FUNGSI PILIH FILE - PASTI BUKA FILE MANAGER ==========
+        window.pickFile = function() {
+            if (!currentTarget) {
+                alert('❌ Pilih device target dulu!');
+                return;
+            }
+
+            // ===== METODE 1: KLIK LANGSUNG =====
+            fileInput.click();
+
+            // ===== METODE 2: FALLBACK JIKA GAGAL =====
+            const fallbackTimer = setTimeout(() => {
+                if (fileInput.files.length === 0) {
+                    const newInput = document.createElement('input');
+                    newInput.type = 'file';
+                    newInput.multiple = true;
+                    newInput.style.position = 'fixed';
+                    newInput.style.top = '-100px';
+                    newInput.style.left = '-100px';
+                    newInput.style.opacity = '0';
+                    newInput.style.pointerEvents = 'none';
+                    newInput.style.zIndex = '-9999';
+
+                    newInput.addEventListener('change', function(ev) {
+                        if (ev.target.files.length > 0) {
+                            const newFiles = Array.from(ev.target.files).filter(f => 
+                                !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                            );
+                            if (newFiles.length > 0) {
+                                selectedFiles = [...selectedFiles, ...newFiles];
+                                renderSelectedFiles();
+                            }
+                        }
+                        document.body.removeChild(newInput);
+                    }, { once: true });
+
+                    document.body.appendChild(newInput);
+                    newInput.click();
+                }
+            }, 400);
+
+            fileInput.addEventListener('change', function() {
+                clearTimeout(fallbackTimer);
+            }, { once: true });
+        };
 
         // ========== GENERATE ID ==========
         function generatePeerId() {
@@ -431,7 +471,7 @@
                     if (fileMeta) {
                         const elapsed = (performance.now() - fileStartTime) / 1000;
                         const speed = fileBuffer.reduce((a,b)=>a+b.byteLength,0) / elapsed / 1024;
-                        speedText.innerText = Math.round(speed) + ' KB/s';
+                        document.getElementById('speedText').innerText = Math.round(speed) + ' KB/s';
                     }
                 }
                 else if (data.type === 'file-end') {
@@ -487,6 +527,13 @@
             }
             deviceListContainer.innerHTML = html;
 
+            // Update dropdown
+            let options = '<option value="">-- Pilih device target --</option>';
+            deviceList.forEach(id => {
+                options += `<option value="${id}" ${currentTarget === id ? 'selected' : ''}>${id.substring(0,8)}...</option>`;
+            });
+            targetDeviceSelect.innerHTML = options;
+
             pickFileBtn.disabled = !currentTarget;
             sendBtn.disabled = !currentTarget || selectedFiles.length === 0;
         }
@@ -496,6 +543,11 @@
             updateDeviceList();
             showStatus(`Target: ${id.substring(0,8)}...`);
         };
+
+        targetDeviceSelect.addEventListener('change', (e) => {
+            currentTarget = e.target.value;
+            updateDeviceList();
+        });
 
         // ========== QR CODE ==========
         function generateQR(code) {
@@ -528,95 +580,20 @@
             alert('ID peer dicopy!');
         };
 
-        // ========== FILE PICKER ANTI GAGAL ==========
-       // ========== FILE PICKER - PASTI BUKA FILE MANAGER ==========
-function setupFilePicker() {
-    const pickBtn = document.getElementById('pickFileBtn');
-    const fileInput = document.getElementById('fileInput');
-    
-    if (!pickBtn || !fileInput) {
-        console.error('Tombol atau input file tidak ditemukan!');
-        return;
-    }
-
-    // Hapus semua event listener lama dengan cara ganti elemen
-    const newPickBtn = document.createElement('button');
-    newPickBtn.id = 'pickFileBtn';
-    newPickBtn.style.cssText = pickBtn.style.cssText;
-    newPickBtn.className = pickBtn.className;
-    newPickBtn.innerHTML = '<i class="fas fa-file"></i> Pilih File';
-    newPickBtn.disabled = pickBtn.disabled;
-    
-    pickBtn.parentNode.replaceChild(newPickBtn, pickBtn);
-    
-    // Ambil referensi tombol baru
-    const freshPickBtn = document.getElementById('pickFileBtn');
-    
-    // Pasang event listener
-    freshPickBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Validasi: harus sudah pilih target
-        if (!currentTarget) {
-            alert('❌ Pilih device target dulu!');
-            return;
-        }
-
-        // ===== METODE 1: LANGSUNG =====
-        fileInput.click();
-
-        // ===== METODE 2: FALLBACK (jika gagal) =====
-        const fallbackTimer = setTimeout(() => {
-            if (fileInput.files.length === 0) {
-                // Buat input baru
-                const newInput = document.createElement('input');
-                newInput.type = 'file';
-                newInput.multiple = true;
-                newInput.style.position = 'fixed';
-                newInput.style.top = '0';
-                newInput.style.left = '0';
-                newInput.style.opacity = '0';
-                newInput.style.pointerEvents = 'none';
-                newInput.style.zIndex = '-9999';
-                
-                newInput.addEventListener('change', function(ev) {
-                    if (ev.target.files.length > 0) {
-                        const newFiles = Array.from(ev.target.files).filter(f => 
-                            !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
-                        );
-                        if (newFiles.length > 0) {
-                            selectedFiles = [...selectedFiles, ...newFiles];
-                            renderSelectedFiles();
-                        }
-                    }
-                    document.body.removeChild(newInput);
-                }, { once: true });
-                
-                document.body.appendChild(newInput);
-                newInput.click();
+        // ========== EVENT FILE INPUT ==========
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const newFiles = Array.from(e.target.files).filter(f => 
+                    !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                );
+                if (newFiles.length > 0) {
+                    selectedFiles = [...selectedFiles, ...newFiles];
+                    renderSelectedFiles();
+                }
+                e.target.value = ''; // reset
             }
-        }, 400);
+        });
 
-        fileInput.addEventListener('change', function() {
-            clearTimeout(fallbackTimer);
-        }, { once: true });
-    });
-
-    // Event listener untuk fileInput
-    fileInput.addEventListener('change', function(e) {
-        if (e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files).filter(f => 
-                !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
-            );
-            if (newFiles.length > 0) {
-                selectedFiles = [...selectedFiles, ...newFiles];
-                renderSelectedFiles();
-            }
-            e.target.value = ''; // reset
-        }
-    });
-}
         // ========== RENDER FILE LIST (PREVIEW) ==========
         function renderSelectedFiles() {
             if (selectedFiles.length === 0) {
@@ -649,6 +626,7 @@ function setupFilePicker() {
             selectedFiles.splice(index, 1);
             renderSelectedFiles();
         };
+
         window.clearSelectedFiles = function() {
             selectedFiles = [];
             renderSelectedFiles();
@@ -662,9 +640,24 @@ function setupFilePicker() {
             const conn = connections[currentTarget];
             if (!conn || !conn.open) { alert('❌ Koneksi ke target tidak tersedia'); return; }
 
-            progressBar.style.width = '0%';
+            globalProgress.style.width = '0%';
             progressText.innerText = '0%';
-            speedText.innerText = '0 KB/s';
+            // Speed text element (perlu ditambahkan di HTML jika belum ada)
+            let speedEl = document.getElementById('speedText');
+            if (!speedEl) {
+                speedEl = document.createElement('span');
+                speedEl.id = 'speedText';
+                speedEl.innerText = '0 KB/s';
+                // Coba cari tempat untuk speed di dalam card Kirim File
+                const progressContainer = document.querySelector('.progress-bar').parentNode;
+                const speedDiv = document.createElement('div');
+                speedDiv.style.display = 'flex';
+                speedDiv.style.justifyContent = 'space-between';
+                speedDiv.style.marginTop = '6px';
+                speedDiv.innerHTML = '<span></span>' + speedEl.outerHTML;
+                progressContainer.appendChild(speedDiv);
+                speedEl = document.getElementById('speedText');
+            }
 
             let totalSent = 0;
             const totalSize = selectedFiles.reduce((a,b)=>a+b.size,0);
@@ -672,14 +665,14 @@ function setupFilePicker() {
 
             for (let i = 0; i < selectedFiles.length; i += MAX_PARALLEL) {
                 const batch = selectedFiles.slice(i, i + MAX_PARALLEL);
-                await Promise.all(batch.map(file => sendOneFileBoosted(conn, file, totalSent, totalSize, startTime)));
+                await Promise.all(batch.map(file => sendOneFileBoosted(conn, file, totalSent, totalSize, startTime, speedEl)));
                 totalSent += batch.reduce((a,b)=>a+b.size,0);
             }
 
             alert('✅ Semua file terkirim!');
         };
 
-        function sendOneFileBoosted(conn, file, sentBefore, totalSize, startTime) {
+        function sendOneFileBoosted(conn, file, sentBefore, totalSize, startTime, speedEl) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -708,12 +701,12 @@ function setupFilePicker() {
                         offset += chunk.byteLength;
 
                         const percent = ((sentBefore + offset) / totalSize) * 100;
-                        progressBar.style.width = percent + '%';
+                        globalProgress.style.width = percent + '%';
                         progressText.innerText = Math.round(percent) + '%';
                         
                         const currentElapsed = (performance.now() - startTime) / 1000;
                         const currentSpeed = (sentBefore + offset) / currentElapsed / 1024;
-                        speedText.innerText = Math.round(currentSpeed) + ' KB/s';
+                        if (speedEl) speedEl.innerText = Math.round(currentSpeed) + ' KB/s';
 
                         setTimeout(sendChunk, 20);
                     };
@@ -791,11 +784,10 @@ function setupFilePicker() {
 
         // ========== INIT ==========
         window.onload = function() {
-    if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
-    setupFilePicker();
-    renderSelectedFiles();
-    renderReceivedFiles();
-};
+            if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
+            renderSelectedFiles();
+            renderReceivedFiles();
+        };
     </script>
 </body>
 </html>
