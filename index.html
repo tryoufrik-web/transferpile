@@ -392,11 +392,100 @@
         const downloadAllBtn = document.getElementById('downloadAllBtn');
 
         // ========== INIT ==========
-        window.onload = function() {
-            if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
-            showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
-            setupFilePicker();
-        };
+      window.onload = function() {
+    if (!roomInput.value) roomInput.value = 'demo-' + Math.random().toString(36).substring(2,6);
+    showToast('🟢 Aplikasi siap. Masukkan kode room dan klik Join.', 'info');
+    setupFilePicker(); // 🔥 WAJIB ADA!
+};
+         // ========== FILE PICKER - PASTI BUKA FILE MANAGER ==========
+function setupFilePicker() {
+    const pickBtn = document.getElementById('pickFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    
+    if (!pickBtn || !fileInput) {
+        console.error('Tombol atau input file tidak ditemukan!');
+        return;
+    }
+
+    // Hapus semua event listener lama dengan cara clone & replace
+    const newPickBtn = pickBtn.cloneNode(true);
+    pickBtn.parentNode.replaceChild(newPickBtn, pickBtn);
+    
+    // Gunakan tombol yang baru
+    const freshPickBtn = document.getElementById('pickFileBtn');
+    
+    freshPickBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Validasi: harus sudah pilih target
+        if (!currentTarget) {
+            showToast('❌ Pilih device target dulu!', 'error');
+            return;
+        }
+
+        // ========== METODE 1: LANGSUNG ==========
+        fileInput.click();
+
+        // ========== METODE 2: FALLBACK ==========
+        // Jika dalam 400ms fileInput tidak kebuka, buat input baru
+        const fallbackTimer = setTimeout(() => {
+            // Cek apakah fileInput sudah memiliki file (indikasi berhasil)
+            if (fileInput.files.length === 0) {
+                // Buat input file baru
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.multiple = true;
+                newInput.style.position = 'fixed';
+                newInput.style.top = '0';
+                newInput.style.left = '0';
+                newInput.style.opacity = '0';
+                newInput.style.pointerEvents = 'none';
+                newInput.style.zIndex = '-9999';
+                
+                newInput.addEventListener('change', function(ev) {
+                    if (ev.target.files.length > 0) {
+                        // Proses file yang dipilih
+                        const newFiles = Array.from(ev.target.files).filter(f => 
+                            !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                        );
+                        if (newFiles.length > 0) {
+                            selectedFiles = [...selectedFiles, ...newFiles];
+                            renderSelectedFiles();
+                            showToast(`📁 +${newFiles.length} file`, 'success');
+                        }
+                    }
+                    // Hapus elemen sementara
+                    document.body.removeChild(newInput);
+                }, { once: true });
+                
+                document.body.appendChild(newInput);
+                newInput.click();
+            }
+        }, 400);
+
+        // Batalkan fallback jika fileInput berhasil memicu change
+        fileInput.addEventListener('change', function() {
+            clearTimeout(fallbackTimer);
+        }, { once: true });
+    });
+
+    // Event listener untuk fileInput
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const newFiles = Array.from(e.target.files).filter(f => 
+                !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+            );
+            if (newFiles.length > 0) {
+                selectedFiles = [...selectedFiles, ...newFiles];
+                renderSelectedFiles();
+                showToast(`📁 +${newFiles.length} file`, 'success');
+            }
+            // Reset input agar bisa pilih file yang sama lagi
+            e.target.value = '';
+        }
+    });
+}
 
         // ========== TOAST ==========
         function showToast(msg, type = 'info') {
@@ -407,8 +496,87 @@
         }
 
         // ========== FILE PICKER - PASTI BUKA FILE MANAGER ==========
-        function setupFilePicker() {
-            if (!pickFileBtn || !fileInput) return;
+       // ========== FILE PICKER - PASTI BUKA FILE MANAGER ==========
+function setupFilePicker() {
+    const pickBtn = document.getElementById('pickFileBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    if (!pickBtn || !fileInput) {
+        console.error('❌ Tombol atau input file tidak ditemukan!');
+        return;
+    }
+
+    // Hapus event listener lama (biar bersih)
+    const newPickBtn = pickBtn.cloneNode(true);
+    pickBtn.parentNode.replaceChild(newPickBtn, pickBtn);
+    
+    const freshPickBtn = document.getElementById('pickFileBtn');
+
+    freshPickBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Wajib pilih target dulu
+        if (!currentTarget) {
+            showToast('❌ Pilih device target dulu!', 'error');
+            return;
+        }
+
+        // ========== METODE 1: LANGSUNG ==========
+        fileInput.click();
+
+        // ========== METODE 2: FALLBACK (kalau gak kebuka) ==========
+        const fallbackTimer = setTimeout(() => {
+            if (fileInput.files.length === 0) {
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.multiple = true;
+                newInput.style.position = 'fixed';
+                newInput.style.top = '0';
+                newInput.style.left = '0';
+                newInput.style.opacity = '0';
+                newInput.style.pointerEvents = 'none';
+                newInput.style.zIndex = '-9999';
+
+                newInput.addEventListener('change', function(ev) {
+                    if (ev.target.files.length > 0) {
+                        const newFiles = Array.from(ev.target.files).filter(f => 
+                            !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+                        );
+                        if (newFiles.length > 0) {
+                            selectedFiles = [...selectedFiles, ...newFiles];
+                            renderSelectedFiles();
+                            showToast(`📁 +${newFiles.length} file`, 'success');
+                        }
+                    }
+                    document.body.removeChild(newInput);
+                }, { once: true });
+
+                document.body.appendChild(newInput);
+                newInput.click();
+            }
+        }, 400);
+
+        fileInput.addEventListener('change', function() {
+            clearTimeout(fallbackTimer);
+        }, { once: true });
+    });
+
+    // ========== HANDLE FILE YANG DIPILIH ==========
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            const newFiles = Array.from(e.target.files).filter(f => 
+                !selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)
+            );
+            if (newFiles.length > 0) {
+                selectedFiles = [...selectedFiles, ...newFiles];
+                renderSelectedFiles();
+                showToast(`📁 +${newFiles.length} file`, 'success');
+            }
+            e.target.value = ''; // reset
+        }
+    });
+}
 
             // Hapus onclick dari HTML, pakai event listener
             pickFileBtn.removeAttribute('onclick');
